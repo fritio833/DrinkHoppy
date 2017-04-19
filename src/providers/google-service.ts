@@ -3,6 +3,9 @@ import { Http, Response } from '@angular/http';
 import { SingletonService } from './singleton-service';
 import { Platform } from 'ionic-angular';
 import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/delay';
+import 'rxjs/add/operator/retry';
+import 'rxjs/add/operator/timeout';
 
 
 /*
@@ -42,6 +45,8 @@ export class GoogleService {
   reverseGeocodeLookup(lat,lng) {
     return this.http.get(this.googleGeocodeURL 
     	  + 'latlng=' + lat + ',' + lng + '&sensor=false&key=' + this.googleGeocodeAPIKey)
+        .retry(2)
+        .timeout(5000,new Error('Error connecting'))
         .map(this.getCityState);  	
   }
 
@@ -176,6 +181,8 @@ export class GoogleService {
         + '&type=' + placeType
         + '&key=' 
         + this.googlePlacesAPIKey)
+        .retry(2)
+        .timeout(5000,new Error('Error connecting'))        
         .map(res => res.json());
 
   }
@@ -229,6 +236,8 @@ export class GoogleService {
         + _name
         + '&key=' 
         + this.googlePlacesAPIKey)
+        .retry(2)
+        .timeout(5000,new Error('Error connecting'))        
         .map(res => res.json());
   }
 
@@ -236,6 +245,8 @@ export class GoogleService {
     return this.http.get(this.googlePlacesURL + 'nearbysearch/json?pagetoken='
         + nextToken
         + '&key=' + this.googlePlacesAPIKey)
+        .retry(2)
+        .timeout(5000,new Error('Error connecting'))         
         .map(res => res.json());
   }
 
@@ -244,6 +255,8 @@ export class GoogleService {
     return this.http.get(this.googlePlacesURL + searchType + '/json?pagetoken='
         + nextToken 
         + '&key=' + this.googlePlacesAPIKey)
+        .retry(2)
+        .timeout(5000,new Error('Error connecting'))         
         .map(res => res.json());
   }
 
@@ -257,9 +270,12 @@ export class GoogleService {
         + name
         +'&rankby=distance&key=' 
         + this.googlePlacesAPIKey)
+        .retry(2)
+        .timeout(5000,new Error('Error connecting'))          
         .map(res => res.json());
   }
-
+  // NOT USED
+  /*
   placesNearByName(name,lat,lng) {
 
     return this.http.get(this.googlePlacesURL + 'nearbysearch/json?location='
@@ -270,18 +286,22 @@ export class GoogleService {
         .map(res => res.json());
 
   }
-
+  */
   placeDetail(placeId) {
     return this.http.get(this.googlePlacesURL + 'details/json?placeid='
         + placeId
         + '&key=' + this.googlePlacesAPIKey)
+        .retry(2)
+        .timeout(5000,new Error('Error connecting'))        
         .map(res => res.json());    
   }
 
   placePhotos(photoRef) {
     return this.http.get(this.googlePlacesURL + 'photo?photoreference='
         + photoRef
-        + '&maxwidth=400&key=' + this.googlePlacesAPIKey);    
+        + '&maxwidth=400&key=' + this.googlePlacesAPIKey)
+        .retry(2)
+        .timeout(5000,new Error('Error connecting'));    
   }
 
   placesAutocomplete(locationName) {
@@ -299,6 +319,8 @@ export class GoogleService {
         + cityName + "&country=us" 
         + '&types=(cities)&key=' 
         + this.googlePlacesAPIKey)
+        .retry(2)
+        .timeout(5000,new Error('Error connecting'))  
         .map(res => res.json());    
   }
 

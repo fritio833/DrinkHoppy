@@ -28,23 +28,25 @@
   <p><ion-icon name="person"></ion-icon>&nbsp;Profile</p>
 </div>
 <ion-card>
-  <ion-item no-lines>
-    <span item-left id="profile-left" (click)="goToProfile()">
-      <div align="center">
-        <ion-avatar>
-          <img [src]="profileIMG">
-        </ion-avatar>
-        <p>{{displayName}}</p>
-      </div>
-    </span>
-    <span item-left id="profile-right">
-      <button ion-button icon-left round (click)="goTackMap()">
-         <ion-icon name="pin"></ion-icon>
-            {{checkinCount}} Checkins
-      </button>
-      <p *ngIf="userPoints">{{userPoints}} Points</p>
-    </span>
-  </ion-item>
+  <ion-card-content>
+    <ion-item no-lines>
+      <span item-left id="profile-left" (click)="goToProfile()">
+        <div align="center">
+          <ion-avatar>
+            <img [src]="profileIMG">
+          </ion-avatar>
+          <p>{{displayName}}</p>
+        </div>
+      </span>
+      <span item-left id="profile-right">
+        <button ion-button icon-left round (click)="goTackMap()">
+          <ion-icon name="pin"></ion-icon>
+              {{checkinCount}} Checkins
+        </button>
+        <p *ngIf="userPoints">{{userPoints}} Points</p>
+      </span>
+    </ion-item>
+  </ion-card-content>
 </ion-card>
 <!----
 <div class="card-head">

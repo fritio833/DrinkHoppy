@@ -239,6 +239,8 @@ export class LocationDetailPage {
             this.locationPhotosArray[i]['url'] = photo.url;
             if (i == (this.locationPhotosArray.length-1))
               resolve(true);
+        },error=>{
+          console.log('error',error);
         });
       }
     });
@@ -273,6 +275,8 @@ export class LocationDetailPage {
     if (this.location.hasOwnProperty('photos')) {
       this.geo.placePhotos(this.location.photos[0].photo_reference).subscribe((photo)=>{
         this.locationPhoto = photo.url;
+      },error=>{
+        console.log('error',error);
       });
     } else {
       // this.locationPhoto = '../images/bar3.jpg';

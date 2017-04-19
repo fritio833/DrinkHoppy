@@ -100,9 +100,21 @@ export class SearchBreweriesPage {
           this.beerAPI.loadBreweryBeers(pub.data.breweryId).subscribe((beers)=>{
               //console.log('beers',beers);
               this.navCtrl.push(BreweryDetailPage,{brewery:pub.data,beers:beers});
+          },error=>{
+            console.log('error',error);
+            this.loading.dismiss().catch(() => {});
+            this.presentToast('Could not connect. Check connection.');
           });
           
+        },error=>{
+          console.log('error',error);
+          this.loading.dismiss().catch(() => {});
+          this.presentToast('Could not connect. Check connection.');
         });
+      },error=>{
+        console.log('error',error);
+        this.loading.dismiss().catch(() => {});
+        this.presentToast('Could not connect. Check connection.');
       });
       
     } else {
@@ -115,21 +127,30 @@ export class SearchBreweriesPage {
         if (pub.results.length) {
           //Get place detail
           this.geo.placeDetail(pub.results[0].place_id).subscribe(detail=>{
-            //console.log('detail',detail);
 
             this.beerAPI.loadBreweryBeers(brewery.breweryId).subscribe((beers)=>{
-                //console.log('beers',beers);
-                this.loading.dismiss();
-                this.navCtrl.push(BreweryDetailPage,{brewery:brewery,beers:beers,place:detail.result});
+              this.loading.dismiss();
+              this.navCtrl.push(BreweryDetailPage,{brewery:brewery,beers:beers,place:detail.result});
+            },error=>{
+              console.log('error',error);
+              this.loading.dismiss().catch(() => {});
+              this.presentToast('Could not connect. Check connection.');
             });
           });
         } else {
-            this.beerAPI.loadBreweryBeers(brewery.breweryId).subscribe((beers)=>{
-                //console.log('beers',beers);
-                this.loading.dismiss();
-                this.navCtrl.push(BreweryDetailPage,{brewery:brewery,beers:beers,place:null});
-            });          
+          this.beerAPI.loadBreweryBeers(brewery.breweryId).subscribe((beers)=>{
+              //console.log('beers',beers);
+              this.loading.dismiss();
+              this.navCtrl.push(BreweryDetailPage,{brewery:brewery,beers:beers,place:null});
+          },error=>{
+            console.log('error',error);
+            this.loading.dismiss().catch(() => {});
+            this.presentToast('Could not connect. Check connection.');
+          });          
         }
+      },error=>{
+        this.loading.dismiss().catch(() => {});
+        this.presentToast('Could not connect. Check connection.');        
       });
     }
   }
@@ -194,9 +215,9 @@ export class SearchBreweriesPage {
             this.numPages = 0;
             this.showNoBreweries();
           }
-          this.loading.dismiss();      
+          this.loading.dismiss();    
 	      },error=>{
-          this.loading.dismiss();
+          this.loading.dismiss().catch(() => {});
           this.presentToast('Could not connect. Check connection.');
         });
 
@@ -215,10 +236,10 @@ export class SearchBreweriesPage {
             this.numPages = 0;
             this.showNoBreweries();
           }
-          this.loading.dismiss();         
+          this.loading.dismiss();       
 	      },error=>{
-          this.loading.dismiss();
-          this.presentToast('Could not connect. Check connection.');          
+          this.loading.dismiss().catch(() => {});
+          this.presentToast('Could not connect. Check connection.');        
         });    	
     }
   }

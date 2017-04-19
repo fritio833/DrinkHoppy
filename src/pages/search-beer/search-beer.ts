@@ -110,7 +110,7 @@ export class SearchBeerPage {
           this.loading.dismiss();          
 	    },error=>{
         console.log('error',error);
-        this.loading.dismiss();
+        this.loading.dismiss().catch(() => {});
         this.showNoResults = false;
         this.presentToast('Could not connect. Check connection.');
       });
@@ -140,6 +140,8 @@ export class SearchBeerPage {
         if (this.currentPage == this.numberOfPages)
           infiniteScroll.enable(false);
 
+      },error=>{
+         this.presentToast('Could not connect. Check connection.');
       });
     }, 1000);
   }
@@ -172,7 +174,7 @@ export class SearchBeerPage {
             }
             this.loading.dismiss();
         },error=>{
-          this.loading.dismiss();
+          this.loading.dismiss().catch(() => {});
           this.presentToast('Could not connect. Check connection.');
         });
       }

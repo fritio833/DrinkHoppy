@@ -107,6 +107,8 @@ export class BreweryService {
            .map(res => res.json());    
   }
 
+  // NOT BEING USED
+  /*
   findBreweriesByCity(city) {
     return this.http.get(this.breweryDbUrl 
            + 'locations/?key=' 
@@ -114,6 +116,7 @@ export class BreweryService {
            + '&locality=' + city)
            .map(res => res.json());
   }
+  */
 
   findBreweriesByGeo(lat,lng,radius?) {
     let _radius = 25;
@@ -135,6 +138,8 @@ export class BreweryService {
            .map(res => res.json());
   }
 
+  // NOT USED
+  /*
   loadBreweryById(breweryId) {
     return this.http.get(this.breweryDbUrl 
          + 'brewery/' 
@@ -142,19 +147,23 @@ export class BreweryService {
          + '/?key=' + this.breweryDbAPI)
         .map(res => res.json());    
   }
-
+  */
   loadBreweryLocations(breweryId) {
     return this.http.get(this.breweryDbUrl 
          + 'brewery/'+breweryId+'/locations'
          + '/?key=' + this.breweryDbAPI)
-        .map(res => res.json());
+         .retry(2)
+         .timeout(5000,new Error('Error connecting'))         
+         .map(res => res.json());
   }
 
   loadLocationById(locationId) {
     return this.http.get(this.breweryDbUrl 
          + 'location/'+locationId
          + '/?key=' + this.breweryDbAPI)
-        .map(res => res.json());
+         .retry(2)
+         .timeout(5000,new Error('Error connecting'))          
+         .map(res => res.json());
   }  
 
   loadBreweryBeers(breweryId) {
@@ -162,7 +171,9 @@ export class BreweryService {
          + 'brewery/' 
          + breweryId 
          + '/beers?key=' + this.breweryDbAPI)
-        .map(res => res.json());    
+         .retry(2)
+         .timeout(5000,new Error('Error connecting'))          
+         .map(res => res.json()); 
   }
 
   loadBeerById(beerId)  {
@@ -172,14 +183,18 @@ export class BreweryService {
          + beerId 
          + '/?key=' + this.breweryDbAPI
          + '&type=beer&withBreweries=Y')
-        .map(res => res.json());
+         .retry(2)
+         .timeout(5000,new Error('Error connecting'))         
+         .map(res => res.json());
   } 
 
   loadBeerCategories() {
     return this.http.get(this.breweryDbUrl 
          + 'categories/'
          + '?key=' + this.breweryDbAPI)
-        .map(res => res.json());
+         .retry(2)
+         .timeout(5000,new Error('Error connecting'))          
+         .map(res => res.json());
   }
 
   loadBeerStyles() {
@@ -189,13 +204,17 @@ export class BreweryService {
     return this.http.get(this.breweryDbUrl 
          + 'styles/'
          + '?key=' + this.breweryDbAPI)
-        .map(res => res.json());    
+         .retry(2)
+         .timeout(5000,new Error('Error connecting'))          
+         .map(res => res.json());    
   }
 
   loadBeerGlassware() {
     return this.http.get(this.breweryDbUrl 
          + 'glassware/'
          + '?key=' + this.breweryDbAPI)
+         .retry(2)
+         .timeout(5000,new Error('Error connecting'))          
         .map(res => res.json());    
   }
 

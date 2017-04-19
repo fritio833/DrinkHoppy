@@ -1,19 +1,10 @@
-import { Component, ViewChild } from '@angular/core';
-import { NavController, LoadingController, ToastController, ModalController } from 'ionic-angular';
+import { Component } from '@angular/core';
+import { NavController, Events, LoadingController, ToastController, ModalController } from 'ionic-angular';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 import { Storage } from '@ionic/storage';
-import { Ionic2RatingModule } from 'ionic2-rating';
-import { Geolocation } from 'ionic-native';
 
 import { SingletonService } from '../../providers/singleton-service';
 
-import { HelloIonicPage } from '../hello-ionic/hello-ionic';
-import { BeerDetailPage } from '../beer-detail/beer-detail';
-import { TackMapPage } from '../tack-map/tack-map';
-import { SearchStartPage } from '../search-start/search-start';
-import { SearchBeerPage } from '../search-beer/search-beer';
-import { SearchLocationPage } from '../search-location/search-location';
-import { SearchBreweriesPage } from '../search-breweries/search-breweries';
 import { ProfilePage } from '../profile/profile';
 import { SearchMenuPage } from '../search-menu/search-menu';
 
@@ -29,31 +20,36 @@ export class HomePage {
   public reviews = new Array();
   public profileIMG:string = 'images/default-profile.png';
   public displayName:string = '';
-  public drinkRating = 4;
-  public locRating = 4.5;
   public profileRef:any;
   public checkinCount:number;
   public joinedDate:any;
   public userPoints:number;
   public getProfile:boolean = true;
   public loading:any;
+  public uid:any;
+  public profile:any;
 
   constructor(public navCtrl: NavController, 
   	          public sing:SingletonService,
               public modalCtrl:ModalController,
               public loadingCtrl:LoadingController,
   	          public toastCtrl:ToastController,
+              public events:Events,
+              public angFire:AngularFire,
   	          public storage:Storage) {
+                              
 
   }
 
   getProfileData() {
 
+    let start = Date.now() / 1000;
+    let end;
+
     this.storage.ready().then(()=>{
       this.storage.get('uid').then(uid=>{
-        this.showLoading();
         if (uid != null) {
-          this.profileRef = firebase.database().ref('users/'+uid).on('value',snapshot => {
+          this.profileRef = firebase.database().ref('users/'+uid).once('value').then(snapshot => {
             //console.log('snap',snapshot.val());
            
             this.checkinCount = snapshot.val().checkins;
@@ -65,8 +61,6 @@ export class HomePage {
             this.userPoints = snapshot.val().points;
             if (snapshot.val().photo!=null && snapshot.val().photo !='')
               this.profileIMG = snapshot.val().photo;
-            
-            this.loading.dismiss();
           });
         }
       });
@@ -74,7 +68,7 @@ export class HomePage {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad HomePage'); 
+    console.log('ionViewDidLoad HomePage');
     this.getProfileData();
   }
 
@@ -85,10 +79,6 @@ export class HomePage {
       duration: 3000
     });
     toast.present();
-  }
-
-  goTackMap() {
-    this.navCtrl.push(TackMapPage);
   }
 
   goToProfile() {

@@ -46,9 +46,8 @@ export class DrinkMenuPage {
     console.log('beers',this.breweryBeers);
   }
 
-  getBeerDetail(beer) {
-
-  	this.navCtrl.push(BeerDetailPage,{beerId:beer.id});
+  getBeerDetail(beerId) {
+  	this.navCtrl.push(BeerDetailPage,{beerId:beerId});
 
   }
 

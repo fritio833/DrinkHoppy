@@ -43,7 +43,9 @@ export class SelectLocationPage {
   		this.sing.selectLat = success.result.geometry.location.lat;
   		this.sing.selectLng = success.result.geometry.location.lng;
   		this.view.dismiss(true);
-  	});
+  	},error=>{
+      console.log('error',error);
+    });
   }
 
   setCurrentLocation() {

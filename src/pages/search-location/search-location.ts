@@ -201,9 +201,14 @@ export class SearchLocationPage {
                   this.loading.dismiss().catch(() => {});
                 },(error)=>{
                   console.log(error);
+                  this.presentToast('Could not connect. Check connection.');
                   this.loading.dismiss().catch(() => {}); 
                   //console.log('Geolocation with high accuracy.');
                 });
+            },error=>{
+              console.log(error);
+              this.presentToast('Could not connect. Check connection.');
+              this.loading.dismiss().catch(() => {});              
             });
 
       } else {
@@ -212,15 +217,18 @@ export class SearchLocationPage {
           .subscribe((success)=>{
              
              this.locations = this.fixLocations(success.results);
-             this.nextNearByToken = success.next_page_token;
+             this.nextNearByToken = success.next_page_token;             
              this.loading.dismiss().catch(() => {});
           },(error)=>{
             console.log(error);
+            this.presentToast('Could not connect. Check connection.');
             this.loading.dismiss().catch(() => {});
           });
       }
        
     }).catch((error) => {
+      this.presentToast('Could not connect. Check connection.');
+      this.loading.dismiss().catch(() => {});      
       console.log('Error getting location', error);
     });
 
@@ -255,16 +263,20 @@ export class SearchLocationPage {
           //infiniteScroll.enable(false);
           this.nextNearByToken = null;
         }
+      },error=>{
+         this.presentToast('Could not connect. Check connection.');        
       });
     }, 1000);
   }
 
   getLocationDetail(location) {
 
+    this.showLoading('Loading. Please wait...');
     this.geo.placeDetail(location.place_id).subscribe((resp)=>{
 
       this.isBrewery(resp.result).then(status=>{
         //console.log('is brewery',status);
+        this.loading.dismiss().catch(() => {});
         if (!status) {
           for (var i=0;i<resp.result.types.length;i++) {
 
@@ -278,6 +290,11 @@ export class SearchLocationPage {
         }
 
       });   
+    },error=>{
+      console.log('error',error);
+      this.loading.dismiss().catch(() => {});
+      this.presentToast('Could not connect. Check connection.');
+
     });
 
   }
@@ -357,6 +374,9 @@ export class SearchLocationPage {
                 this.setLocationMarkers();
              }
              this.loading.dismiss().catch(() => {});
+          },error=>{
+            console.log('error',error);
+            this.loading.dismiss().catch(() => {});
           });
         } else {
           this.geo.placesNearByRadius(this.geoLat,
@@ -372,6 +392,9 @@ export class SearchLocationPage {
                 this.setLocationMarkers();
              }
              this.loading.dismiss().catch(() => {});
+          },error=>{
+            console.log('error',error);
+            this.loading.dismiss().catch(() => {});            
           });
         }
       }

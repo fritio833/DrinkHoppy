@@ -249,6 +249,8 @@ export class BreweryDetailPage {
             this.locationPhotosArray[i]['url'] = photo.url;
             if (i == (this.locationPhotosArray.length-1))
               resolve(true);
+        },error=>{
+          console.log('error',error);
         });
       }
     });

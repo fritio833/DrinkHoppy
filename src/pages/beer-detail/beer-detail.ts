@@ -136,8 +136,11 @@ export class BeerDetailPage {
       this.loadBeer(this.beer);
       //console.log(this.beer);
       this.getBeerReviews();
+      //this.beerLoaded = true;
       setTimeout(()=>{this.beerLoaded = true;},500);
-      
+    },error=>{
+      this.beerLoaded = true;
+      this.presentToast('Could not connect. Check connection.');
     });
   }
  

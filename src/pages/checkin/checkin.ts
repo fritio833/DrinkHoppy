@@ -428,6 +428,8 @@ export class CheckinPage {
         //console.log('photos',res);
         this.locations[index]['url'] = res.url;
         resolve(true);
+      },error=>{
+        console.log('error',error);
       });
     });
   }

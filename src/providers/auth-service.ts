@@ -48,7 +48,8 @@ export class AuthService {
     firebase.auth().onAuthStateChanged((_currentUser) => {
         if (_currentUser && !this.loggedIn) {
           console.log("User " + _currentUser.uid);
-          this.user = _currentUser;            
+          this.user = _currentUser;
+          //console.log('user',_currentUser);        
         } else {
           this.user = null;
           console.log("AUTH: User is logged out");

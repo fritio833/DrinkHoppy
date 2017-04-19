@@ -10,7 +10,7 @@
         <p>Beer List</p>
         <p item-right>{{breweryBeers.length}} Beers</p>
       </ion-item>
-        <div *ngFor="let beer of breweryBeers; let i=index" (click)="getBeerDetail(beer)">
+        <div *ngFor="let beer of breweryBeers; let i=index" (click)="getBeerDetail(beer.id)">
 	      	<ion-item>
 		      	<ion-thumbnail item-left>
 		      		<img *ngIf="beer.labels.icon!='zzz'" [src]="beer.labels.medium" />
@@ -29,7 +29,7 @@
       <ion-item>
         <p item-left>Beer List</p>
       </ion-item>      
-      <ion-item  *ngFor="let beer of localBeers | async" (click)="getBeerDetail(beer)">
+      <ion-item  *ngFor="let beer of localBeers | async" (click)="getBeerDetail(beer.$key)">
         <ion-thumbnail item-left>
           <img *ngIf="beer.img!=''" [src]="beer.img" />
         </ion-thumbnail>		      	

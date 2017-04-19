@@ -69,19 +69,6 @@ export class ProfilePage {
               //console.log('currUser',this.user);
               this.isEmailVerified = this.user.emailVerified;
             }
-            /*
-            this.checkins =  this.angFire.database.list('/checkin/users/'+this.user.uid,{
-              query:{
-                orderByChild:'dateCreated'
-              }
-            }).map((array) => array.reverse()) as FirebaseListObservable<any[]>;
-
-            this.checkins.subscribe(resp=>{
-              this.checkinLen = resp.length;
-              //console.log('resp',resp);   
-            });
-            */
-
             this.loading.dismiss();            
           });
         } 

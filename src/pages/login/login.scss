@@ -1,0 +1,92 @@
+page-login {
+
+	.fb-button {
+	  width:200px;
+	}
+
+	button {
+	  width:250px;
+	  padding-botom:20px;
+	}
+
+	.btn {
+	  padding-top: 5px;
+	  padding-bottom:5px;
+	  text-align:center;
+	}
+
+	#home-content {
+	  //background-image: url('../images/login-splash-black.png');
+	  //background-repeat: no-repeat;
+	  //background-size: cover;
+	  background-color: #01796f;
+	}
+
+
+	h1 {
+	  font-size: 50px;
+	  color: #ffffff;
+	  text-shadow: black 0.1em 0.1em 0.2em;
+	  padding-top:10px;
+	  margin:0px;
+	  position:relative;
+	  top: -5px;
+	}
+
+	h3 {
+	  color:#fff;
+	  text-shadow: black 0em 0em 0.125em;
+	  text-align: center;
+	  font-size:20px;
+	  position:relative;
+	  top:-5px;
+	}
+
+	#or-sep {
+
+      font-size: 40p;
+      color:#ffffff;
+      margin:10px;
+
+	}
+
+	a {
+	  color:#ffffff;
+	  font-weight:bold;
+	  text-decoration:none;
+	  padding-top:20px;
+	}
+    
+    .ion-toolbar {
+      text-align:center;
+    }
+
+    ion-item {
+      background: rgba(0, 0, 0, 0) !important;
+      padding-bottom:10px !important;
+      padding-right:20px !important;
+      padding-left:0px !important;
+    }
+
+    .item-inner {
+      border:none !important;
+	  border-bottom-color: transparent !important;
+	  box-shadow: none !important;    
+    }
+
+    ion-input, ion-select, ion-textarea {
+        background-color: #f2f2f2;
+        padding-left:50px;
+    }
+
+    .login-btn {
+
+    }
+
+    .label-icon {
+      position: absolute !important;
+      bottom: 9px !important;
+      left: 40px !important;
+    }
+
+}

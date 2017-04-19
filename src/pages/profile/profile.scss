@@ -1,0 +1,39 @@
+page-profile {
+
+  #profile-avatar ion-avatar img {     
+    width:100% !important;  
+    height : 100% !important;  
+    max-width: 80px !important;  //any size
+    max-height: 80px !important; //any size 
+  }
+
+  .white-background {
+    background-color: #ffffff;
+  }
+
+  ion-title {
+    text-align:center !important;
+  }
+
+  #profile-avatar {
+      padding-top:25px;
+      padding-bottom:25px;
+      
+      .item-inner,ion-item {
+          border-bottom-color: transparent !important;
+      }
+  }  
+  
+  ion-avatar {
+    padding-bottom:5px;
+  }
+
+  #avatar-nav item-innter {
+    text-align:center !important;
+  }
+
+  .card-head {
+    font-size: 20px;
+    padding-left: 10px;
+  }  
+}

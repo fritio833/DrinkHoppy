@@ -1,0 +1,122 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-buttons start>
+        <button ion-button icon-only (click)="cancel()">
+          <ion-icon name="close"></ion-icon>
+        </button>
+    </ion-buttons>      
+    <ion-title>Check-in {{firstToUpperCase(checkinType)}}</ion-title>  
+  </ion-navbar>
+</ion-header>
+<ion-content class="white-background">
+  <div id="choose-beer" *ngIf="beer==null">
+    <button ion-item (click)="selectBeer()" text-wrap>      
+      <label>Select a Beer for {{locationName}}</label>
+      <ion-icon name="add-circle" color="secondary" item-right></ion-icon>
+    </button>
+  </div>
+  <div class="beer-pick" *ngIf="beer!=null">
+    <ion-item>
+      <span item-left>
+        <ion-thumbnail>
+          <img [src]="beer.labels.medium" *ngIf="beer.labels.medium!=null && beer.labels.medium!=''" />
+        </ion-thumbnail>
+      </span>
+      <span id="beer-header-info" item-left>
+          <ion-label>{{beer.name}}</ion-label>
+          <p>{{beer?.breweries[0].name}}</p>
+          <p>{{beer?.style.shortName}}</p>
+      </span>
+      <span id="remove-beer-icon" item-right (click)="removeBeer()">
+          <ion-icon name="remove-circle"></ion-icon>
+      </span>
+    </ion-item>
+  </div>
+    <ion-item>
+      <ion-label>Rating</ion-label>
+      <span item-right><rating [(ngModel)]="beerRating" max="5"></rating></span>
+    </ion-item>
+    <ion-item class="botton-border-item">
+       <ion-range min="0" 
+                  max="5" 
+                  step="1" 
+                  snaps="true" 
+                  [(ngModel)]="beerRating">
+         
+       </ion-range>    
+    </ion-item>
+
+  <div *ngIf="locationsLen">
+  <ion-item>
+    <label>Location</label>
+    <p item-right *ngIf="locationsLen > 1">Swipe Left</p>
+  </ion-item>
+  <ion-item id="loadingLocation" *ngIf="!showLocationSlide">
+    <div align="center">
+      <ion-spinner></ion-spinner>
+    </div>
+  </ion-item>  
+  <ion-slides id="locSlider" *ngIf="showLocationSlide" (ionSlideDidChange)="slideChanged()" pager="{{showPager}}">
+    <ion-slide *ngFor="let location of locations" text-wrap>    
+      <ion-item class="slide-item" [ngStyle]="getBackgroundImg(location.url)">
+        <div class="slide-overlay">
+          <div class="slide-text">
+            <h2>{{location.name}}</h2>
+            <p>{{location.vicinity}}</p>
+            <p>{{location.place_types}}</p>
+          </div>
+        </div>
+      </ion-item>
+    </ion-slide>           
+  </ion-slides>
+  </div>
+  <div class="camera botton-border-item">
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <img [src]="base64Image" *ngIf="base64Image" />
+        </ion-col>
+        <ion-col>
+          <button *ngIf="!base64Image" ion-button icon-left (click)="pictureActions()">
+            <ion-icon name="camera"></ion-icon>
+              Take Picture
+          </button>        
+          <button *ngIf="base64Image" ion-button icon-left (click)="deletePicture()">
+            <ion-icon name="trash"></ion-icon>
+              Remove Picture
+          </button>          
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+  <ion-item class="botton-border-item">
+    <ion-label>Serving Style</ion-label>
+    <ion-select [(ngModel)]="servingStyleName">
+      <ion-option value="Bottle">Bottle</ion-option>
+      <ion-option value="Can">Can</ion-option>    
+      <ion-option *ngFor="let option of glassware" value="{{option.name}}">
+        {{option.name}}
+      </ion-option> 
+    </ion-select>
+  </ion-item>
+  <ion-item>
+    <ion-label>Comment</ion-label>
+    <ion-badge item-right color="dark">{{maxText(socialMessage)}}</ion-badge>
+  </ion-item>
+  <ion-item class="botton-border-item">
+    <ion-textarea maxlength="150" rows="5" [(ngModel)]="socialMessage">
+    </ion-textarea>
+  </ion-item>
+  <ion-item class="botton-border-item">
+      <ion-label>Share</ion-label>
+      <button color="facebook" item-right ion-button icon-left (click)="shareOnFacebook()">
+        <ion-icon class="social-button" ios="logo-facebook" md="logo-facebook"></ion-icon>
+        Facebook
+      </button>
+      <button color="twitter" item-right ion-button icon-left (click)="shareOnFacebook()">
+        <ion-icon class="social-button" ios="logo-twitter" md="logo-twitter"></ion-icon>
+        Twitter
+      </button>
+  </ion-item>
+  <button class="chk-btn" ion-button color="check" full (click)="doCheckin()">Check-in</button>
+</ion-content>

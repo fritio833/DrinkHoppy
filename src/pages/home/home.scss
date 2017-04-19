@@ -1,0 +1,84 @@
+page-home {
+
+  .center {
+    text-align:center;
+  }
+
+  .right {
+    text-align:right;
+  }
+
+  .bold {
+    font-weight:bold;
+  }
+
+  #map {
+    height:100%;
+    width:100%;
+  }
+
+  .background-home {
+  	background-image: url('../images/bar3.jpg');
+	  background-repeat: no-repeat;
+	  background-size: cover;
+	  background-color: #000000;
+  }
+
+  #find-drinks-button {
+    padding:20px;
+  }
+  .card-head {
+     font-size: 20px;
+     padding-left: 10px;
+  }
+
+  ion-content {
+    background-color: #dddddd;
+  }
+
+  .border-left {
+    border-left: think solid #dddddd;
+  }
+
+  .comm-label {
+    font-size: 15px;
+    color: #387ef5;
+  }
+
+  .num-tacks {
+    font-size:20px;
+  }
+
+  .challenge-icon {
+    font-size:40px;
+  }
+
+  #challenge-label {
+    font-size:15px;
+    font-weight:bold;
+  }
+
+  .home-change {
+    font-size:20px;
+    font-weight:bold;
+    color:#ffffff;
+    text-decoration:underline;
+  }
+
+  #profile-left {
+    width:50%;
+    text-align:center;
+  }
+
+  #profile-right {
+    width:50%;
+    text-align:center;
+  }
+
+  ion-avatar img {     
+    width:100% !important;  
+    height : 100% !important;  
+    max-width: 60px !important;  //any size
+    max-height: 60px !important; //any size 
+  }
+}

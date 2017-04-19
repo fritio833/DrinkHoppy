@@ -1,0 +1,89 @@
+page-beer-detail {
+
+	p {
+	   padding-top:3px;
+	}
+
+	.info-label {
+	   color:#666;
+	}
+
+	#beer-info-head {
+	  padding-top:5px;
+	  padding-top:5px;
+	  margin-bottom:10px;
+	  margin-top:10px;
+	  font-weight:16px;
+	  color: #fff;
+	  background-color: #387ef5;
+	  text-align: center;
+	}
+
+	ion-spinner {
+		width:50px;
+		height:50px;
+	}
+
+	#bold-info {
+	  margin-top:5px;
+	  margin-bottom:5px;
+	}
+
+	ion-navbar.show-back-button .back-button {
+	    display: inline-block;
+	}
+
+    .pad-detail {
+      margin-top:20px;
+    }
+
+	ul {
+	  padding: 0px;
+
+	  &.rating li {
+	    padding: 5px 10px;
+	    background: none;
+	    color: #ffb400;
+
+	    ion-icon {
+	      font-size: 25px;
+	    }
+	  }
+	}
+
+  ion-col {
+    padding:0px !important;
+	}
+
+	ion-grid {
+		padding:0px !important;
+	}
+
+	#checkin-button {
+		margin:0 !important;
+		height: 4.75rem;
+	}
+
+  .beer-info {
+		height:170px;
+	}
+
+	.btn {
+		margin:0px !important;
+		border-radius: 0px !important;
+	}
+
+	.no-margin {
+	  margin: 0 !important;
+	}
+
+	.no-padding {
+	  padding: 0 !important;
+	}
+
+    .card-head {
+    	font-size: 20px;
+    	padding-left: 10px;
+    }	   
+
+}

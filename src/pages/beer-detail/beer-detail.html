@@ -1,0 +1,103 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>Beer</ion-title>  
+  </ion-navbar>
+</ion-header>
+<ion-content>
+
+<ion-item class="beer-info" text-wrap>
+	<div *ngIf="!beerLoaded" align="center">
+		<ion-spinner></ion-spinner>
+	</div>
+  <ion-thumbnail item-left *ngIf="beerLoaded">
+	    <img [src]="beer?.labels.medium" />
+  </ion-thumbnail>
+	<span item-left *ngIf="beerLoaded">
+	    <b>{{beer?.name}}</b>
+	    <p>{{beer?.breweries[0].name}}</p>
+	    <p>{{beer?.style.shortName}}</p>
+	    <p>
+	      <span *ngIf="beer?.abv!=null">{{beer?.abv}}% ABV</span> 
+	      <span *ngIf="beer?.abv!=null && beer?.ibu!=null">&#9726;</span> 
+	      <span *ngIf="beer?.ibu!=null">{{beer?.ibu}} IBU</span>
+	    </p>
+	    <p>{{beer?.available.description}}</p>
+	</span>
+</ion-item>
+<ion-grid>
+  <ion-row>
+    <ion-col>
+			<button class="btn" item-left block ion-button icon-left>
+				<ion-icon name="pin"></ion-icon>
+				LOCATE
+			</button>
+    </ion-col>
+		<ion-col>
+			<button class="btn" item-right block ion-button icon-left (click)='saveBeerToFavorites(beer?.id)'>
+				<ion-icon name="heart"></ion-icon>
+				SAVE
+			</button>
+		</ion-col>
+  </ion-row>
+</ion-grid>	
+<button id="checkin-button" color="check" ion-button block full (click)='checkIn(beer)'>
+	CHECK-IN
+</button>
+<ion-card>
+  <ion-card-header>
+    BREWERY
+  </ion-card-header>
+  <ion-card-content>
+  <ion-grid *ngFor="let brewery of beer?.breweries">
+    <ion-row>
+      <ion-col width-33>
+        <img [src]="brewery?.images.medium" />
+      </ion-col>
+      <ion-col width-67>
+        <h2>{{brewery.name}}</h2>
+        <p>Established in {{brewery.established}}</p>
+        <button ion-button>View More</button>      
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  </ion-card-content>
+</ion-card>
+
+<ion-card [hidden]="beer?.description == null">
+  <ion-card-header>
+    DESCRIPTION
+  </ion-card-header>
+  <ion-card-content>
+  	 {{beer?.description}}
+  </ion-card-content>
+</ion-card>
+<div *ngIf="checkinLen">
+	<div class="card-head">
+		<p><ion-icon name="people"></ion-icon>&nbsp;Recent Check-Ins</p>
+	</div>
+	<div *ngFor="let check of checkins | async">
+			<checkin [checkin]="check"></checkin>
+	</div>
+  <ion-infinite-scroll (ionInfinite)="getMoreCheckins($event)">
+		<ion-infinite-scroll-content></ion-infinite-scroll-content>
+	</ion-infinite-scroll>  	
+</div>
+<!--
+<div *ngIf="beerReviewCount">
+	<div class="card-head">
+	  <p><ion-icon name="happy"></ion-icon>&nbsp;{{beer?.name}} Reviews</p>
+	</div>
+	<ion-card *ngFor="let review of beerReviews" >
+	  <ion-card-content>
+	    {{review.review}}
+	    <div [hidden]="+review.beer_rating == 0" align="right">  	
+	    	<rating [(ngModel)]="review.beer_rating" readOnly="true" max="5"></rating>
+	    </div>
+	    <div align="right">
+	      <p>{{review.date_created}}</p>
+	    </div>	    
+	  </ion-card-content>
+	</ion-card>
+</div>
+-->
+</ion-content>

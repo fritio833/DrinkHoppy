@@ -1,0 +1,115 @@
+page-location-detail {
+
+	ul {
+	  padding: 0px;
+
+	  &.rating li {
+	    padding: 5px 10px;
+	    background: none;
+	    color: #ffb400;
+
+	    ion-icon {
+	      font-size:25px;
+	    }
+	  }
+	}
+
+	.hours {
+    color:#ffffff;
+    text-align:center;
+    font-size:12px;
+	}
+
+	.hours-head {
+		font-size:20px;
+		padding-top: 20px;
+    text-shadow: black 0.1em 0.1em 0.2em;
+	}
+
+	#map {
+	    text-align:center;
+	    height:300px;
+	    width:300px;
+	}
+
+    .card-head {
+    	font-size: 20px;
+    	padding-left: 10px;
+    }
+
+    .item-inner {
+     border-bottom: 1px solid #dedede !important;
+    }
+
+  .background-home {
+	  background-repeat: no-repeat;
+	  background-size: cover;
+	  background-color: #ffffff;
+	  background-position: right 0px;
+  }
+
+  .loc-area {
+    height: 225px;
+
+    #header {
+      font-size: 22px;
+	    color: #ffffff;
+	    text-shadow: black 0.1em 0.1em 0.2em;
+	    text-align:center;
+    }
+    #ptype {
+	  color: #ffffff;
+	  text-shadow: black 0.1em 0.1em 0.2em;
+	  text-align:center;    
+    }
+  }
+
+  .loc-area #loc-rating {
+    text-align:center;
+  }
+
+  .loc-area div {
+    //background-color : #000000;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 10px;
+    //filter: alpha(opacity=50);
+  }
+
+  .square {
+    width: 100% !important;
+    padding: 0 0 0 0 !important;
+
+    .loc-btns {
+      height: 6rem !important;
+      box-shadow: inherit !important;            
+    }
+
+    .border-right {
+      border-right: 1px solid #999999;
+    }
+
+    .chk-btn {
+      box-shadow: inherit !important;
+      height: 4.75rem;
+    }
+
+    ion-col {
+      margin: 0 !important;
+    }
+  }
+
+  .butt {
+    margin-left:0;
+    margin-right:0;  
+  }
+
+   label {
+     display:block;
+     font-size: 13px;
+   }
+
+  .card-head {
+     font-size: 20px;
+     padding-left: 10px;
+  }
+}

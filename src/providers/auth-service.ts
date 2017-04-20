@@ -3,7 +3,7 @@ import { Platform, App } from 'ionic-angular';
 
 import { Observable } from 'rxjs/Observable';
 import { AuthProviders, AuthMethods, AngularFire  } from 'angularfire2';
-import { Facebook } from 'ionic-native';
+import { Facebook, Geolocation } from 'ionic-native';
 import firebase from 'firebase';
 
 import 'rxjs/add/operator/map';

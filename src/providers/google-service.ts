@@ -6,6 +6,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/delay';
 import 'rxjs/add/operator/retry';
 import 'rxjs/add/operator/timeout';
+import 'rxjs/add/operator/retrywhen';
 
 
 /*
@@ -45,7 +46,7 @@ export class GoogleService {
   reverseGeocodeLookup(lat,lng) {
     return this.http.get(this.googleGeocodeURL 
     	  + 'latlng=' + lat + ',' + lng + '&sensor=false&key=' + this.googleGeocodeAPIKey)
-        .retry(2)
+        .retryWhen(error => error.delay(500))
         .timeout(5000,new Error('Error connecting'))
         .map(this.getCityState);  	
   }
@@ -155,8 +156,6 @@ export class GoogleService {
         + '&types=night_club|bar|food|grocery_or_supermarket|restaurant|liquor_store|gas_station|convenience_store&radius=200&&key=' 
         + this.googlePlacesAPIKey)
         .map(res => res.json());    
-
-    //grocery_or_supermarket ?
   }
 
   searchByPlaceType(cityState,placeType,filter?) {
@@ -181,7 +180,7 @@ export class GoogleService {
         + '&type=' + placeType
         + '&key=' 
         + this.googlePlacesAPIKey)
-        .retry(2)
+        .retryWhen(error => error.delay(500))
         .timeout(5000,new Error('Error connecting'))        
         .map(res => res.json());
 
@@ -236,7 +235,7 @@ export class GoogleService {
         + _name
         + '&key=' 
         + this.googlePlacesAPIKey)
-        .retry(2)
+        .retryWhen(error => error.delay(500))
         .timeout(5000,new Error('Error connecting'))        
         .map(res => res.json());
   }
@@ -245,7 +244,7 @@ export class GoogleService {
     return this.http.get(this.googlePlacesURL + 'nearbysearch/json?pagetoken='
         + nextToken
         + '&key=' + this.googlePlacesAPIKey)
-        .retry(2)
+        .retryWhen(error => error.delay(500))
         .timeout(5000,new Error('Error connecting'))         
         .map(res => res.json());
   }
@@ -255,7 +254,7 @@ export class GoogleService {
     return this.http.get(this.googlePlacesURL + searchType + '/json?pagetoken='
         + nextToken 
         + '&key=' + this.googlePlacesAPIKey)
-        .retry(2)
+        .retryWhen(error => error.delay(500))
         .timeout(5000,new Error('Error connecting'))         
         .map(res => res.json());
   }
@@ -270,7 +269,7 @@ export class GoogleService {
         + name
         +'&rankby=distance&key=' 
         + this.googlePlacesAPIKey)
-        .retry(2)
+        .retryWhen(error => error.delay(500))
         .timeout(5000,new Error('Error connecting'))          
         .map(res => res.json());
   }
@@ -291,7 +290,7 @@ export class GoogleService {
     return this.http.get(this.googlePlacesURL + 'details/json?placeid='
         + placeId
         + '&key=' + this.googlePlacesAPIKey)
-        .retry(2)
+        .retryWhen(error => error.delay(500))
         .timeout(5000,new Error('Error connecting'))        
         .map(res => res.json());    
   }
@@ -300,7 +299,7 @@ export class GoogleService {
     return this.http.get(this.googlePlacesURL + 'photo?photoreference='
         + photoRef
         + '&maxwidth=400&key=' + this.googlePlacesAPIKey)
-        .retry(2)
+        .retryWhen(error => error.delay(500))
         .timeout(5000,new Error('Error connecting'));    
   }
 
@@ -319,7 +318,7 @@ export class GoogleService {
         + cityName + "&country=us" 
         + '&types=(cities)&key=' 
         + this.googlePlacesAPIKey)
-        .retry(2)
+        .retryWhen(error => error.delay(500))
         .timeout(5000,new Error('Error connecting'))  
         .map(res => res.json());    
   }

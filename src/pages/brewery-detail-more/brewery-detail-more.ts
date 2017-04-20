@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, Platform } from 'ionic-angular';
+import { NavController, NavParams, Platform, ModalController } from 'ionic-angular';
 
 import { GoogleService } from '../../providers/google-service';
+
+import { LocationMapPage } from '../location-map/location-map';
 
 declare var window: any;
 
@@ -23,6 +25,7 @@ export class BreweryDetailMorePage {
   constructor(public navCtrl: NavController, 
   	          public params: NavParams,
   	          public platform: Platform,
+              public modalCtrl:ModalController,
   	          public geo:GoogleService) {
   	this.brewery = params.get('brewery');
     this.location = params.get('location');
@@ -59,7 +62,17 @@ export class BreweryDetailMorePage {
     }
     return str;
   }
-    
+  
+
+  viewMap() {
+    let modal = this.modalCtrl.create(LocationMapPage,
+                                      { lat:this.location.geometry.location.lat,
+                                        lng:this.location.geometry.location.lng,
+                                        locName:this.location.name
+                                      });
+    modal.present();
+  }   
+
   getGoogleStaticMap() {
       return this.geo.getStaticMap(this.brewery.latitude,this.brewery.longitude);
   }

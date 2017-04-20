@@ -11,6 +11,7 @@ import { LocationMapPage } from '../location-map/location-map';
 import { BreweryDetailMorePage } from '../brewery-detail-more/brewery-detail-more';
 import { DrinkMenuPage } from '../drink-menu/drink-menu';
 import { CheckinPage } from '../checkin/checkin';
+import { ReviewsPage } from '../reviews/reviews';
 
 declare var window: any;
 declare var cordova: any;
@@ -99,6 +100,19 @@ export class BreweryDetailPage {
 
   }
 
+
+
+  viewMap() {
+    let modal = this.modalCtrl.create(LocationMapPage,
+                                      { lat:this.location.geometry.location.lat,
+                                        lng:this.location.geometry.location.lng,
+                                        locName:this.location.name
+                                      });
+    modal.present();
+  }  
+
+  
+
   getCheckIns() {
     this.checkins =  this.angFire.database.list('/checkin/brewery/'+this.brewery.id,{
       query:{
@@ -178,16 +192,6 @@ export class BreweryDetailPage {
     return 0;
   }  
 
-  showMap(beer) {
-    
-    let modal = this.modalCtrl.create(LocationMapPage,
-                                      { lat:beer.latitude,
-                                        lng:beer.longitude,
-                                        locName:beer.name
-                                      });
-    modal.present();
-  }
-
   getGoogleStaticMap() {
       return this.geo.getStaticMap(this.brewery.latitude,this.brewery.longitude);
   }
@@ -261,6 +265,15 @@ export class BreweryDetailPage {
                                               brewery:this.brewery,
                                               photo:this.locationPhoto}); 
   }
+
+  viewReviews() {
+    let modal = this.modalCtrl.create(ReviewsPage,
+                                      { 
+                                        reviews:this.locationReviews,
+                                        locName:this.location.name
+                                      });
+    modal.present();
+  }   
 
   getBackgroundImg(pic) {
     let img:any;

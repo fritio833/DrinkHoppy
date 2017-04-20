@@ -3,6 +3,7 @@
     <ion-toolbar>
     	<ion-searchbar (ionInput)="doSearchBeer($event)"
                      debounce="1000"
+                     spellcheck="true"
                      (ionClear)="clearSearch($event)"
                      placeholder="Enter Beer Name">
       </ion-searchbar>

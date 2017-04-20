@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, Platform } from 'ionic-angular';
+import { NavController, NavParams, Platform, ModalController } from 'ionic-angular';
 
 import { Ionic2RatingModule } from 'ionic2-rating';
 import { GoogleService } from '../../providers/google-service';
@@ -25,7 +25,8 @@ export class LocationDetailsMorePage {
 
   constructor(public navCtrl: NavController, 
               public params: NavParams,
-              public platform:Platform, 
+              public platform:Platform,
+              public modalCtrl:ModalController, 
               public goog:GoogleService) {
     this.location = params.get('location');
     this.locationPhoto = params.get('photo');
@@ -74,6 +75,8 @@ export class LocationDetailsMorePage {
                                         locName:this.location.name
                                       });
   }
+
+  
 
   getBackgroundImg(pic) {
     let img:any;

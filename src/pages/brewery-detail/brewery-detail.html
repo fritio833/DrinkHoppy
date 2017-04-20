@@ -13,6 +13,9 @@
 				    <p id="loc-rating" *ngIf="brewery.brewery.images.icon!=null">
 				        <img [src]="brewery?.brewery.images.icon" />
 				    </p>
+						<p id="brewery-type">
+              {{brewery?.locationTypeDisplay}}
+						</p>
 				    <p id="loc-rating" [hidden]="!locationRating">
 				      <rating [(ngModel)]="locationRating" readOnly="true" max="5"></rating>
 				    </p>
@@ -45,10 +48,10 @@
 			    <label>Call</label>
 		    </div>
 		  </ion-col>		  
-		  <ion-col class="loc-btns border-right" color="light" full ion-button (click)='viewMap()'>
+		  <ion-col class="loc-btns border-right" color="light" full ion-button (click)='viewReviews()'>
 		    <div> 
 			    <ion-icon name="heart"></ion-icon>
-			    <label>Save</label>
+			    <label>Review</label>
 		    </div>              
 		  </ion-col>
 		  <ion-col class="loc-btns border-right" color="light" full ion-button (click)='showDrinkMenu()'>
@@ -70,7 +73,7 @@
 		  	CHECK-IN
 		  </ion-col>
 		</ion-row>
-    </ion-grid>
+  </ion-grid>
   <div *ngIf="breweryBeers.length">
     <ion-card>
       <ion-item>
@@ -107,8 +110,12 @@
           </p>
 	    </ion-item>
         <img [src]="getGoogleStaticMap()" (click)="goToNavApp()" />       
-		  <ion-item (click)="goToNavApp()">
-		    <button ion-button icon-left clear item-right>
+		  <ion-item>
+				<button ion-button icon-left clear item-left (click)='viewMap()'>
+		      <ion-icon name="expand"></ion-icon>
+		      Zoom Out          
+				</button>				
+		    <button ion-button icon-left clear item-right (click)="goToNavApp()">
 		      <ion-icon name="navigate"></ion-icon>
 		      Start
 		    </button>

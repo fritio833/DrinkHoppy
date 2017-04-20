@@ -57,8 +57,12 @@
           </p>
 	    </ion-item>
         <img [src]="getGoogleStaticMap()" (click)="goToNavApp()" />       
-		  <ion-item (click)="goToNavApp()">
-		    <button ion-button icon-left clear item-right>
+		  <ion-item>
+				<button ion-button icon-left clear item-left (click)='viewMap()'>
+		      <ion-icon name="expand"></ion-icon>
+		      Zoom Out          
+				</button>	        
+		    <button ion-button icon-left clear item-right (click)="goToNavApp()"t>
 		      <ion-icon name="navigate"></ion-icon>
 		      Start
 		    </button>

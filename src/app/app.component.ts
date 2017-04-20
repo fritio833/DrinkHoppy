@@ -6,7 +6,7 @@ import { StatusBar, Splashscreen, Geolocation } from 'ionic-native';
 import { SingletonService } from '../providers/singleton-service';
 import { GoogleService } from '../providers/google-service';
 import { ConnectivityService } from '../providers/connectivity-service';
-import {AuthService} from '../providers/auth-service';
+import { AuthService } from '../providers/auth-service';
 
 import { LoginPage } from '../pages/login/login';
 import { HomePage } from '../pages/home/home';
@@ -59,8 +59,7 @@ export class MyApp {
       { title: 'Home', component: HomePage },
       { title: 'Search', component: SearchMenuPage },
       { title: 'Favorites', component: FavoritesPage },
-      { title: 'Profile', component: ProfilePage },
-      { title: 'Settings', component: HomePage }
+      { title: 'Profile', component: ProfilePage }
     ];
   }
 
@@ -74,7 +73,12 @@ export class MyApp {
           this.getGeolocation();
       });
       */      
-      this.getGeolocation();
+      //this.getGeolocation();
+      this.sing.getGeolocation().subscribe(resp=>{
+        this.setCityState(resp);
+      },error=>{
+        console.log('error',error);
+      });
       
       StatusBar.styleDefault();
       Splashscreen.hide();
@@ -100,8 +104,14 @@ export class MyApp {
     });
   }
 
-
-
+  setCityState(coords) {
+    this.geo.reverseGeocodeLookup(coords.latitude,coords.longitude)
+      .subscribe((success)=>{
+      this.sing.geoCity = success.city;
+      this.sing.geoState = success.state;
+    });    
+  }
+  /*
   getGeolocation() {
 
     var temp = this;  // setInteval needs a tmp var to this.
@@ -157,7 +167,7 @@ export class MyApp {
       console.log('Error getting location using low accuracy. Attempt: ' + this.geoAttempt, error);      
     });    
   }
-
+  */
   presentToast(msg) {
     let toast = this.toastCtrl.create({
       message: msg,

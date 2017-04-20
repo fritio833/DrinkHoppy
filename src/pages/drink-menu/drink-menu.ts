@@ -56,13 +56,17 @@ export class DrinkMenuPage {
 
     if (this.location) {
       this.locationId = this.location.place_id;
-      this.localBeers = this.angFire.database.list('/location_menu/'+this.locationId+'/beers');
+      this.localBeers = this.angFire.database.list('/location_menu/'+this.locationId+'/beers',{
+        query: {
+          orderByChild: 'name'
+        }
+      });
     }
 
   }
 
   timeDiff(previous) {
-    return this.sing.timeDifference( new Date().getTime(),previous);
+    return this.sing.timeDifference( new Date().getTime(),previous,true);
   }
 
 }

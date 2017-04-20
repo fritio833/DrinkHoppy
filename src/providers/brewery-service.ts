@@ -4,6 +4,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/delay';
 import 'rxjs/add/operator/retry';
 import 'rxjs/add/operator/timeout';
+import 'rxjs/add/operator/retrywhen';
 
 import { Observable } from 'rxjs/Observable';
 import { SingletonService } from './singleton-service';
@@ -80,8 +81,8 @@ export class BreweryService {
            + _page
            + _filter 
            +'&withBreweries=Y')
-           .retry(2)
-           .timeout(5000,new Error('Error connecting'))
+           .retryWhen(error => error.delay(500))
+           .timeout(5000,new Error('delay exceeded'))
            .map(res => res.json());
     } else {
       return this.http.get(this.breweryDbUrl 
@@ -90,7 +91,7 @@ export class BreweryService {
            + '&q=' + beerName
            + _page 
            +'&type=beer&withBreweries=Y')
-           .retry(2)
+           .retryWhen(error => error.delay(500))
            .timeout(5000,new Error('Error connecting'))           
            .map(res => res.json());
     }
@@ -102,7 +103,7 @@ export class BreweryService {
            + this.breweryDbAPI 
            + '&q=' + name
            + '&type=brewery')
-           .retry(2)
+           .retryWhen(error => error.delay(500))
            .timeout(5000)
            .map(res => res.json());    
   }
@@ -133,7 +134,7 @@ export class BreweryService {
            + "&radius=" + _radius 
            + '&key='           
            + this.breweryDbAPI)
-           .retry(2)
+           .retryWhen(error => error.delay(500))
            .timeout(5000,new Error('Error connecting'))           
            .map(res => res.json());
   }
@@ -152,7 +153,7 @@ export class BreweryService {
     return this.http.get(this.breweryDbUrl 
          + 'brewery/'+breweryId+'/locations'
          + '/?key=' + this.breweryDbAPI)
-         .retry(2)
+         .retryWhen(error => error.delay(500))
          .timeout(5000,new Error('Error connecting'))         
          .map(res => res.json());
   }
@@ -161,7 +162,7 @@ export class BreweryService {
     return this.http.get(this.breweryDbUrl 
          + 'location/'+locationId
          + '/?key=' + this.breweryDbAPI)
-         .retry(2)
+         .retryWhen(error => error.delay(500))
          .timeout(5000,new Error('Error connecting'))          
          .map(res => res.json());
   }  
@@ -171,7 +172,7 @@ export class BreweryService {
          + 'brewery/' 
          + breweryId 
          + '/beers?key=' + this.breweryDbAPI)
-         .retry(2)
+         .retryWhen(error => error.delay(500))
          .timeout(5000,new Error('Error connecting'))          
          .map(res => res.json()); 
   }
@@ -183,7 +184,7 @@ export class BreweryService {
          + beerId 
          + '/?key=' + this.breweryDbAPI
          + '&type=beer&withBreweries=Y')
-         .retry(2)
+         .retryWhen(error => error.delay(500))
          .timeout(5000,new Error('Error connecting'))         
          .map(res => res.json());
   } 
@@ -192,7 +193,7 @@ export class BreweryService {
     return this.http.get(this.breweryDbUrl 
          + 'categories/'
          + '?key=' + this.breweryDbAPI)
-         .retry(2)
+         .retryWhen(error => error.delay(500))
          .timeout(5000,new Error('Error connecting'))          
          .map(res => res.json());
   }
@@ -204,7 +205,7 @@ export class BreweryService {
     return this.http.get(this.breweryDbUrl 
          + 'styles/'
          + '?key=' + this.breweryDbAPI)
-         .retry(2)
+         .retryWhen(error => error.delay(500))
          .timeout(5000,new Error('Error connecting'))          
          .map(res => res.json());    
   }
@@ -213,7 +214,7 @@ export class BreweryService {
     return this.http.get(this.breweryDbUrl 
          + 'glassware/'
          + '?key=' + this.breweryDbAPI)
-         .retry(2)
+         .retryWhen(error => error.delay(500))
          .timeout(5000,new Error('Error connecting'))          
         .map(res => res.json());    
   }

@@ -3,7 +3,7 @@ import { NavController, NavParams, LoadingController, ModalController, Platform 
 import { Geolocation } from 'ionic-native';
 import { Ionic2RatingModule } from 'ionic2-rating';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
-import {BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import { LocationService } from '../../providers/location-service';
 import { GoogleService } from '../../providers/google-service';
@@ -14,6 +14,9 @@ import { LocationMapPage } from '../location-map/location-map';
 import { LocationDetailsMorePage } from '../location-details-more/location-details-more';
 import { CheckinPage } from '../checkin/checkin';
 import { DrinkMenuPage } from '../drink-menu/drink-menu';
+import { ReviewsPage } from '../reviews/reviews';
+
+import { BeerDetailPage } from '../beer-detail/beer-detail';
 
 import firebase from 'firebase';
 
@@ -48,6 +51,8 @@ export class LocationDetailPage {
   public limit:any;
   public lastKey:string;
   public queryable:boolean = true;
+  public localBeers:FirebaseListObservable<any>;
+  public localBeerLen:number;
 
 
   constructor(public navCtrl:NavController, 
@@ -118,6 +123,17 @@ export class LocationDetailPage {
                                       });
     modal.present();
   }
+
+
+
+  viewReviews() {
+    let modal = this.modalCtrl.create(ReviewsPage,
+                                      { 
+                                        reviews:this.locationReviews,
+                                        locName:this.location.name
+                                      });
+    modal.present();
+  }  
 
   getBackgroundImg(pic) {
     let img:any;
@@ -261,11 +277,37 @@ export class LocationDetailPage {
       if (!this.queryable)
         infiniteScroll.enable(false);
     }, 1000);
- }  
+  }
+
+  getBeerDetail(beerId) {
+  	this.navCtrl.push(BeerDetailPage,{beerId:beerId});
+
+  }  
+
+  getBeerMenu() {
+    if (this.location) {
+      this.localBeers = this.angFire.database.list('/location_menu/'+this.location.place_id+'/beers',{
+        query: {
+          orderByChild: 'priority',
+          limitToFirst: this.limit
+        }
+      });
+
+      this.localBeers.subscribe(snap=>{
+        this.localBeerLen = snap.length;
+      });
+    }    
+  }
+
+  timeDiff(previous) {
+    return this.sing.timeDifference( new Date().getTime(),previous,true);
+  }  
 
   ionViewDidLoad() {
 
     console.log('ionViewDidLoad LocationDetailPage');
+
+    this.getBeerMenu();
 
     this.getCheckIns();
 
@@ -327,7 +369,8 @@ export class LocationDetailPage {
     }
 
     this.location.place_types = ptypes.replace(/,\s*$/, "").replace(/_/g, " ");
-    //console.log('location',this.location);
   }
+
+  
 
 }

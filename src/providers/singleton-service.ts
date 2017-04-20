@@ -1,7 +1,11 @@
 // App Global Variables
 
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/fromPromise';
+import { Geolocation } from 'ionic-native';
 
+import { GoogleService } from './google-service';
 
 @Injectable()
 export class SingletonService {
@@ -97,49 +101,83 @@ export class SingletonService {
     var msPerDay = msPerHour * 24;
     var msPerMonth = msPerDay * 30;
     var msPerYear = msPerDay * 365;
+    var checkOne;
 
     var elapsed = current - previous;
 
     if (elapsed < msPerMinute) {
         if (short)
           return Math.round(elapsed/1000) + 's';
-        else
-         return Math.round(elapsed/1000) + ' seconds ago';   
+        else {
+         checkOne = Math.round(elapsed/1000);
+         if (checkOne == 1)
+           return Math.round(elapsed/1000) + ' second ago';
+         else
+           return Math.round(elapsed/1000) + ' seconds ago';
+        }  
     }
 
     else if (elapsed < msPerHour) {
          if (short)
            return Math.round(elapsed/msPerMinute) + 'm';
-         else
-           return Math.round(elapsed/msPerMinute) + ' minutes ago';   
+         else {
+          checkOne = Math.round(elapsed/msPerMinute) ;
+          if (checkOne == 1)
+            return Math.round(elapsed/msPerMinute)  + ' minute ago';
+          else
+            return Math.round(elapsed/msPerMinute) + ' minutes ago';           
+         }              
     }
 
     else if (elapsed < msPerDay ) {
          if (short)
            return Math.round(elapsed/msPerHour ) + 'h';
-        else
-           return Math.round(elapsed/msPerHour ) + ' hours ago';   
+        else {
+          checkOne = Math.round(elapsed/msPerHour) ;
+          if (checkOne == 1)
+            return Math.round(elapsed/msPerHour )  + ' hour ago';
+          else
+            return Math.round(elapsed/msPerHour ) + ' hours ago';            
+        }
+              
     }
 
     else if (elapsed < msPerMonth) {
         if (short)
           return Math.round(elapsed/msPerDay) + 'd';
-        else
-          return 'approximately ' + Math.round(elapsed/msPerDay) + ' days ago';   
+        else {
+          checkOne = Math.round(elapsed/msPerDay) ;
+          if (checkOne == 1)
+            return Math.round(elapsed/msPerDay)  + ' day ago';
+          else
+            return 'approximately ' + Math.round(elapsed/msPerDay) + ' days ago';
+        } 
     }
 
     else if (elapsed < msPerYear) {
         if (short)
           return Math.round(elapsed/msPerMonth) + 'mo';
-        else
-          return 'approximately ' + Math.round(elapsed/msPerMonth) + ' months ago';   
+        else {
+          checkOne = Math.round(elapsed/msPerMonth) ;
+          if (checkOne == 1)
+            return Math.round(elapsed/msPerMonth)  + ' month ago';
+          else
+            return 'approximately ' + Math.round(elapsed/msPerMonth) + ' months ago';           
+        }
+            
     }
 
     else {
         if (short)
           return Math.round(elapsed/msPerYear ) + 'yr';
-        else
-          return 'approximately ' + Math.round(elapsed/msPerYear ) + ' years ago';   
+        else {
+          checkOne = Math.round(elapsed/msPerYear) ;
+          if (checkOne == 1)
+            return Math.round(elapsed/msPerYear)  + ' year ago';
+          else
+            return 'approximately ' + Math.round(elapsed/msPerYear ) + ' years ago';           
+        }
+            
     }
   }
 
@@ -150,6 +188,21 @@ export class SingletonService {
       var minutes = fourDigitTime.substring(2);
 
       return hours + ':' + minutes + amPm;
-  };  
+  }
 
+  getGeolocation() {
+    let options = {timeout: 5000, enableHighAccuracy: true, maximumAge:3000};
+
+    return Observable.fromPromise(Geolocation.getCurrentPosition(options))
+      .map(location => location.coords)
+      .map(coords => {
+        if (coords.latitude){
+          console.log('geo high accuracy');
+          return coords;
+        } else  
+          throw Observable.throw('Geolocation Timeout');
+      })
+      .retryWhen(error => error.delay(1000))
+      .timeout(10000)
+  } 
 }

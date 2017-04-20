@@ -285,6 +285,8 @@ export class CheckinPage {
       this.beerAPI.loadBeerGlassware().subscribe(glass=>{
         this.glassware = glass.data;
         //console.log(this.glassware);
+      },error=>{
+        console.log('error',error)
       });
 
       if ( this.sing.test ) {
@@ -350,6 +352,8 @@ export class CheckinPage {
     this.beerAPI.loadBeerGlassware().subscribe(glass=>{
       this.glassware = glass.data;
       //console.log(this.glassware);
+    },error=>{
+      console.log('error',error);
     });
 
     if (this.locations[0].hasOwnProperty('photos')) {
@@ -367,6 +371,8 @@ export class CheckinPage {
     this.beerAPI.loadBeerGlassware().subscribe(glass=>{
       this.glassware = glass.data;
       //console.log(this.glassware);
+    },error=>{
+      console.log('error',error);
     });
     if (this.locations != null) {
       this.location = this.locations[0];
@@ -535,6 +541,7 @@ export class CheckinPage {
           userIMG:this.user.photoURL,
           userName:this.user.displayName,
           breweryId:'',
+          breweryDBId:'',
           placeId:this.location.place_id,
           name:this.location.name,
           photo:this.location.url,
@@ -547,13 +554,15 @@ export class CheckinPage {
           zip:success.zip,
           country:success.country,
           comments:this.socialMessage,
-          img:''
+          img:'',
+          isBrewery:'N'
         }
 
         if (this.checkinType == 'brewery') {
-          locationData['breweryId'] = this.brewery.id;
+          locationData['breweryDBId'] = this.brewery.id;
           locationData['address'] = this.brewery.streetAddress;
           locationData['zip'] = this.brewery.postalCode;
+          locationData['isBrewery'] = this.brewery.postalCode;
         }
 
         if (this.beer != null) {
@@ -578,6 +587,9 @@ export class CheckinPage {
           } else {
             locationData['beerLabels'] = '';
             locationData['beerIMG'] = '';
+            locationData['beerLabelIcon'] = '';
+            locationData['beerLabelMedium'] = '';
+            locationData['beerLabelLarge'] = '';            
           }
 
           if (this.beer.hasOwnProperty('style')) {
@@ -626,6 +638,7 @@ export class CheckinPage {
           this.demo.setBeerDemo(locationData).subscribe(resp=>{});  
           this.demo.setBeerByCityDemo(locationData).subscribe(resp=>{});
           this.demo.setBeerByLocation(locationData).subscribe(resp=>{});
+          this.demo.setLocation(locationData).subscribe(resp=>{});
 
           //set checkin count for user
           this.demo.setCheckinUserCount(this.user.uid).subscribe(resp=>{});

@@ -102,7 +102,7 @@ export class BreweryService {
            + 'search/?key=' 
            + this.breweryDbAPI 
            + '&q=' + name
-           + '&type=brewery')
+           + '&withLocations=Y&type=brewery')
            .retryWhen(error => error.delay(500))
            .timeout(5000)
            .map(res => res.json());    

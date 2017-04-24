@@ -7,6 +7,9 @@ import { SingletonService } from '../../providers/singleton-service';
 
 import { ProfilePage } from '../profile/profile';
 import { SearchMenuPage } from '../search-menu/search-menu';
+import { SearchBeerPage } from '../search-beer/search-beer';
+import { SearchLocationPage } from '../search-location/search-location';
+import { SearchBreweriesPage } from '../search-breweries/search-breweries';
 
 import firebase from 'firebase';
 
@@ -66,6 +69,26 @@ export class HomePage {
       });
     });
   }
+
+  doSearch(page) {
+
+    switch(page) {
+
+      case 'beers':
+        this.navCtrl.push(SearchBeerPage); 
+        break;
+      case 'locations':
+        this.navCtrl.push(SearchLocationPage,{searchType:'nearbysearch'});
+        break;
+      case 'breweries':
+        this.navCtrl.push(SearchBreweriesPage);
+        break;
+      case 'bars':
+        this.navCtrl.push(SearchLocationPage,{placeType:'bar',searchType:'textsearch'});
+        break;                  
+      default: console.log('not valid search');
+    }
+  }  
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad HomePage');

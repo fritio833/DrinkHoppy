@@ -5,6 +5,8 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/fromPromise';
 import { Geolocation } from 'ionic-native';
 
+import firebase from 'firebase';
+
 import { GoogleService } from './google-service';
 
 @Injectable()
@@ -28,6 +30,7 @@ export class SingletonService {
   public selectLat = null;
   public selectLng = null;
   public checkinsPerPage:number = 10;
+  public checkBeerArray = new Array();
   
   // App configuration.  API keys, webservice url, etc. 
   public breweryDbAPIKey:string = '3c7ec73417afb44ae7a4450482f99d70';
@@ -181,6 +184,16 @@ export class SingletonService {
     }
   }
 
+  getDateMonthDayYear(timestamp) {
+    var a = new Date(timestamp);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var year = a.getFullYear();
+    var month = months[a.getMonth()];
+    var date = a.getDate();
+
+    return month + ' ' + date + ', ' + year;
+  }  
+
   getFormattedTime (fourDigitTime) {
       var hours24 = parseInt(fourDigitTime.substring(0, 2),10);
       var hours = ((hours24 + 11) % 12) + 1;
@@ -189,6 +202,19 @@ export class SingletonService {
 
       return hours + ':' + minutes + amPm;
   }
+
+  getServerTime() {
+    return new Observable(observer=>{
+      var offsetRef = firebase.database().ref(".info/serverTimeOffset");
+      offsetRef.on("value", function(snap) {
+        var offset = snap.val();
+        var timestamp = new Date().getTime() + offset;
+        observer.next(timestamp);
+      },error=>{
+        observer.error(error);
+      });
+    });  
+  }  
 
   getGeolocation() {
     let options = {timeout: 5000, enableHighAccuracy: true, maximumAge:3000};
@@ -204,5 +230,68 @@ export class SingletonService {
       })
       .retryWhen(error => error.delay(1000))
       .timeout(10000)
+  }
+
+  setCheckinTime(time,beerId) {
+    let found:boolean = false;
+    let dateTime:number = new Date().getTime();
+    var elapsed = dateTime - time;
+    let timeDifference = Math.round(elapsed/1000);
+    let indexToRemove:number = 0;
+
+    for (var i=0; i<this.checkBeerArray.length; i++) {
+
+      if (this.checkBeerArray[i].beerId == beerId) {
+
+        found = true;
+
+        if (timeDifference > 30)
+          indexToRemove = i; //this.checkBeerArray.slice()
+        else
+          this.checkBeerArray[i].checkinTime = dateTime;
+
+      }
+    }
+
+    if (!found) {
+      this.checkBeerArray.push({beerId:beerId,checkinTime:dateTime});
+    }
+    if (indexToRemove) {
+      this.checkBeerArray.slice(indexToRemove);
+    }
+
+    console.log('set',this.checkBeerArray);
+  }
+
+
+  canCheckIn(beerId) {
+    let indexToRemove:number = 0;
+    let dateTime:number = new Date().getTime();
+    var elapsed:number;
+    let timeDifference:number;
+    let prevTime:number;
+
+    if (!this.checkBeerArray.length)
+      return true;
+
+    for (var i=0; i < this.checkBeerArray.length; i++) {
+
+      if (this.checkBeerArray[i].beerId == beerId) {
+        prevTime = this.checkBeerArray[i].checkinTime;
+        elapsed = dateTime - prevTime;
+        timeDifference = Math.round(elapsed/1000);
+        console.log('timeDiff',timeDifference);
+        if (timeDifference > 30)
+          indexToRemove = i;
+        else {
+          console.log('check1',this.checkBeerArray);
+          return false;
+        }        
+      }
+    }
+    
+    this.checkBeerArray.slice(indexToRemove);
+    return true;
+
   } 
 }

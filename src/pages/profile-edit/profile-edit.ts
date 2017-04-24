@@ -164,9 +164,9 @@ export class ProfileEditPage {
   takePicture(sourceType) {
     this.showLoading();
     var options = {
-      quality: 100,
-      targetWidth: 250,
-      targetHeight: 250,
+      quality: 90,
+      targetWidth: 100,
+      targetHeight: 100,
       allowEdit: true,
       encodingType: Camera.EncodingType.PNG,
       destinationType: Camera.DestinationType.DATA_URL,

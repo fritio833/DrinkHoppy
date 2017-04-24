@@ -143,29 +143,10 @@
 			<p><ion-icon name="people"></ion-icon>&nbsp;Recent Check-Ins</p>
 		</div>
 		<div *ngFor="let check of checkins | async">
-			 <checkin [checkin]="check"></checkin>
+			 <checkin [checkin]="check" page="brewery" [id]="brewery.id"></checkin>
 		</div>
 		<ion-infinite-scroll (ionInfinite)="getMoreCheckins($event)">
 			<ion-infinite-scroll-content></ion-infinite-scroll-content>
 		</ion-infinite-scroll> 		
 	</div>
-	<!--
-	<div [hidden]="locationReviews == null">
-	  <ion-card>
-        <ion-item>
-          <p>Reviews</p>
-        </ion-item>
-        <ion-item *ngFor="let review of locationReviews" text-wrap>
-          <p>{{review?.text}}</p>
-		    <div align="right" [hidden]="review.rating == 0">  	
-		    	<rating [(ngModel)]="review.rating" readOnly="true" max="5"></rating>
-		    </div>
-		    <div align="right">
-		      <p>{{review.author_name}}</p>
-		      <p>{{review.relative_time_description}}</p>
-		    </div>          
-        </ion-item> 
-	  </ion-card>		
-	</div>
-	-->  
 </ion-content>

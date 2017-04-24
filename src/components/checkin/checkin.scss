@@ -10,23 +10,49 @@ checkin {
     padding:0px;
 
     &.rating li {
-	    padding: 5px 10px;
+	    padding: 2px 2px !important;
 	    background: none;
 	    color: #ffb400;      
       ion-icon {
         font-size:20px;
       }
     }
-  }  
+  }
+
+  ion-chip {
+    ion-icon {
+        text-align:center !important;
+    }
+  }
+  
+  .loc-btn-image {
+    text-transform: none !important;
+    text-shadow: black 0.1em 0.1em 0.2em;
+  }
+
+  .loc-btn {
+    text-transform: none !important;
+  }
 
   .background-checkin {
 	  background-repeat: no-repeat;
 	  background-size: cover;
 	  background-color: #ffffff;
-      height: 150px;
-      color: #ffffff;
-      position:relative !important;
+    height: 150px;
+    color: #ffffff;
+    background-position: center center;
 
+    .pic-overlay {
+      //background: rgba(0, 0, 0, 0.3);
+      background: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0));
+      height:60px !important;
+      width:100%;
+      position:absolute !important;
+      left:0px !important;
+      top:0px !important;
+    }
+    
+    position:relative !important;
     p {
       color:#ffffff;
       font-size:15px;
@@ -39,16 +65,30 @@ checkin {
     ion-avatar {
       position: absolute !important;
       top:0px;
+      left: 10px;
     }
     .check-place {
       position: absolute !important;
       top:30px !important;
       left:70px;
+      width:50%;
+    }
+    #check-pic-click {
+      height:100px;
+      position:relative !important;
+      top:30px;
+      left:0px;
     }
 
     .check-name {
       position: absolute !important;
-      left:70px;      
+      left:70px;
+      width:100%;
+
+      button {
+        position: absolute !important;
+        top:0px;
+      }    
     }
     .check-timestamp {
       position: absolute !important;

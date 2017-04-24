@@ -14,10 +14,10 @@
 				      <rating [(ngModel)]="locationRating" readOnly="true" max="5"></rating>
 				    </p>
 				    <p id="ptype">{{location?.place_types}}</p>
-						<p class="hours" [hidden]="locationOpen || locationOpen==null">
+						<p class="hours" *ngIf="!locationOpen && locationHours">
 							Closed. {{locationHours}}
 						</p>
-						<p class="hours" [hidden]="!locationOpen || locationOpen==null">
+						<p class="hours" *ngIf="locationOpen && locationHours">
 							Open from {{locationHours}}
 						</p>						
 			    </div>
@@ -95,7 +95,7 @@
 			      <h2>{{beer.name}}</h2>
 						<p>{{beer.brewery}}</p>
 			      <p>{{beer.style}}</p>
-					  <p>Checked-in {{timeDiff(beer.beerUpdated)}} ago</p> 
+					  <p>Checked-in {{getCheckinTime(beer.beerUpdated)}} ago</p> 
 			      <ion-icon name="arrow-forward" item-right></ion-icon>
 		     </ion-item>
       	</div>
@@ -150,29 +150,10 @@
 		</div>
 	
 		<div *ngFor="let check of checkins | async">
-			 <checkin [checkin]="check"></checkin>
+			 <checkin [checkin]="check" page="locations" [id]="location.place_id"></checkin>
 		</div>
 	</div>
   <ion-infinite-scroll (ionInfinite)="getMoreCheckins($event)">
 		<ion-infinite-scroll-content></ion-infinite-scroll-content>
-	</ion-infinite-scroll>  
-	<!--
-	<div [hidden]="locationReviews == null">
-	  <ion-card>
-        <ion-item>
-          <p>Reviews</p>
-        </ion-item>
-        <ion-item *ngFor="let review of locationReviews" text-wrap>
-          <p>{{review?.text}}</p>
-		    <div align="right" [hidden]="review.rating == 0">  	
-		    	<rating [(ngModel)]="review.rating" readOnly="true" max="5"></rating>
-		    </div>
-		    <div align="right">
-		      <p>{{review.author_name}}</p>
-		      <p>{{review.relative_time_description}}</p>
-		    </div>          
-        </ion-item> 
-	  </ion-card>		
-	</div>
-	--> 
+	</ion-infinite-scroll> 
 </ion-content>

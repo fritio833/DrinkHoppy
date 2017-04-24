@@ -1,0 +1,71 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>Checkin Detail</ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content>
+  <img id="user-pic" [src]="checkinImg">
+  <ion-card>
+    <ion-card-header>Check-in Info</ion-card-header>
+    <ion-card-content>
+      <ion-item>
+          <ion-avatar item-left *ngIf="userIMG" (click)="getProfile(uid)">
+            <img [src]="userIMG">
+          </ion-avatar>
+          <ion-avatar item-left *ngIf="!userIMG" (click)="getProfile(uid)">
+            <img src="images/default-profile.png">
+          </ion-avatar>
+          <span item-left>
+            <p class="check-name" (click)="getProfile(uid)">
+                <span>
+                  {{userName}}
+                </span>						 
+            </p>	
+          </span>
+          <span item-right>
+            <p class="check-timestamp">{{getDateMonthDayYear(dateCreated)}}</p>
+          </span>
+      </ion-item>
+      <ion-item (click)="getBeerDetail()">
+        <ion-thumbnail item-left>
+          <img [src]="beerIMG">
+        </ion-thumbnail>
+        <span item-left>
+          <h3>{{beerDisplayName}}</h3>
+          <p>{{breweryName}}</p>
+          <p>{{beerStyleName}}</p>
+          <p *ngIf="servingStyleName!=''">
+            <ion-icon name="beer"></ion-icon>&nbsp;{{servingStyleName}}
+          </p>        
+        </span>
+      </ion-item>
+      <ion-item *ngIf="comments!=''" text-wrap class="botton-border-item">
+        <ion-icon color="check" item-left name="quote"></ion-icon>
+        <p>{{comments}}</p>
+      </ion-item>
+      <ion-item class="botton-border-item" *ngIf="beerRating">
+        <rating class="check-rating" item-left class="check-rating" [(ngModel)]="beerRating" readOnly="true" max="5"></rating>
+        <ion-chip item-right>
+          <ion-icon name="star" color="check"></ion-icon>
+            <ion-label>{{beerRating}} stars</ion-label>
+        </ion-chip>
+      </ion-item>
+    </ion-card-content>  
+  </ion-card>
+  <ion-card (click)="getDetail()">
+    <ion-card-header>Location</ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-thumbnail class="place-thumb" item-left>
+          <img [src]="photo">
+        </ion-thumbnail>
+        <span item-left>
+          <h3>{{businessName}}</h3>
+          <p>{{placeType}}</p>
+          <p>{{city}}, {{state}}</p>
+        </span>
+        <ion-icon name="arrow-forward" item-right></ion-icon>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

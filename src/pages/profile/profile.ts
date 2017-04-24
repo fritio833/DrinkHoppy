@@ -35,9 +35,10 @@ export class ProfilePage {
   public limit:any;
   public lastKey:string;
   public queryable:boolean = true;
+  public isLookup:boolean = false;
 
   constructor(public navCtrl: NavController, 
-              public navParams: NavParams, 
+              public params: NavParams, 
               public sing: SingletonService,
               public alertCtrl: AlertController,
               public loadingCtrl:LoadingController,
@@ -49,41 +50,50 @@ export class ProfilePage {
         this.user = this.auth.getUser();
         this.checkinsPerPage = sing.checkinsPerPage; 
         this.limit = new BehaviorSubject(this.checkinsPerPage);
-               
-        this.showLoading();
-        if (this.user.uid != null) {
-          this.uid = this.user.uid;
-          
-          this.profileRef = firebase.database().ref('users/'+this.uid).on('value', snapshot => {
-            this.displayName = snapshot.val().name;
-            if (snapshot.val().photo!=null && snapshot.val().photo !='')
-              this.profileIMG = snapshot.val().photo;
+        
+        this.isLookup = params.get('lookup');
 
-            let date = new Date(snapshot.val().dateCreated);
-            this.joinedDate = date.toDateString();
-            this.joinedDate = this.joinedDate.substring(4,this.joinedDate.length);
-            this.checkinCount = snapshot.val().checkins;
-            this.points = snapshot.val().points;
-            
-            if (this.user!=null) {
-              //console.log('currUser',this.user);
-              this.isEmailVerified = this.user.emailVerified;
-            }
-            this.loading.dismiss();            
-          });
-        } 
-  
+        if (this.isLookup) {
+          this.uid = params.get('uid');
+          if (this.uid === this.user.id)
+            this.isLookup = false;  // Can't friend myself
+        } else {
+          this.uid = this.user.uid;
+        }
   }
 
-  getCheckIns() {
-    this.checkins =  this.angFire.database.list('/checkin/users/'+this.user.uid,{
+  getUserProfile(uid) {
+
+    this.showLoading();
+    if (uid != null) {
+      
+      this.profileRef = firebase.database().ref('users/'+uid).on('value', snapshot => {
+        this.displayName = snapshot.val().name;
+        if (snapshot.val().photo!=null && snapshot.val().photo !='')
+          this.profileIMG = snapshot.val().photo;
+
+        this.joinedDate = this.sing.getDateMonthDayYear(snapshot.val().dateCreated);
+        this.checkinCount = snapshot.val().checkins;
+        this.points = snapshot.val().points;
+        
+        if (!this.isLookup && this.user!=null) {
+          //console.log('currUser',this.user);
+          this.isEmailVerified = this.user.emailVerified;
+        }
+        this.loading.dismiss();            
+      });
+    } 
+  }
+
+  getCheckIns(uid) {
+    this.checkins =  this.angFire.database.list('/checkin/users/'+uid,{
       query:{
         orderByChild:'priority',
         limitToFirst: this.limit
       }
     });
   
-    this.angFire.database.list('/checkin/users/'+this.user.uid,{
+    this.angFire.database.list('/checkin/users/'+uid,{
       query: {
         orderByChild: 'priority',
         limitToLast: 1
@@ -159,7 +169,8 @@ export class ProfilePage {
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad ProfilePage');
-    this.getCheckIns();
+    this.getUserProfile(this.uid);
+    this.getCheckIns(this.uid);
   }
 
 }

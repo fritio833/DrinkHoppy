@@ -42,6 +42,7 @@ import { MyRatingsPage } from '../pages/my-ratings/my-ratings';
 import { LocationResultsPage } from '../pages/location-results/location-results';
 import { LocationDetailPage } from '../pages/location-detail/location-detail';
 import { CheckinPage }  from '../pages/checkin/checkin';
+import { CheckinDetailPage }  from '../pages/checkin-detail/checkin-detail';
 import { CheckinSelectBeerPage } from '../pages/checkin-select-beer/checkin-select-beer';
 import { TackMapPage } from '../pages/tack-map/tack-map';
 import { LocationMapPage } from '../pages/location-map/location-map';
@@ -97,6 +98,7 @@ export const firebaseConfig = {
     LocationDetailPage,
     LocationDetailsMorePage,
     CheckinPage,
+    CheckinDetailPage,
     CheckinSelectBeerPage,
     TackMapPage,
     LocationMapPage,
@@ -148,6 +150,7 @@ export const firebaseConfig = {
     LocationDetailPage,
     LocationDetailsMorePage,
     CheckinPage,
+    CheckinDetailPage,
     CheckinSelectBeerPage,
     TackMapPage,
     LocationMapPage,

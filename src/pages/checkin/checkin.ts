@@ -49,10 +49,11 @@ export class CheckinPage {
   public maxMsgLen:number = 150;
   public lastImage: string = null;
   public showPager:boolean = true; 
-  public checkin: FirebaseListObservable<any>;
+  public checkin:any;
   public checkinLocationRF:any;
   public checkinUserRF:any;
   public checkinBeerRF:any;
+  public usersRef:any;
   public checkinBreweryRF:any;
   public checkinPictureRef: firebase.storage.Reference;
   public checkinPicSeqRef:any;
@@ -61,6 +62,7 @@ export class CheckinPage {
   public beers:any;
   public user:any;
   public checkinScore:number;
+  public fbRef:any;
 
   constructor(public navCtrl: NavController, 
   	          public params: NavParams,
@@ -82,15 +84,17 @@ export class CheckinPage {
     this.checkinType = params.get('checkinType');  //beer,brewery,places
     this.price = 0;
     this.checkinScore = 0;
-    this.checkin = angFire.database.list('/checkin/feeds');
+    this.checkin = firebase.database();
     
+    this.usersRef = firebase.database();
     this.checkinPictureRef = firebase.storage().ref('/checkins/');
     this.checkinPicSeqRef = firebase.database().ref('/sequences/checkinIMG/');
 
     this.checkinLocationRF = firebase.database();
     this.checkinUserRF = firebase.database();
     this.checkinBeerRF = firebase.database();
-    this.checkinBreweryRF = firebase.database();  
+    this.checkinBreweryRF = firebase.database();
+    this.fbRef = firebase.database();
 
     if (this.checkinType == 'place') {
       this.locations = new Array();
@@ -499,12 +503,33 @@ export class CheckinPage {
     this.loading.present();
   }
 
+  // Can only checkin the same beer 1 minute at a time
+  // Also, prevent code from bugging out doing mutiple checkins.
+  canCheckIn() {
+
+    //console.log('currtime',currentTime);
+    //console.log('prevTime',prevTime);
+
+   if (this.sing.canCheckIn(this.beer.id)) {
+      return true;
+    } else {
+      //console.log('have to wait');
+      this.presentToast("Have to wait 30 seconds to post another checkin");
+      return false;
+    }
+  }
+
   doCheckin() {
 
     if (this.beer == null) {
       this.presetNoBeerSelected();
       return;
     }
+    
+    if(!this.canCheckIn())
+      return;
+    
+    this.sing.setCheckinTime(new Date().getTime(),this.beer.id);
 
     let locationData:any = {};
 
@@ -562,7 +587,7 @@ export class CheckinPage {
           locationData['breweryDBId'] = this.brewery.id;
           locationData['address'] = this.brewery.streetAddress;
           locationData['zip'] = this.brewery.postalCode;
-          locationData['isBrewery'] = this.brewery.postalCode;
+          locationData['isBrewery'] = 'Y';
         }
 
         if (this.beer != null) {
@@ -645,37 +670,9 @@ export class CheckinPage {
           this.demo.setUserScore(this.user.uid,this.checkinScore).subscribe(resp=>{});
         }
         // Upload Picture and save it to firebase storage
-        if (this.base64Image != null) { 
 
-          this.getCheckinPicSeq().then(value=>{
-            let subDir = this.getImgSeqDirectory(value);
-            this.checkinPictureRef.child(subDir.sub1)
-              .child(subDir.sub2)
-              .child(subDir.sub3)
-              .child(subDir.img)
-              .putString(this.imageToUpload,'base64',{contentType:'image/png'})
-              .then(resp=>{
-               
-              //console.log('resp',resp);
-              locationData['img'] = resp.downloadURL;
-              this.setCheckinData(locationData);
+        this.setCheckinData(locationData);
 
-              this.view.dismiss();
-              this.presentToast("Check-in was successful");
-              this.loading.dismiss(); 
-            });            
-          });
-          
-        } else {
-
-          this.setCheckinData(locationData);
-
-          this.view.dismiss();
-          this.presentToast("Check-in was successful");
-          this.loading.dismiss();
-        }
-
-        //console.log('loc',success);
       });
     }
       
@@ -685,6 +682,8 @@ export class CheckinPage {
 
     var offsetRef = firebase.database().ref(".info/serverTimeOffset");
     var that = this;
+    
+
     offsetRef.on("value", function(snap) {
       var offset = snap.val();
       var negativeTimestamp = (new Date().getTime() + offset) * -1; // for ordering new checkins first
@@ -693,25 +692,71 @@ export class CheckinPage {
       locationData['priority'] = negativeTimestamp;
       //console.log('locData',locationData);
      
-      that.checkin.push(locationData);
-      
-      var newCheckRef = that.checkinLocationRF.ref('/checkin/locations/'+that.location.place_id).push();
-      newCheckRef.set(locationData);
+      //that.checkin.push(locationData);
+      var newKey;
+      var newFeedRef = that.checkin.ref('/checkin/feeds/')
+                       .push(locationData);
+      newKey = newFeedRef.key;
+      var updates = {};
 
-      var newCheckUserRef = that.checkinUserRF.ref('/checkin/users/'+that.user.uid).push();
-      newCheckUserRef.set(locationData);
+      if (that.checkinType != 'brewery') 
+        updates['/checkin/locations/'+that.location.place_id+'/'+newKey] = locationData;
 
-      if (that.beer != null){
-        var newCheckBeerRef = that.checkinBeerRF.ref('/checkin/beers/'+that.beer.id).push();
-        newCheckBeerRef.set(locationData);  
-      }
+      updates['/checkin/users/'+that.user.uid+'/'+newKey] = locationData;
+      updates['/checkin/beers/'+that.beer.id+'/'+newKey] = locationData;
 
-      if (that.checkinType == 'brewery' && that.brewery != null) {
-        var newCheckBreweryRef = that.checkinBreweryRF.ref('/checkin/brewery/'+ that.brewery.id).push();
-        newCheckBreweryRef.set(locationData); 
-      }
+      if (that.checkinType == 'brewery' && that.brewery != null)
+        updates['/checkin/brewery/'+ that.brewery.id+'/'+newKey] = locationData;
 
+       that.fbRef.ref().update(updates,complete=>{
+         if (that.base64Image != null) {
+           that.setCheckinIMG(newKey);
+         } else {
+          that.view.dismiss();
+          that.presentToast("Check-in was successful");
+          that.loading.dismiss();           
+         }      
+       });     
     });        
+  }
+
+  setCheckinIMG(key) {
+    let downloadURL;
+    //let fbRef = firebase.database();
+
+    this.getCheckinPicSeq().then(value=>{
+      let subDir = this.getImgSeqDirectory(value);
+      this.checkinPictureRef.child(subDir.sub1)
+        .child(subDir.sub2)
+        .child(subDir.sub3)
+        .child(subDir.img)
+        .putString(this.imageToUpload,'base64',{contentType:'image/png'})
+        .then(resp=>{
+
+          downloadURL = resp.downloadURL;
+          if (downloadURL!=null) {
+            var imgUpdates = {};
+            imgUpdates['/checkin/feeds/'+key+'/img'] = downloadURL;
+
+            if (this.checkinType != 'brewery')
+              imgUpdates['/checkin/locations/'+this.location.place_id+'/'+key+'/img'] = downloadURL;
+
+            imgUpdates['/checkin/users/'+this.user.uid+'/'+key+'/img'] = downloadURL;
+            imgUpdates['/checkin/beers/'+this.beer.id+'/'+key+'/img'] = downloadURL;
+            
+            if (this.checkinType == 'brewery' && this.brewery != null)
+              imgUpdates['/checkin/brewery/'+this.brewery.id+'/'+key+'/img'] = downloadURL;
+
+            this.fbRef.ref().update(imgUpdates,complete=>{
+              this.view.dismiss();
+              this.presentToast("Check-in was successful");
+              this.loading.dismiss();               
+            });
+          }
+      },error=>{
+        console.log('error',error);
+      });            
+    });    
   }
 
   firstToUpperCase( str ) {

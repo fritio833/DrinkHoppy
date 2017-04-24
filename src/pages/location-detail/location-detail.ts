@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { NavController, NavParams, LoadingController, ModalController, Platform } from 'ionic-angular';
 import { Geolocation } from 'ionic-native';
 import { Ionic2RatingModule } from 'ionic2-rating';
@@ -64,6 +64,7 @@ export class LocationDetailPage {
               public sing:SingletonService,
               public platform:Platform,
               public angFire:AngularFire,
+              public cdr:ChangeDetectorRef,
   	          public geo:GoogleService) {
 
     this.location = params.get("location");
@@ -299,12 +300,16 @@ export class LocationDetailPage {
     }    
   }
 
-  timeDiff(previous) {
-    return this.sing.timeDifference( new Date().getTime(),previous,true);
-  }  
+  getCheckinTime(prevTime) {
+      return this.sing.timeDifference( new Date().getTime(),prevTime,true);
+  }
+  
+  ngOnInit() {
+    this.cdr.detach();
+  }
 
-  ionViewDidLoad() {
-
+  ngAfterViewInit() {
+    setTimeout(() => this.cdr.reattach());
     console.log('ionViewDidLoad LocationDetailPage');
 
     this.getBeerMenu();
@@ -326,17 +331,26 @@ export class LocationDetailPage {
     }
 
     if (this.location.hasOwnProperty('opening_hours')) {
+      console.log(this.location.opening_hours);
       //this.locationHours = this.location.opening_hours.weekday_text;
-      let dayOfWeek = this.location.opening_hours.periods[new Date().getDay()];
-      this.locationOpen = this.location.opening_hours.open_now;
-      this.locationHours = this.sing.getFormattedTime(dayOfWeek.open.time) 
-                          + ' - ' + this.sing.getFormattedTime(dayOfWeek.close.time);
+      let dayOfWeek;
 
+      dayOfWeek = this.location.opening_hours.weekday_text[new Date().getDay()];
+        /*
+        this.locationHours = this.sing.getFormattedTime(dayOfWeek.open.time) 
+                            + ' - ' + this.sing.getFormattedTime(dayOfWeek.close.time);
+        */
+      this.locationHours = dayOfWeek;
+    
+      this.locationOpen = this.location.opening_hours.open_now;
+         
     }
     else {
       this.locationHours = null;
       this.locationOpen = null;
-    }    
+    }
+
+    console.log('locHours',this.locationHours);
 
     // get lat, lng
     if (this.location.hasOwnProperty('geometry')) {

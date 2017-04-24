@@ -38,13 +38,16 @@
     <ion-item>
       <p><ion-icon name="search"></ion-icon>&nbsp;Search Results.</p>
     </ion-item>
-    <ion-item>
-      <button ion-item *ngFor="let result of brewerySearch" (click)="getDetail(result)">
-          <h2 class="loc-name">{{result.name}}</h2>
-          <p>{{result.type}}</p>
-          <ion-icon name="arrow-forward" item-right></ion-icon>
-      </button>
-    </ion-item>
+    <button ion-item *ngFor="let result of brewerySearch" (click)="getDetail(result)">
+      <ion-thumbnail item-left *ngIf="result.images">
+        <img [src]="result.images.icon">
+      </ion-thumbnail>
+      <span item-left>
+        <h2 class="loc-name">{{result.name}}</h2>
+        <p>{{result.type}}</p>
+      </span>
+      <ion-icon name="arrow-forward" item-right></ion-icon>
+    </button>
   </ion-list>
 </div>
 <div [hidden]="qBreweryAuto.length || showMap"> 

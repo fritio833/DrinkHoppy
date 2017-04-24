@@ -2,6 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 
 import { Platform, MenuController, Nav, AlertController,ToastController } from 'ionic-angular';
 import { StatusBar, Splashscreen, Geolocation } from 'ionic-native';
+import firebase from 'firebase';
 
 import { SingletonService } from '../providers/singleton-service';
 import { GoogleService } from '../providers/google-service';
@@ -29,7 +30,9 @@ export class MyApp {
   comp:any;
   geoInterval:any;
   geoAttempt:number = 0;
-
+  profileRef:any;
+  profileIMG:string = 'images/default-profile.png';
+  displayName:string = '';
 
   constructor(
     public platform: Platform,
@@ -47,6 +50,7 @@ export class MyApp {
     this.auth.isLoggedIn().then((status)=>{
       if (status) {
         this.rootPage = HomePage;
+        this.getProfileData();
       } else {
         this.rootPage = LoginPage;
       }
@@ -110,6 +114,23 @@ export class MyApp {
       this.sing.geoCity = success.city;
       this.sing.geoState = success.state;
     });    
+  }
+
+  getProfileData() {
+    this.storage.ready().then(()=>{
+      this.storage.get('uid').then(uid=>{
+        if (uid != null) {
+          this.profileRef = firebase.database().ref('users/'+uid).once('value').then(snapshot => {
+            //console.log('snap',snapshot.val());
+          
+            this.displayName = snapshot.val().name;
+
+            if (snapshot.val().photo!=null && snapshot.val().photo !='')
+              this.profileIMG = snapshot.val().photo;
+          });
+        }
+      });
+    });
   }
   /*
   getGeolocation() {

@@ -36,8 +36,8 @@ page-checkin {
 
   .slide-text {
     text-align:center;
-	text-shadow: black 0.1em 0.1em 0.2em;
-	padding: 10px;
+	  text-shadow: black 0.1em 0.1em 0.2em;
+	  padding: 10px;
   }
 
   #loadingLocation {
@@ -103,7 +103,7 @@ page-checkin {
     height: 250px !important;
     background-repeat: no-repeat;
     background-size: cover;
-    background-position: right 0px;
+    background-position: center center;
     
     h2 {
       font-size:15px;

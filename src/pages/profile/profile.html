@@ -1,14 +1,14 @@
 <ion-header>
   <ion-navbar  color="primary">
-	<button ion-button menuToggle>
-      <ion-icon name="menu"></ion-icon>
-    </button>
-    <ion-buttons left>
-	    <button ion-button (click)="editProfile()">
-	      EDIT
-	    </button>
-    </ion-buttons>
-   <ion-buttons right>
+		<button ion-button menuToggle>
+				<ion-icon name="menu"></ion-icon>
+		</button>
+		<ion-buttons [hidden]="isLookup" left>
+			<button ion-button (click)="editProfile()">
+				EDIT
+			</button>
+		</ion-buttons>
+    <ion-buttons right [hidden]="isLookup">
        <button ion-button icon-only (click)="doSettings()">
            <ion-icon name="settings"></ion-icon>
        </button>            
@@ -22,6 +22,11 @@
 				<img [src]="profileIMG">
 			</ion-avatar>
 			<p>{{displayName}}</p>
+		</div>
+		<div *ngIf="isLookup" align="center">
+      <button ion-button>
+        Send Friend Request
+      </button>
 		</div>
 	</ion-item>
 	<ion-item>
@@ -42,7 +47,7 @@
 		</ion-label>
 		<h2 item-right>{{checkinCount}}</h2>
 	</ion-item>
-	<ion-item>
+	<ion-item *ngIf="!isLookup">
 		<ion-label>
 			Email Verified
 		</ion-label>
@@ -63,7 +68,7 @@
 			<p><ion-icon name="person"></ion-icon>&nbsp;Recent Check-Ins</p>
 		</div>		
 		<div *ngFor="let check of checkins | async">
-			 <checkin [checkin]="check"></checkin>
+			 <checkin [checkin]="check"  page="users" [id]="uid"></checkin>
 		</div>
 	</div>
 	<ion-infinite-scroll (ionInfinite)="getMoreCheckins($event)">

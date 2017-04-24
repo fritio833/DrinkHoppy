@@ -32,45 +32,46 @@
       </span>
     </ion-item>
   </div>
+  <div *ngIf="beer">
     <ion-item>
       <ion-label>Rating</ion-label>
       <span item-right><rating [(ngModel)]="beerRating" max="5"></rating></span>
     </ion-item>
     <ion-item class="botton-border-item">
-       <ion-range min="0" 
+        <ion-range min="0" 
                   max="5" 
                   step="1" 
                   snaps="true" 
                   [(ngModel)]="beerRating">
-         
-       </ion-range>    
+          
+        </ion-range>    
     </ion-item>
-
-  <div *ngIf="locationsLen">
-  <ion-item>
-    <label>Location</label>
-    <p item-right *ngIf="locationsLen > 1">Swipe Left</p>
-  </ion-item>
-  <ion-item id="loadingLocation" *ngIf="!showLocationSlide">
-    <div align="center">
-      <ion-spinner></ion-spinner>
-    </div>
-  </ion-item>  
-  <ion-slides id="locSlider" *ngIf="showLocationSlide" (ionSlideDidChange)="slideChanged()" pager="{{showPager}}">
-    <ion-slide *ngFor="let location of locations" text-wrap>    
-      <ion-item class="slide-item" [ngStyle]="getBackgroundImg(location.url)">
-        <div class="slide-overlay">
-          <div class="slide-text">
-            <h2>{{location.name}}</h2>
-            <p>{{location.vicinity}}</p>
-            <p>{{location.place_types}}</p>
-          </div>
-        </div>
-      </ion-item>
-    </ion-slide>           
-  </ion-slides>
   </div>
-  <div class="camera botton-border-item">
+  <div *ngIf="locationsLen">
+    <ion-item>
+      <label>Location</label>
+      <p item-right *ngIf="locationsLen > 1">Swipe Left</p>
+    </ion-item>
+    <ion-item id="loadingLocation" *ngIf="!showLocationSlide">
+      <div align="center">
+        <ion-spinner></ion-spinner>
+      </div>
+    </ion-item>  
+    <ion-slides id="locSlider" *ngIf="showLocationSlide" (ionSlideDidChange)="slideChanged()" pager="{{showPager}}">
+      <ion-slide *ngFor="let location of locations" text-wrap>    
+        <ion-item class="slide-item" [ngStyle]="getBackgroundImg(location.url)">
+          <div class="slide-overlay">
+            <div class="slide-text">
+              <h2>{{location.name}}</h2>
+              <p>{{location.vicinity}}</p>
+              <p>{{location.place_types}}</p>
+            </div>
+          </div>
+        </ion-item>
+      </ion-slide>           
+    </ion-slides>
+  </div>
+  <div class="camera botton-border-item" *ngIf="beer">
     <ion-grid>
       <ion-row>
         <ion-col>
@@ -89,7 +90,7 @@
       </ion-row>
     </ion-grid>
   </div>
-  <ion-item class="botton-border-item">
+  <ion-item class="botton-border-item" *ngIf="beer">
     <ion-label>Serving Style</ion-label>
     <ion-select [(ngModel)]="servingStyleName">
       <ion-option value="Bottle">Bottle</ion-option>
@@ -99,15 +100,15 @@
       </ion-option> 
     </ion-select>
   </ion-item>
-  <ion-item>
+  <ion-item  *ngIf="beer">
     <ion-label>Comment</ion-label>
     <ion-badge item-right color="dark">{{maxText(socialMessage)}}</ion-badge>
   </ion-item>
-  <ion-item class="botton-border-item">
+  <ion-item class="botton-border-item" *ngIf="beer">
     <ion-textarea maxlength="150" rows="5" [(ngModel)]="socialMessage">
     </ion-textarea>
   </ion-item>
-  <ion-item class="botton-border-item">
+  <ion-item class="botton-border-item" *ngIf="beer">
       <ion-label>Share</ion-label>
       <button color="facebook" item-right ion-button icon-left (click)="shareOnFacebook()">
         <ion-icon class="social-button" ios="logo-facebook" md="logo-facebook"></ion-icon>
@@ -118,5 +119,5 @@
         Twitter
       </button>
   </ion-item>
-  <button class="chk-btn" ion-button color="check" full (click)="doCheckin()">Check-in</button>
+  <button *ngIf="beer" class="chk-btn" ion-button color="check" full (click)="doCheckin()">Check-in</button>
 </ion-content>

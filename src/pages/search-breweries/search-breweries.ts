@@ -1,6 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { NavController, LoadingController, ToastController, PopoverController, AlertController, NavParams, ModalController } from 'ionic-angular';
 import { Geolocation } from 'ionic-native';
+import { Observable } from 'rxjs/Observable';
 
 import { BreweryService } from '../../providers/brewery-service';
 import { SingletonService } from '../../providers/singleton-service';
@@ -73,10 +74,31 @@ export class SearchBreweriesPage {
     toast.present();
   }
 
+  getBreweryFromGoogle(breweryName,lat,lng) {
+    //console.log('brewery',brewery);
+    let _breweryName = encodeURIComponent(breweryName);
+
+    return new Observable(observer=>{
+      this.geo.getPlaceByOrigin(_breweryName,lat,lng).subscribe(pub=>{
+        if (pub.results.length) {
+          //Get place detail
+          this.geo.placeDetail(pub.results[0].place_id).subscribe(detail=>{
+            //console.log('detail',detail);
+            observer.next(detail);
+          });
+        } else {
+          observer.next(false);
+        }
+      });      
+    });
+  
+  }
+
   getDetail(brewery) {
     console.log(brewery);
     let breweryId;
     let foundBrewpub:number = -1;
+  
     this.showLoading('Loading Brewery...');
         
     if (!brewery.hasOwnProperty('breweryId') && brewery.hasOwnProperty('id')) {
@@ -93,24 +115,33 @@ export class SearchBreweriesPage {
         if (foundBrewpub == -1) {
           foundBrewpub = 0;
         }
-
-        this.beerAPI.loadLocationById(success.data[foundBrewpub].id).subscribe((pub)=>{
-          //console.log('pub',pub);
+        //console.log('brewery',brewery);
+        //console.log('breweryLoc',success.data[foundBrewpub]);
+        
+        this.getBreweryFromGoogle(brewery.name,
+                                  success.data[foundBrewpub].latitude,
+                                  success.data[foundBrewpub].longitude).subscribe(resp=>{
+          //console.log('data',resp['result']);
           
-          this.beerAPI.loadBreweryBeers(pub.data.breweryId).subscribe((beers)=>{
-              //console.log('beers',beers);
-              this.navCtrl.push(BreweryDetailPage,{brewery:pub.data,beers:beers});
+          this.beerAPI.loadLocationById(success.data[foundBrewpub].id).subscribe((pub)=>{
+                  
+            this.beerAPI.loadBreweryBeers(pub.data.breweryId).subscribe((beers)=>{
+
+                this.loading.dismiss();
+                this.navCtrl.push(BreweryDetailPage,{brewery:pub.data,beers:beers,place:resp['result']});
+            },error=>{
+              console.log('error',error);
+              this.loading.dismiss().catch(() => {});
+              this.presentToast('Could not connect. Check connection.');
+            });
+            
           },error=>{
             console.log('error',error);
             this.loading.dismiss().catch(() => {});
             this.presentToast('Could not connect. Check connection.');
           });
-          
-        },error=>{
-          console.log('error',error);
-          this.loading.dismiss().catch(() => {});
-          this.presentToast('Could not connect. Check connection.');
         });
+        
       },error=>{
         console.log('error',error);
         this.loading.dismiss().catch(() => {});
@@ -121,9 +152,9 @@ export class SearchBreweriesPage {
 
       // Use Google Places to associated with BreweryDB
       let breweryName = encodeURIComponent(brewery.brewery.name);
-      console.log('breweryName',breweryName);
+      //console.log('breweryName',breweryName);
+      
       this.geo.getPlaceByOrigin(breweryName,brewery.latitude,brewery.longitude).subscribe(pub=>{
-        //console.log('pub',pub);
         if (pub.results.length) {
           //Get place detail
           this.geo.placeDetail(pub.results[0].place_id).subscribe(detail=>{
@@ -139,7 +170,6 @@ export class SearchBreweriesPage {
           });
         } else {
           this.beerAPI.loadBreweryBeers(brewery.breweryId).subscribe((beers)=>{
-              //console.log('beers',beers);
               this.loading.dismiss();
               this.navCtrl.push(BreweryDetailPage,{brewery:brewery,beers:beers,place:null});
           },error=>{

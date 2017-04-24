@@ -1,0 +1,24 @@
+page-checkin-detail {
+  #user-pic {
+      width:100%;
+  }
+
+  .check-rating ul {
+    padding:0px;
+
+    &.rating li {
+	    padding: 2px 2px !important;
+	    background: none;
+	    color: #ffb400;      
+      ion-icon {
+        font-size:20px;
+      }
+    }
+  }
+
+  ion-chip {
+    ion-icon {
+        text-align:center !important;
+    }
+  }  
+}

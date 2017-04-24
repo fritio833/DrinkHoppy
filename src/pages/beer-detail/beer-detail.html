@@ -51,12 +51,16 @@
   <ion-grid *ngFor="let brewery of beer?.breweries">
     <ion-row>
       <ion-col width-33>
-        <img [src]="brewery?.images.medium" />
+				<div align="center">
+          <img [src]="brewery?.images.medium" />
+				</div>
       </ion-col>
       <ion-col width-67>
-        <h2>{{brewery.name}}</h2>
-        <p>Established in {{brewery.established}}</p>
-        <button ion-button>View More</button>      
+				<div align="center">
+					<h2>{{brewery.name}}</h2>
+					<p>Established in {{brewery.established}}</p>
+					<button ion-button>View More</button>
+				</div>      
       </ion-col>
     </ion-row>
   </ion-grid>
@@ -76,28 +80,10 @@
 		<p><ion-icon name="people"></ion-icon>&nbsp;Recent Check-Ins</p>
 	</div>
 	<div *ngFor="let check of checkins | async">
-			<checkin [checkin]="check"></checkin>
-	</div>
-  <ion-infinite-scroll (ionInfinite)="getMoreCheckins($event)">
-		<ion-infinite-scroll-content></ion-infinite-scroll-content>
-	</ion-infinite-scroll>  	
+			<checkin [checkin]="check" page="beers" [id]="beerId"></checkin>
+	</div> 	
 </div>
-<!--
-<div *ngIf="beerReviewCount">
-	<div class="card-head">
-	  <p><ion-icon name="happy"></ion-icon>&nbsp;{{beer?.name}} Reviews</p>
-	</div>
-	<ion-card *ngFor="let review of beerReviews" >
-	  <ion-card-content>
-	    {{review.review}}
-	    <div [hidden]="+review.beer_rating == 0" align="right">  	
-	    	<rating [(ngModel)]="review.beer_rating" readOnly="true" max="5"></rating>
-	    </div>
-	    <div align="right">
-	      <p>{{review.date_created}}</p>
-	    </div>	    
-	  </ion-card-content>
-	</ion-card>
-</div>
--->
+<ion-infinite-scroll *ngIf="checkinLen" (ionInfinite)="getMoreCheckins($event)">
+	<ion-infinite-scroll-content></ion-infinite-scroll-content>
+</ion-infinite-scroll> 
 </ion-content>

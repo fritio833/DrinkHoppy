@@ -1,27 +1,30 @@
 <ion-card>
   <ion-item *ngIf="check.img" class="botton-border-item background-checkin" [ngStyle]="getBackgroundImg(check.img)">
-    <ion-avatar item-left *ngIf="check.userIMG">
-      <img [src]="check.userIMG">
-    </ion-avatar>
-    <ion-avatar item-left *ngIf="!check.userIMG">
-      <img src="images/default-profile.png">
-    </ion-avatar>
-    <span item-left>
-      <p class="check-name">
-          <span>
-            {{check.userName}}
-          </span>						 
-      </p>
-      <p class="check-place" *ngIf="check.name">
-        <ion-icon name="at"></ion-icon>&nbsp;{{check.name}}	
-      </p>	
-    </span>
-    <span item-right>
-      <p class="check-timestamp">{{checkinTime}}</p>
-    </span>
+    <div class="pic-overlay" (click)="getProfile(check.uid)">
+      <ion-avatar item-left *ngIf="check.userIMG">
+        <img [src]="check.userIMG">
+      </ion-avatar>
+      <ion-avatar item-left *ngIf="!check.userIMG">
+        <img src="images/default-profile.png">
+      </ion-avatar>
+      <span item-left>
+        <p class="check-name">
+            <span>
+              {{check.userName}}
+            </span>						 
+        </p>
+        <p class="check-place" *ngIf="check.name">
+            <ion-icon name="at"></ion-icon>
+            {{check.name}}
+        </p>	
+      </span>
+      <span item-right>
+        <p class="check-timestamp">{{checkinTime}}</p>
+      </span>
+    </div>
+    <div id="check-pic-click" (click)="getCheckinDetail(check.$key)"></div>
   </ion-item>
-
-  <ion-item *ngIf="!check.img" class="botton-border-item">
+  <ion-item *ngIf="!check.img" class="botton-border-item" (click)="getProfile(check.uid)">
     <ion-avatar item-left *ngIf="check.userIMG">
       <img [src]="check.userIMG">
     </ion-avatar>
@@ -35,13 +38,15 @@
           </span>
       </p>
       <p *ngIf="check.name">
-        <ion-icon name="at"></ion-icon>&nbsp;{{check.name}}	
+        <button class="loc-btn" icon-left ion-button clear small color="check">
+          <ion-icon name="at"></ion-icon>
+          {{check.name}}
+        </button>	
       </p>						
     </span>
     <span item-right><p>{{getTimestamp(check.dateCreated)}}</p></span>
   </ion-item>
-
-  <ion-item class="botton-border-item">
+  <ion-item class="botton-border-item" (click)="getCheckinDetail(check.$key)">
     <ion-thumbnail item-left>
       <img [src]="check.beerIMG">
     </ion-thumbnail>
@@ -60,6 +65,12 @@
     <p>{{check.comments}}</p>
   </ion-item>
   <ion-item class="botton-border-item" *ngIf="beerRating">
+    <!--
     <rating item-left class="check-rating" [(ngModel)]="beerRating" readOnly="true" max="5"></rating>
+    -->
+    <ion-chip item-right>
+      <ion-icon name="star" color="check"></ion-icon>
+        <ion-label>{{beerRating}} stars</ion-label>
+    </ion-chip>    
   </ion-item>
 </ion-card>

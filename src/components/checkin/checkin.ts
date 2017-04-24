@@ -1,21 +1,32 @@
-import { Component,Input, Output, ChangeDetectorRef  } from '@angular/core';
+import { Component,Input, Output, ChangeDetectionStrategy  } from '@angular/core';
+import { NavController, NavParams} from 'ionic-angular';
+
 import { SingletonService } from '../../providers/singleton-service';
+
+import { ProfilePage } from '../../pages/profile/profile';
+import { CheckinDetailPage } from '../../pages/checkin-detail/checkin-detail';
 
 
 @Component({
   selector: 'checkin',
-  templateUrl: 'checkin.html'
+  templateUrl: 'checkin.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-//,  changeDetection: ChangeDetectionStrategy.OnPush
+
 
 export class CheckinComponent {
 
   @Input ('checkin') checkToUse;
+  @Input ('page') pageToUse;
+  @Input ('id') pageId;
   public check:any;
+  public checkPage:any;
+  public checkinPageId:any;
   public beerRating:any;
   public checkinTime:string;
 
-  constructor(public sing:SingletonService, public cdRef:ChangeDetectorRef) {
+  constructor(public sing:SingletonService, 
+              public navCtrl:NavController ) {
     //console.log('Hello Checkin Component');
     this.check = {};
   }
@@ -23,6 +34,8 @@ export class CheckinComponent {
   ngOnInit() {
 
     this.check = this.checkToUse;
+    this.checkPage = this.pageToUse;
+    this.checkinPageId = this.pageId;
 
     if (this.check.beerRating == '')
       this.beerRating = 0;
@@ -44,8 +57,24 @@ export class CheckinComponent {
     }
   }
 
+  getCheckinDetail(key) {
+    console.log('key',key);
+    console.log('page',this.checkPage);
+
+    this.navCtrl.push(CheckinDetailPage,{checkinKey:key,page:this.checkPage,checkinPageId:this.checkinPageId});
+  }
+
   getTimestamp(prevTime) {
     return this.sing.timeDifference(new Date().getTime(),prevTime,true);
-  }    
+  }
+
+  getLocation() {
+
+    console.log('checkin clicked');
+  }
+
+  getProfile(uid) {
+    this.navCtrl.push(ProfilePage,{uid:uid,lookup:true});
+  }
 
 }

@@ -108,6 +108,7 @@ export class AuthService {
       provider:provider,
       photo:photoURL,
       emailVerified: resp.emailVerified,
+      lastBeerCheckin:'',
       points:0,
       checkins:0         
     });

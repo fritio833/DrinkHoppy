@@ -23,9 +23,14 @@
 			</ion-avatar>
 			<p>{{displayName}}</p>
 		</div>
-		<div *ngIf="isLookup" align="center">
-      <button ion-button>
+		<div *ngIf="isLookup && !sentFriendRequest && !userIsFriend" align="center">
+      <button ion-button (click)="sendFriendRequest()">
         Send Friend Request
+      </button>
+		</div>
+		<div *ngIf="isLookup && sentFriendRequest && !userIsFriend" align="center">
+      <button ion-button (click)="sendFriendRequest()">
+         Request Sent
       </button>
 		</div>
 	</ion-item>

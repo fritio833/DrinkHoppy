@@ -36,6 +36,10 @@ export class ProfilePage {
   public lastKey:string;
   public queryable:boolean = true;
   public isLookup:boolean = false;
+  public fbRef:any;
+  public friendsRequested = new Array();
+  public userIsFriend:boolean = false;
+  public sentFriendRequest:boolean = false;
 
   constructor(public navCtrl: NavController, 
               public params: NavParams, 
@@ -50,15 +54,21 @@ export class ProfilePage {
         this.user = this.auth.getUser();
         this.checkinsPerPage = sing.checkinsPerPage; 
         this.limit = new BehaviorSubject(this.checkinsPerPage);
-        
+        this.fbRef = firebase.database();
         this.isLookup = params.get('lookup');
 
         if (this.isLookup) {
           this.uid = params.get('uid');
-          if (this.uid === this.user.id)
+          //console.log('uid ' + this.uid + ' - ' + this.user.uid);
+          if (this.uid === this.user.uid)
             this.isLookup = false;  // Can't friend myself
+          else {
+            this.getRequestedFriendsList();
+            this.getUserFriendsList();
+          }
         } else {
           this.uid = this.user.uid;
+          
         }
   }
 
@@ -83,6 +93,14 @@ export class ProfilePage {
         this.loading.dismiss();            
       });
     } 
+  }
+
+  getUserFriendsList() {
+    this.fbRef.ref('/users/'+this.user.uid+'/friends').on('child_added',snapshot =>{
+      //this.userFriendsList = snapshot.val().uid;
+      if (this.uid === snapshot.val().uid)
+        this.userIsFriend = true;
+    });
   }
 
   getCheckIns(uid) {
@@ -167,10 +185,43 @@ export class ProfilePage {
     alert.present();
   }
 
+  sendFriendRequest() {
+    /*
+    this.fbRef.ref('/users/'+this.user.uid+'/friendRequests/'+this.uid).set({
+      uid:this.uid,
+      displayName:this.displayName,
+      photo:this.profileIMG,
+      requestData: new Date().getTime(),
+      priority: (new Date().getTime()) * -1
+    });
+    */
+    this.fbRef.ref('/users/'+this.uid+'/friendRequests/'+this.user.uid).set({
+      uid:this.user.uid,
+      requestDate: new Date().getTime(),
+      priority: (new Date().getTime()) * -1
+    });    
+    this.sentFriendRequest = true;
+  }
+
+  getRequestedFriendsList() {
+    //this.friendsRequested;
+    this.fbRef.ref('/users/'+this.user.uid+'/friendRequests/').on('child_added',snapshot=>{
+      //this.friendsRequested.push(snapshot.val().uid);
+      //console.log('uid: '+this.uid+' - '+snapshot.val().uid);
+      console.log('uid: ',snapshot.val());
+      if (this.uid === snapshot.val().uid) {
+        this.sentFriendRequest = true;
+      }
+      
+    });
+  }
+
   ionViewDidLoad() {
     console.log('ionViewDidLoad ProfilePage');
     this.getUserProfile(this.uid);
     this.getCheckIns(this.uid);
+    //console.log('lookup',this.isLookup);
+    //console.log('friendReq',this.friendsRequested);
   }
 
 }

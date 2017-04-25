@@ -36,6 +36,7 @@ import { ProfilePage } from '../pages/profile/profile';
 import { ProfileEditPage } from '../pages/profile-edit/profile-edit';
 import { ReviewsPage } from '../pages/reviews/reviews';
 import { FriendsPage } from '../pages/friends/friends';
+import { FriendsAddPage } from '../pages/friends-add/friends-add';
 import { ReviewBeerPage } from '../pages/review-beer/review-beer';
 import { HomePage } from '../pages/home/home';
 import { MyRatingsPage } from '../pages/my-ratings/my-ratings';
@@ -91,6 +92,7 @@ export const firebaseConfig = {
     ProfileEditPage,
     ReviewsPage,
     FriendsPage,
+    FriendsAddPage,
     ReviewBeerPage,
     HomePage,
     MyRatingsPage,
@@ -143,6 +145,7 @@ export const firebaseConfig = {
     ProfileEditPage,
     ReviewsPage,
     FriendsPage,
+    FriendsAddPage,
     ReviewBeerPage,
     HomePage,
     MyRatingsPage,

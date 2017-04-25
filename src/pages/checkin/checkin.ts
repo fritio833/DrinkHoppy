@@ -403,6 +403,7 @@ export class CheckinPage {
 
     console.log('ionViewDidLoad CheckinPage');
     this.user = this.auth.getUser();
+    console.log('user',this.user);
 
     switch(this.checkinType) {
 

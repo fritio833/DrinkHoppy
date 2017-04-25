@@ -92,7 +92,10 @@ export class ProfileEditPage {
 
       let user = this.auth.getUser();
       if (this.profileForm.controls.name.value.toUpperCase() !== this.displayName.toUpperCase()) {
-        let updateName = {name:this.profileForm.controls.name.value};
+        let updateName = {
+                           name:this.profileForm.controls.name.value,
+                           nameLower:this.profileForm.controls.name.value.toLowerCase()
+                        };
         this.userRef.ref('users/' + this.uid).update(updateName);
 
         user.updateProfile({

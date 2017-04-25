@@ -1,0 +1,34 @@
+<ion-header>
+  <ion-navbar color="primary" no-border-bottom>
+    <ion-title>Add Friends</ion-title>
+    <ion-buttons right>
+        <button ion-button icon-only (click)="cancel()">
+          <ion-icon name="close"></ion-icon>
+        </button>
+    </ion-buttons>
+  </ion-navbar>
+  <ion-toolbar no-border-top color="primary">
+    <ion-searchbar (ionInput)="doSearchFriends($event)">
+                   debounce="500"
+                   (ionClear)="clearSearch($event)"
+                   placeholder="Search Friends">
+    </ion-searchbar>    
+  </ion-toolbar>    
+</ion-header>
+<ion-content>
+    <ion-card *ngFor="let friend of friendSearch">
+      <ion-item>
+        <ion-avatar item-left>
+          <img *ngIf="friend.photo" [src]="friend.photo">
+          <img *ngIf="!friend.photo" src="images/default-profile.png">
+        </ion-avatar>
+        <h2>
+          {{friend.name}}
+        </h2>
+        <button ion-button item-right icon-left (click)="sendFriendRequest(friend.uid)">
+          <ion-icon name="person-add"></ion-icon>
+          Add Friend
+        </button>        
+      </ion-item>
+    </ion-card> 
+</ion-content>

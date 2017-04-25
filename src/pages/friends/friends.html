@@ -1,18 +1,80 @@
-<!--
-  Generated template for the Friends page.
-
-  See http://ionicframework.com/docs/v2/components/#navigation for more info on
-  Ionic pages and navigation.
--->
-<!----
 <ion-header>
-  <ion-navbar>
-    <ion-title>{{sing.userName}}'s Friends</ion-title>
-  </ion-navbar>
-
+  <ion-navbar color="primary" no-border-bottom>
+		<button ion-button menuToggle>
+				<ion-icon name="menu"></ion-icon>
+		</button>
+    <ion-title>Friends</ion-title>
+    <ion-buttons right>
+      <button ion-button icon-only (click)="searchFriend()">
+        <ion-icon name="person-add"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>  
+  <ion-toolbar no-border-top color="primary">   
+    <ion-segment [(ngModel)]="icons" color="white">
+      <ion-segment-button value="friends" icon-left>
+        <ion-icon name="contacts"></ion-icon>
+        Friends
+      </ion-segment-button>
+      <ion-segment-button value="requests" icon-left>
+        <ion-icon id="notification-button" name="notifications" [color]="notificationColor">
+          <ion-badge id="notifications-badge" color="danger">{{friendReq.length}}</ion-badge>
+        </ion-icon>
+        Requests
+      </ion-segment-button>
+    </ion-segment>
+    <ion-searchbar *ngIf="icons == 'friends'" (ionInput)="doSearchFriends($event)"
+                    debounce="1000"
+                    (ionClear)="clearSearch($event)"
+                    placeholder="Search Friends">
+    </ion-searchbar>    
+  </ion-toolbar>
 </ion-header>
----->
-
-<ion-content padding>
-
+<ion-content>
+<div [ngSwitch]="icons">  
+  <ion-list *ngSwitchCase="'friends'">   
+    <ion-item-sliding *ngFor="let friend of userFriends">
+      <ion-item-options side="left">
+        <button ion-button (click)="unfriend(friend.uid)" color="dark">
+           <ion-icon name="trash"></ion-icon>
+          Remove
+        </button>
+      </ion-item-options>
+      <ion-item (click)="getUserProfile(friend.uid)">
+        <ion-avatar item-left>
+          <img *ngIf="friend.photo" [src]="friend.photo">
+          <img *ngIf="!friend.photo" src="images/default-profile.png">
+        </ion-avatar>
+        <h2>
+          {{friend.name}}
+        </h2>
+        <!-- <p>{{friend.dateAccept}}</p> -->
+      </ion-item>
+    </ion-item-sliding>
+  </ion-list>
+  <ion-list *ngSwitchCase="'requests'">
+    <ion-item-sliding *ngFor="let friend of friendReq">
+      <ion-item-options side="left">
+        <button ion-button (click)="removeRequest(friend.uid)" color="dark">
+           <ion-icon name="trash"></ion-icon>
+          Remove
+        </button>
+      </ion-item-options>
+      <ion-item>
+        <ion-avatar item-left>
+          <img *ngIf="friend.photo" [src]="friend.photo">
+          <img *ngIf="!friend.photo" src="images/default-profile.png">
+        </ion-avatar>
+        <h2>
+          {{friend.name}}
+        </h2>
+        <p>{{friend.dateSent}}</p>     
+        <button ion-button item-right icon-left (click)="addFriend(friend.uid)">
+          <ion-icon name="person-add"></ion-icon>
+          Add Friend
+        </button>
+      </ion-item>
+    </ion-item-sliding>
+  </ion-list>  
+</div>
 </ion-content>

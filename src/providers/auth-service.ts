@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Platform, App } from 'ionic-angular';
+import { Platform, App, Events } from 'ionic-angular';
 
 import { Observable } from 'rxjs/Observable';
 import { AuthProviders, AuthMethods, AngularFire  } from 'angularfire2';
@@ -38,6 +38,7 @@ export class AuthService {
               public angFire:AngularFire,
               public storage:Storage,
               public platform:Platform,
+              public events:Events,
               public app:App,
               public db:DbService) {
     this.auth = firebase.auth();
@@ -49,9 +50,11 @@ export class AuthService {
         if (_currentUser && !this.loggedIn) {
           console.log("User " + _currentUser.uid);
           this.user = _currentUser;
-          //console.log('user',_currentUser);        
+          //console.log('user',_currentUser);
+          this.events.publish('user:loggedIn',this.user.uid);    
         } else {
           this.user = null;
+          this.events.publish('user:loggedOut',null);
           console.log("AUTH: User is logged out");
         }
     });
@@ -101,6 +104,7 @@ export class AuthService {
     this.userRef.ref('users/' + resp.uid).set({
       uid:resp.uid,
       name:displayName,
+      nameLower:displayName.toLowerCase(),
       email:resp.email,
       dateCreated:timestamp,
       dateLoggedIn:timestamp,      
@@ -122,6 +126,15 @@ export class AuthService {
         this.auth.currentUser.sendEmailVerification();
         this.storage.set('uid',resp.uid);
         this.writeUserData(resp,'email','',cred.name.value);
+
+        resp.updateProfile({
+          displayName: cred.name.value
+        }).then(function() {
+          // Update successful.
+        }, function(error) {
+          // An error happened.
+        });
+
         observer.next(resp);
       }).catch(error=> {
         // Handle Errors here.
@@ -341,10 +354,10 @@ export class AuthService {
  
   public logOut() {
     let sing = this.sing;
-    let stor = this.storage;
+    var that = this;
     return new Promise(resolve=>{
       firebase.auth().signOut().then(resp=>{
-          stor.remove('uid');
+          that.storage.remove('uid');
           //console.log('logged out');
           resolve(true);
         }).catch(error=>{

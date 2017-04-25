@@ -1,3 +1,18 @@
 page-friends {
+  #notification-button {            
+            position: relative;
+            width: 42px;
+            top:1px;
+            right: 1px;
+            overflow: visible!important;
+        }
 
+
+   #notifications-badge {
+            background-color: red;
+            position: absolute;
+            top: 2px;
+            right: 0;
+            border-radius: 100%;
+    }
 }

@@ -94,5 +94,21 @@ checkin {
       position: absolute !important;
       right:5px;
     }
-  } 
+  }
+
+  .checkinFriends {
+    width:100px;
+    float:left !important;
+    text-align:center;
+
+    ion-avatar {
+      text-align:center !important;
+      margin-left:25px !important;
+
+      img {
+        max-width: 30px !important;  //any size
+        max-height: 30px !important; //any size         
+      }
+    }
+  }
 }

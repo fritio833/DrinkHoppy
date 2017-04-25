@@ -5,13 +5,16 @@
 		</button>
     <ion-title>Friends</ion-title>
     <ion-buttons right>
-      <button ion-button icon-only (click)="searchFriend()">
+      <button *ngIf="mode!='checkin'" ion-button icon-only (click)="searchFriend()">
         <ion-icon name="person-add"></ion-icon>
       </button>
+      <button *ngIf="mode=='checkin'" ion-button icon-only (click)="cancel()">
+        <ion-icon name="close"></ion-icon>
+      </button>      
     </ion-buttons>
-  </ion-navbar>  
+  </ion-navbar>
   <ion-toolbar no-border-top color="primary">   
-    <ion-segment [(ngModel)]="icons" color="white">
+    <ion-segment [(ngModel)]="icons" color="white" *ngIf="mode!='checkin'">
       <ion-segment-button value="friends" icon-left>
         <ion-icon name="contacts"></ion-icon>
         Friends
@@ -23,15 +26,27 @@
         Requests
       </ion-segment-button>
     </ion-segment>
-    <ion-searchbar *ngIf="icons == 'friends'" (ionInput)="doSearchFriends($event)"
+    <ion-searchbar *ngIf="icons == 'friends' || icons == 'checkin'" (ionInput)="doSearchFriends($event)"
                     debounce="1000"
                     (ionClear)="clearSearch($event)"
                     placeholder="Search Friends">
-    </ion-searchbar>    
+    </ion-searchbar>
   </ion-toolbar>
 </ion-header>
-<ion-content>
-<div [ngSwitch]="icons">  
+<ion-content class="white-background">
+<div [ngSwitch]="icons">
+  <ion-list *ngSwitchCase="'checkin'">
+      <ion-item *ngFor="let friend of userFriends">
+        <ion-avatar item-left>
+          <img *ngIf="friend.photo" [src]="friend.photo">
+          <img *ngIf="!friend.photo" src="images/default-profile.png">
+        </ion-avatar>
+        <h2 item-left>
+          {{friend.name}}
+        </h2>
+        <ion-checkbox item-right checked="false" [(ngModel)]="friend.checked"></ion-checkbox>
+      </ion-item>
+  </ion-list>  
   <ion-list *ngSwitchCase="'friends'">   
     <ion-item-sliding *ngFor="let friend of userFriends">
       <ion-item-options side="left">
@@ -48,7 +63,6 @@
         <h2>
           {{friend.name}}
         </h2>
-        <!-- <p>{{friend.dateAccept}}</p> -->
       </ion-item>
     </ion-item-sliding>
   </ion-list>
@@ -78,3 +92,10 @@
   </ion-list>  
 </div>
 </ion-content>
+<ion-footer *ngIf="mode=='checkin'">
+  <ion-toolbar>
+    <ion-segment>
+     <button full ion-button (click)="setCheckinFriends()">DONE</button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-footer>

@@ -108,6 +108,33 @@
     <ion-textarea maxlength="150" rows="5" [(ngModel)]="socialMessage">
     </ion-textarea>
   </ion-item>
+  <ion-item *ngIf="beer">
+    <button ion-button icon-left item-left (click)="tagFriends()">
+      <ion-icon name="person-add"></ion-icon>
+      Tag Friends
+    </button>
+    <button *ngIf="checkinUsers.length" ion-button item-left (click)="clearCheckinFriends()">
+      Remove All
+    </button>    
+  </ion-item>
+  <ion-item *ngIf="checkinUsers.length">
+    <ion-card>
+      <ion-card-header>Friends</ion-card-header>
+      <ion-card-content>
+        <div class="checkinFriends" align="center" item-left *ngFor="let checkinUser of checkinUsers">
+          <ion-avatar>
+            <img *ngIf="checkinUser.photo" [src]="checkinUser.photo">
+            <img *ngIf="!checkinUser.photo" src="images/default-profile.png">
+          </ion-avatar>        
+          <p>{{checkinUser.name}}</p>
+        </div>
+        <ion-item>          
+          <label item-right>Notify Friends</label>
+          <ion-checkbox item-right [(ngModel)]="notifyFriends" checked="true"></ion-checkbox>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+  </ion-item>
   <ion-item class="botton-border-item" *ngIf="beer">
       <ion-label>Share</ion-label>
       <button color="facebook" item-right ion-button icon-left (click)="shareOnFacebook()">

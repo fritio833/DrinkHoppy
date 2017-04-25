@@ -65,6 +65,7 @@
     <p>{{check.comments}}</p>
   </ion-item>
   <ion-item class="botton-border-item" *ngIf="beerRating">
+    
     <!--
     <rating item-left class="check-rating" [(ngModel)]="beerRating" readOnly="true" max="5"></rating>
     -->
@@ -72,5 +73,17 @@
       <ion-icon name="star" color="check"></ion-icon>
         <ion-label>{{beerRating}} stars</ion-label>
     </ion-chip>    
+  </ion-item>
+  <ion-item *ngIf="check.friends">
+    <h2 item-left>Friends Tagged</h2>
+  </ion-item>
+  <ion-item *ngIf="check.friends">    
+    <div item-right class="checkinFriends" *ngFor="let friend of check.friends">
+      <ion-avatar>
+        <img *ngIf="friend.photo" [src]="friend.photo">
+        <img *ngIf="!friend.photo" src="images/default-profile.png">
+      </ion-avatar>      
+      <p>{{friend.name}}</p>
+    </div>
   </ion-item>
 </ion-card>

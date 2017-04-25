@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, ModalController } from 'ionic-angular';
+import { NavController, NavParams, ViewController, ModalController } from 'ionic-angular';
 
 import { SingletonService } from '../../providers/singleton-service';
 import { AuthService } from '../../providers/auth-service';
@@ -22,16 +22,24 @@ export class FriendsPage {
   public notificationColor:string ="white";
   public icons:string = 'friends';
   public friendSearch = new Array();
+  public mode:string;
+
 
   constructor(public navCtrl: NavController, 
-              public navParams: NavParams, 
+              public params: NavParams, 
               public sing: SingletonService,
               public modalCtrl:ModalController,
+              public view:ViewController,
               public auth: AuthService) {
 
     this.fbRef = firebase.database();
     this.user = this.auth.getUser();
     this.getFriendRequests();
+    this.mode = params.get('mode');
+
+    if (this.mode == 'checkin') {
+      this.icons = 'checkin';
+    }
   }
 
   getFriendRequests() {
@@ -57,8 +65,18 @@ export class FriendsPage {
       this.notificationColor = 'yellow';
     }
   }
+
+  setCheckinUID(uid,evt) {
+    console.log('uid',uid);
+    console.log('evt',evt);
+  } 
+
   clearSearch(evt) {
     this.getUserFriends();
+  }
+
+  cancel() {
+    this.view.dismiss();
   }
 
   sendFriendRequest(uid) {
@@ -164,6 +182,18 @@ export class FriendsPage {
     });    
   }
 
+  setCheckinFriends() {
+    //console.log('checkinFriends',this.userFriends);
+    let checkinUsers = new Array();// = this.userFriends;
+    for(var i = 0; i < this.userFriends.length; i++) {
+      if (this.userFriends[i].checked === true)
+        checkinUsers.push(this.userFriends[i]);
+    }
+
+    this.view.dismiss(checkinUsers);
+    //console.log(checkinUsers);
+  }
+
   getUserFriends() {
     var userRef = firebase.database();
     this.userFriends = new Array();
@@ -178,6 +208,7 @@ export class FriendsPage {
           uid:userSnap.val().uid,
           name:userSnap.val().name,
           photo:userSnap.val().photo,
+          checked:false,
           dateAccept:this.sing.getDateMonthDayYear(snapshot.val().acceptDate)
         })
       });

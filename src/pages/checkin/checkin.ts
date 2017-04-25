@@ -15,6 +15,7 @@ import { AuthService } from '../../providers/auth-service';
 import { DemoService } from '../../providers/demo-service';
 
 import { CheckinSelectBeerPage } from '../checkin-select-beer/checkin-select-beer';
+import { FriendsPage } from '../friends/friends';
 
 declare var cordova: any;
 
@@ -63,6 +64,8 @@ export class CheckinPage {
   public user:any;
   public checkinScore:number;
   public fbRef:any;
+  public checkinUsers = new Array();
+  public notifyFriends:boolean;
 
   constructor(public navCtrl: NavController, 
   	          public params: NavParams,
@@ -280,6 +283,11 @@ export class CheckinPage {
     modal.present();     
   }
 
+  clearCheckinFriends() {
+    this.checkinUsers = new Array();
+    this.notifyFriends = false;
+  }
+
   checkinBeer() {
 
     this.fixBeer();
@@ -445,6 +453,20 @@ export class CheckinPage {
     });
   }
 
+  tagFriends() {
+    let modal = this.modalCtrl.create( FriendsPage,{mode:'checkin'});
+    modal.onDidDismiss(friendList => {
+
+      if (friendList != null) {
+        this.checkinUsers = friendList;
+        this.notifyFriends = true;
+      }
+      //console.log('checkinUsers',this.checkinUsers);
+    });
+    modal.present();  
+      
+  }
+
   shareOnFacebook() {
 
     SocialSharing.shareViaFacebook('message me',null,'http://benderapp.com').then((success)=>{
@@ -528,7 +550,7 @@ export class CheckinPage {
     }
     
     if(!this.canCheckIn())
-      return;
+      return;      
     
     this.sing.setCheckinTime(new Date().getTime(),this.beer.id);
 
@@ -580,9 +602,12 @@ export class CheckinPage {
           zip:success.zip,
           country:success.country,
           comments:this.socialMessage,
+          friends:this.checkinUsers,
           img:'',
           isBrewery:'N'
         }
+
+        console.log('notify',this.notifyFriends);
 
         if (this.checkinType == 'brewery') {
           locationData['breweryDBId'] = this.brewery.id;

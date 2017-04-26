@@ -40,8 +40,6 @@ export class HomePage {
               public events:Events,
               public angFire:AngularFire,
   	          public storage:Storage) {
-                              
-
   }
 
   getProfileData() {
@@ -117,5 +115,6 @@ export class HomePage {
       content: 'Loading...'
     });
     this.loading.present();
-  }   
+  }
+
 }

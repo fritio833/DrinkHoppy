@@ -2,6 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 
 import { Platform, MenuController, Events, Nav, AlertController,ToastController } from 'ionic-angular';
 import { StatusBar, Splashscreen, Geolocation } from 'ionic-native';
+import { Push, PushToken } from '@ionic/cloud-angular';
 import firebase from 'firebase';
 
 import { SingletonService } from '../providers/singleton-service';
@@ -44,6 +45,7 @@ export class MyApp {
     public geo:GoogleService,
     public storage:Storage,
     public events:Events,
+    public push:Push,
     public alertCtrl: AlertController,
     public conn:ConnectivityService
   ) {
@@ -95,9 +97,21 @@ export class MyApp {
       },error=>{
         console.log('error',error);
       });
+      
+      // Push does not work on desktop
+      if(this.platform.is('cordova')) {
+        this.push.register().then((t: PushToken) => {
+          return this.push.saveToken(t);
+        }).then((t: PushToken) => {
+          console.log('Token saved:', t.token);
+        });
 
-
-
+        this.push.rx.notification()
+          .subscribe((msg) => {
+            alert(msg.title + ': ' + msg.text);
+        });
+      }
+      
       StatusBar.styleDefault();
       Splashscreen.hide();
 

@@ -1,24 +1,24 @@
 {
-  "name": "Bender-Test",
-  "app_id": "",
+  "name": "Brew Search",
+  "app_id": "31aae2b5",
   "v2": true,
   "typescript": true,
-"proxies": [
+  "proxies": [
     {
-        "path": "/v2",
-        "proxyUrl": "http://api.brewerydb.com/v2"
-    },
-    {  
-        "path": "/webservice",
-        "proxyUrl": "http://beermapping.com/webservice"
+      "path": "/v2",
+      "proxyUrl": "http://api.brewerydb.com/v2"
     },
     {
-        "path": "/bender",
-        "proxyUrl": "http://benderapp.servebeer.com/bender"
+      "path": "/webservice",
+      "proxyUrl": "http://beermapping.com/webservice"
     },
     {
-        "path": "/maps",
-        "proxyUrl": "https://maps.googleapis.com/maps"
+      "path": "/bender",
+      "proxyUrl": "http://benderapp.servebeer.com/bender"
+    },
+    {
+      "path": "/maps",
+      "proxyUrl": "https://maps.googleapis.com/maps"
     }
-  ] 
+  ]
 }

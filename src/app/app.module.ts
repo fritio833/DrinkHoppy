@@ -4,6 +4,7 @@ import { Storage } from '@ionic/storage';
 import { MyApp } from './app.component';
 import { Ionic2RatingModule } from 'ionic2-rating';
 import { AngularFireModule, AuthProviders, AuthMethods } from 'angularfire2';
+import { CloudSettings, CloudModule } from '@ionic/cloud-angular';
 
 import { FbProvider } from '../providers/fb-provider';
 import { BreweryService } from '../providers/brewery-service';
@@ -70,6 +71,24 @@ export const firebaseConfig = {
     messagingSenderId: "925035513978"    
 }
 
+const cloudSettings: CloudSettings = {
+  'core': {
+    'app_id': '31aae2b5'
+  },
+  'push': {
+    'sender_id': '925035513978',
+    'pluginConfig': {
+      'ios': {
+        'badge': true,
+        'sound': true
+      },
+      'android': {
+        'iconColor': '#343434'
+      }
+    }
+  }
+};
+
 @NgModule({
   declarations: [
     MyApp,
@@ -121,7 +140,8 @@ export const firebaseConfig = {
   imports: [
     IonicModule.forRoot(MyApp),
     Ionic2RatingModule,
-    AngularFireModule.initializeApp(firebaseConfig)
+    AngularFireModule.initializeApp(firebaseConfig),
+    CloudModule.forRoot(cloudSettings)
   ],
   bootstrap: [IonicApp],
   entryComponents: [

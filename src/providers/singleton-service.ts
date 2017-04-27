@@ -19,6 +19,7 @@ export class SingletonService {
   public realName:string = '';
   public token:string = '';
   public description:string = '';
+  public environment = 'dev';
   public geoCity = null;
   public geoState = null;
   public geoLat = null;
@@ -99,6 +100,9 @@ export class SingletonService {
 
   timeDifference(current, previous, short?) {
 
+    if (previous == null)
+      return '';
+
     var msPerMinute = 60 * 1000;
     var msPerHour = msPerMinute * 60;
     var msPerDay = msPerHour * 24;
@@ -109,6 +113,9 @@ export class SingletonService {
     var elapsed = current - previous;
 
     if (elapsed < msPerMinute) {
+         if (this.environment == 'dev')
+           return 'Today';
+
         if (short)
           return Math.round(elapsed/1000) + 's';
         else {
@@ -121,6 +128,9 @@ export class SingletonService {
     }
 
     else if (elapsed < msPerHour) {
+         if (this.environment == 'dev')
+           return 'Today';
+
          if (short)
            return Math.round(elapsed/msPerMinute) + 'm';
          else {
@@ -133,6 +143,9 @@ export class SingletonService {
     }
 
     else if (elapsed < msPerDay ) {
+         if (this.environment == 'dev')
+           return 'Today';
+
          if (short)
            return Math.round(elapsed/msPerHour ) + 'h';
         else {
@@ -214,6 +227,22 @@ export class SingletonService {
         observer.error(error);
       });
     });  
+  }
+
+  getPriorityTime() {
+    return new Observable(observer=>{
+
+      var offsetRef = firebase.database().ref(".info/serverTimeOffset");
+      offsetRef.on("value", function(snap) {
+        var offset = snap.val();
+        var negativeTimestamp = (new Date().getTime() + offset) * -1; // for ordering new checkins first
+        observer.next(negativeTimestamp);
+      },error=>{
+        observer.error(error);
+      });
+
+    });
+   
   }  
 
   getGeolocation() {

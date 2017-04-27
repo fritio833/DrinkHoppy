@@ -208,6 +208,7 @@ export class FriendsPage {
           uid:userSnap.val().uid,
           name:userSnap.val().name,
           photo:userSnap.val().photo,
+          pushToken:userSnap.val().pushToken,
           checked:false,
           dateAccept:this.sing.getDateMonthDayYear(snapshot.val().acceptDate)
         })

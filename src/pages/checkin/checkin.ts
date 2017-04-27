@@ -13,6 +13,7 @@ import { BreweryService } from '../../providers/brewery-service';
 import { SingletonService } from '../../providers/singleton-service';
 import { AuthService } from '../../providers/auth-service';
 import { DemoService } from '../../providers/demo-service';
+import { NotificationService } from '../../providers/notification-service';
 
 import { CheckinSelectBeerPage } from '../checkin-select-beer/checkin-select-beer';
 import { FriendsPage } from '../friends/friends';
@@ -76,6 +77,7 @@ export class CheckinPage {
               public modalCtrl:ModalController,
               public platform:Platform,
               public sing:SingletonService,
+              public notify:NotificationService,
               public beerAPI:BreweryService,
               public auth:AuthService,
               public actionCtrl:ActionSheetController,
@@ -607,7 +609,7 @@ export class CheckinPage {
           isBrewery:'N'
         }
 
-        console.log('notify',this.notifyFriends);
+
 
         if (this.checkinType == 'brewery') {
           locationData['breweryDBId'] = this.brewery.id;
@@ -725,6 +727,10 @@ export class CheckinPage {
       newKey = newFeedRef.key;
       var updates = {};
 
+      if(that.notifyFriends) {
+        that.notify.notifyFriends(that.user,that.checkinUsers,that.location,that.beer,negativeTimestamp,newKey);
+      }      
+
       if (that.checkinType != 'brewery') 
         updates['/checkin/locations/'+that.location.place_id+'/'+newKey] = locationData;
 
@@ -734,7 +740,7 @@ export class CheckinPage {
       if (that.checkinType == 'brewery' && that.brewery != null)
         updates['/checkin/brewery/'+ that.brewery.id+'/'+newKey] = locationData;
 
-       that.fbRef.ref().update(updates,complete=>{
+        that.fbRef.ref().update(updates,complete=>{
          if (that.base64Image != null) {
            that.setCheckinIMG(newKey);
          } else {

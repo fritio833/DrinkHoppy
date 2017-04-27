@@ -26,15 +26,16 @@ import { FriendsPage } from '../pages/friends/friends';
 export class MyApp {
   @ViewChild(Nav) nav: Nav;
 
-  rootPage: any;
-  pages: Array<{title: string, component: any}>;
-  login:any;
-  comp:any;
-  geoInterval:any;
-  geoAttempt:number = 0;
-  profileRef:any;
-  profileIMG:string = 'images/default-profile.png';
-  displayName:string = '';
+  public rootPage: any;
+  public pages: Array<{title: string, component: any}>;
+  public login:any;
+  public comp:any;
+  public geoInterval:any;
+  public geoAttempt:number = 0;
+  public profileIMG:string = 'images/default-profile.png';
+  public displayName:string = '';
+  public fbRef:any;
+
 
   constructor(
     public platform: Platform,
@@ -49,6 +50,7 @@ export class MyApp {
     public alertCtrl: AlertController,
     public conn:ConnectivityService
   ) {
+    this.fbRef = firebase.database();
     this.initializeApp();
 
     // set our app's pages
@@ -63,8 +65,10 @@ export class MyApp {
 
     // Event Listener for logged in and out
     this.events.subscribe('user:loggedIn',userId=>{
-      //console.log('userId Logged In',userId);
       this.getProfileData(userId);
+
+      // Set User Push Notification Token
+      this.setPushNotification(userId);
     });
 
     this.events.subscribe('user:loggedOut',userId=>{
@@ -76,13 +80,6 @@ export class MyApp {
     this.platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
-      /*
-      this.auth.isLoggedIn().then((status)=>{
-        if (status)
-          this.getGeolocation();
-      });
-      */      
-      //this.getGeolocation();
 
       this.auth.isLoggedIn().then((status)=>{
         if (status) {
@@ -98,24 +95,47 @@ export class MyApp {
         console.log('error',error);
       });
       
-      // Push does not work on desktop
-      if(this.platform.is('cordova')) {
-        this.push.register().then((t: PushToken) => {
-          return this.push.saveToken(t);
-        }).then((t: PushToken) => {
-          console.log('Token saved:', t.token);
-        });
-
-        this.push.rx.notification()
-          .subscribe((msg) => {
-            alert(msg.title + ': ' + msg.text);
-        });
-      }
-      
       StatusBar.styleDefault();
       Splashscreen.hide();
 
     });
+  }
+
+  setPushNotification(uid) {
+
+    // Push does not work on desktop and older mobile devices
+    if(this.platform.is('cordova')) {
+      this.push.register().then((t: PushToken) => {
+        return this.push.saveToken(t);
+      }).then((t: PushToken) => {
+        console.log('Token saved:', t.token);
+        let tokenUpdate = {};
+
+        if (uid != null) {
+          tokenUpdate['/users/'+uid+'/pushToken'] = t.token; 
+          //write token
+          this.fbRef.ref().update(tokenUpdate);
+        }
+      });
+
+      this.push.rx.notification()
+        .subscribe((msg) => {
+          let page = msg.raw.additionalData['page'];
+          let isForeground = msg.raw.additionalData.foreground;
+          //alert(msg.title + ': ' + msg.text);
+          //alert(msg.text);
+          console.log('msg',msg);
+          //console.log('page',msg.raw.additionalData['page']);
+          
+          if (page==='friends' && !isForeground) {
+            this.presentFriendAlert(msg.raw);
+          } else {
+            
+            console.log('show alert');
+          }
+          
+      });
+    }
   }
 
   openPage(page) {
@@ -131,7 +151,7 @@ export class MyApp {
       if (allowed) {
         this.nav.setRoot(LoginPage);
         this.presentToast('Log out was successful');
-        this.menu.close(); 
+        this.menu.close();
       }
     });
   }
@@ -144,9 +164,14 @@ export class MyApp {
     });    
   }
 
+  getPushProfile(data) {
+
+  }
+
   getProfileData(uid) {
+
     if (uid != null) {
-      this.profileRef = firebase.database().ref('users/'+uid).on('value',snapshot => {
+      this.fbRef.ref('users/'+uid).on('value',snapshot => {
         console.log('snap',snapshot.val());
       
         this.displayName = snapshot.val().name;
@@ -168,11 +193,24 @@ export class MyApp {
     toast.present();
   }
 
-  presentAlert(msg) {
+  getProfilePage(uid){
+    this.nav.push(ProfilePage,{lookup:true,uid:uid});
+  }
+
+  presentFriendAlert(msg) {
+    let img = msg.additionalData['image'];
+    let uid = msg.additionalData['id'];
+    let alertContent = msg.message;
     let alert = this.alertCtrl.create({
-      title: 'Message',
-      subTitle: msg,
-      buttons: ['Dismiss']
+      title: 'Friend Checked-In',
+      message: alertContent,
+      buttons: [{
+           text: 'Close',
+           role: 'cancel',
+           handler: () => {
+              console.log('Cancel clicked');
+           }        
+      }]
     });
     alert.present();
   }

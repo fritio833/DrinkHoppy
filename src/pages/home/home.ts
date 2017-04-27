@@ -10,6 +10,7 @@ import { SearchMenuPage } from '../search-menu/search-menu';
 import { SearchBeerPage } from '../search-beer/search-beer';
 import { SearchLocationPage } from '../search-location/search-location';
 import { SearchBreweriesPage } from '../search-breweries/search-breweries';
+import { NotificationsPage } from '../notifications/notifications';
 
 import firebase from 'firebase';
 
@@ -108,6 +109,15 @@ export class HomePage {
 
   startSearch() {
     this.navCtrl.push(SearchMenuPage);
+  }
+
+  showNotifications() {
+
+    let modal = this.modalCtrl.create(NotificationsPage,{});
+    modal.onDidDismiss(filter => {
+
+    });
+    modal.present();      
   }
 
   showLoading() {

@@ -15,6 +15,7 @@ import { LocationService } from '../providers/location-service';
 import { GoogleService } from '../providers/google-service';
 import { ConnectivityService } from '../providers/connectivity-service';
 import { DemoService } from '../providers/demo-service';
+import { NotificationService } from '../providers/notification-service';
 
 import { CheckinComponent } from '../components/checkin/checkin';
 
@@ -61,6 +62,7 @@ import { SelectLocationPage } from '../pages/select-location/select-location';
 import { LocationDetailsMorePage } from '../pages/location-details-more/location-details-more';
 import { DrinkMenuPage } from '../pages/drink-menu/drink-menu';
 import { SearchMenuPage } from '../pages/search-menu/search-menu';
+import { NotificationsPage } from '../pages/notifications/notifications';
 
 export const firebaseConfig = {
     apiKey: "AIzaSyCd-WZs4O8gNx9qVlwwyRdK6_qY60WuQl0",
@@ -135,7 +137,8 @@ const cloudSettings: CloudSettings = {
     SelectLocationPage,
     DrinkMenuPage,
     CheckinComponent,
-    SearchMenuPage
+    SearchMenuPage,
+    NotificationsPage
   ],
   imports: [
     IonicModule.forRoot(MyApp),
@@ -188,7 +191,8 @@ const cloudSettings: CloudSettings = {
     BreweryDetailMorePage,
     SelectLocationPage,
     DrinkMenuPage,
-    SearchMenuPage
+    SearchMenuPage,
+    NotificationsPage
   ],
   providers: [{provide: ErrorHandler, 
               useClass: IonicErrorHandler},
@@ -199,6 +203,7 @@ const cloudSettings: CloudSettings = {
               AuthService,
               DbService,
               LocationService,
+              NotificationService,
               DemoService,
               GoogleService,
               ConnectivityService]

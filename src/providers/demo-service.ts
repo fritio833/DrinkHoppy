@@ -169,9 +169,10 @@ export class DemoService {
   setBeerByCityDemo(data) {
     return new Observable(observer => {
       let cityKey = data.city.toLowerCase()+'-'+data.state.toLowerCase()+'-'+data.country.toLowerCase();
+      let beerCityRef = '';
       this.fbRef.ref('/beer_by_city/'+cityKey+'/'+data.beerId).transaction(value=>{
         if (value) {          
-          (value.checkinCount||0)+1;
+          value.checkinCount++;
           //value.cities[]         
           return value;
         } else {
@@ -187,14 +188,42 @@ export class DemoService {
             style:data.beerStyleShortName,
             brewery:data.breweryShortName,
             breweryIMG:data.breweryImages,
-            checkinCount:1,
+            checkinCount:1
           };
           return newBeer;
         }
       },(complete)=>{
 
+        this.fbRef.ref('/beer_by_city/'+cityKey+'/'+data.beerId+'/locations/'+data.placeId).transaction(value=>{
+          if (value) {
+            value.checkinCount++;
+            value.photo = data.photo;
+            value.timestamp = firebase.database.ServerValue.TIMESTAMP;
+            value.uid = data.uid;
+            return value;
+          } else {
+            let location = {
+              name:data.name,
+              placeId:data.placeId,
+              address:data.address,
+              city:data.city,
+              state:data.state,
+              zip:data.zip,
+              photo:data.photo,
+              timestamp:firebase.database.ServerValue.TIMESTAMP,
+              uid:data.uid,
+              lat:data.lat,
+              lng:data.lng,
+              checkinCount:1,
+              placeType:data.placeType
+            }
+            return location;
+          }
+        });
 
       });
+
+      
       observer.next(true);
     });
   }

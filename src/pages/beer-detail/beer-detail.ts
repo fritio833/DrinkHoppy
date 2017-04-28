@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { NavController, NavParams, ToastController, ModalController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
-import {BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Ionic2RatingModule } from 'ionic2-rating';
 
 import { BreweryService } from '../../providers/brewery-service';
 import { SingletonService } from '../../providers/singleton-service';
@@ -11,7 +12,7 @@ import { Beer } from '../../models/beer';
 import { LoginPage } from '../login/login';
 import { ReviewBeerPage } from '../review-beer/review-beer';
 import { CheckinPage } from '../checkin/checkin';
-import { Ionic2RatingModule } from 'ionic2-rating';
+import { LocateBeerPage } from '../locate-beer/locate-beer';
 
 
 
@@ -75,6 +76,8 @@ export class BeerDetailPage {
     });
     */
   }
+
+  
 
   getCheckIns() {
     this.checkins =  this.angFire.database.list('/checkin/beers/'+this.beerId,{
@@ -176,6 +179,10 @@ export class BeerDetailPage {
       this.beer['glass'] = {createDate:'',name:'',id:''};
     }    
     //console.log('detail',this.beer);
+  }
+
+  locateBeer() {
+    this.navCtrl.push(LocateBeerPage,{beer:this.beer});
   }
 
   saveBeerToFavorites(beerId) {

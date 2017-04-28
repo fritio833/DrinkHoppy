@@ -9,6 +9,7 @@ import { BreweryService } from '../../providers/brewery-service';
 
 import { BeerDetailPage } from '../beer-detail/beer-detail';
 import { CheckinPage } from '../checkin/checkin';
+import { LocateBeerPage } from '../locate-beer/locate-beer';
 
 
 @Component({
@@ -62,6 +63,10 @@ export class FavoritesPage {
     });
   }
 
+  locateBeer(beer) {
+    this.navCtrl.push(LocateBeerPage,{beer:beer});
+  }  
+
   getBeerActions(beer) {
     //console.log(beer);
     
@@ -77,7 +82,7 @@ export class FavoritesPage {
           text: 'Locate',
           handler: () => {
             // TODO: Find beers locally
-            // this.removeBeerFromFavorites(beer.id);            
+            this.locateBeer(beer);            
           }
         },{
           text: 'Details',

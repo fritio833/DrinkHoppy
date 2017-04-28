@@ -609,6 +609,10 @@ export class CheckinPage {
           isBrewery:'N'
         }
 
+        // Google inserts maps image.  We want to remove it.
+        if (locationData['photo'].indexOf('maps') != -1) {
+          locationData['photo'] = '';
+        }
 
 
         if (this.checkinType == 'brewery') {
@@ -750,8 +754,13 @@ export class CheckinPage {
           } else {
             that.view.dismiss();
             that.presentToast("Check-in was successful");
+            console.log('checkin without pic uploaded');
             that.loading.dismiss();           
-          } 
+          }
+
+          that.checkin.off();
+          newFeedRef.off();
+
         }).catch(error=>{
           console.log('main checkin error',error);
         });        
@@ -777,6 +786,7 @@ export class CheckinPage {
           downloadURL = resp.downloadURL;
           if (downloadURL!=null) {
             var imgUpdates = {};
+
             imgUpdates['/checkin/feeds/'+key+'/img'] = downloadURL;
 
             if (this.checkinType != 'brewery')
@@ -787,12 +797,16 @@ export class CheckinPage {
             
             if (this.checkinType == 'brewery' && this.brewery != null)
               imgUpdates['/checkin/brewery/'+this.brewery.id+'/'+key+'/img'] = downloadURL;
-
-            this.fbRef.ref().update(imgUpdates,complete=>{
+            
+            this.fbRef.ref().update(imgUpdates).then(success=>{
               this.view.dismiss();
-              this.presentToast("Check-in was successful");
-              this.loading.dismiss();               
+              this.presentToast("Check-in with Picture was successful");
+              console.log('pic uploaded');
+              this.loading.dismiss();            
+            }).catch(error=>{
+              console.log('error setCheckinIMG', error);      
             });
+            
           }
       }).catch(error=>{
         console.log('error setCheckinIMG', error);

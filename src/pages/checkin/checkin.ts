@@ -722,33 +722,42 @@ export class CheckinPage {
      
       //that.checkin.push(locationData);
       var newKey;
-      var newFeedRef = that.checkin.ref('/checkin/feeds/')
-                       .push(locationData);
-      newKey = newFeedRef.key;
-      var updates = {};
+      var newFeedRef;
+      
+      newFeedRef = that.checkin.ref('/checkin/feeds/').push(locationData);
 
-      if(that.notifyFriends) {
-        that.notify.notifyFriends(that.user,that.checkinUsers,that.location,that.beer,negativeTimestamp,newKey);
-      }      
+      newFeedRef.then(resp=>{
 
-      if (that.checkinType != 'brewery') 
-        updates['/checkin/locations/'+that.location.place_id+'/'+newKey] = locationData;
+        newKey = newFeedRef.key;
+        var updates = {};
 
-      updates['/checkin/users/'+that.user.uid+'/'+newKey] = locationData;
-      updates['/checkin/beers/'+that.beer.id+'/'+newKey] = locationData;
+        if (that.notifyFriends) {
+          that.notify.notifyFriends(that.user,that.checkinUsers,that.location,that.beer,negativeTimestamp,newKey);
+        }      
 
-      if (that.checkinType == 'brewery' && that.brewery != null)
-        updates['/checkin/brewery/'+ that.brewery.id+'/'+newKey] = locationData;
+        if (that.checkinType != 'brewery') 
+          updates['/checkin/locations/'+that.location.place_id+'/'+newKey] = locationData;
 
-        that.fbRef.ref().update(updates,complete=>{
-         if (that.base64Image != null) {
-           that.setCheckinIMG(newKey);
-         } else {
-          that.view.dismiss();
-          that.presentToast("Check-in was successful");
-          that.loading.dismiss();           
-         }      
-       });     
+        updates['/checkin/users/'+that.user.uid+'/'+newKey] = locationData;
+        updates['/checkin/beers/'+that.beer.id+'/'+newKey] = locationData;
+
+        if (that.checkinType == 'brewery' && that.brewery != null)
+          updates['/checkin/brewery/'+ that.brewery.id+'/'+newKey] = locationData;
+
+        that.fbRef.ref().update(updates).then(success=>{
+          if (that.base64Image != null) {
+            that.setCheckinIMG(newKey);
+          } else {
+            that.view.dismiss();
+            that.presentToast("Check-in was successful");
+            that.loading.dismiss();           
+          } 
+        }).catch(error=>{
+          console.log('main checkin error',error);
+        });        
+      }).catch(error=>{
+        console.log('main checkin error',error);
+      });
     });        
   }
 
@@ -785,14 +794,10 @@ export class CheckinPage {
               this.loading.dismiss();               
             });
           }
-      },error=>{
-        console.log('error',error);
+      }).catch(error=>{
+        console.log('error setCheckinIMG', error);
       });            
     });    
-  }
-
-  firstToUpperCase( str ) {
-    //return str.substr(0, 1).toUpperCase() + str.substr(1);
   }
 
   maxText(msg) {

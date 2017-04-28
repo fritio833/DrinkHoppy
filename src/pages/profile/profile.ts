@@ -10,6 +10,7 @@ import { FavoritesPage } from '../favorites/favorites';
 import { ProfileEditPage } from '../profile-edit/profile-edit';
 
 import { AuthService } from '../../providers/auth-service';
+import { NotificationService } from '../../providers/notification-service';
 
 import firebase from 'firebase';
 
@@ -49,6 +50,7 @@ export class ProfilePage {
               public modalCtrl:ModalController,
               public auth:AuthService,
               public angFire:AngularFire,
+              public notify:NotificationService,
               public storage:Storage) {
 
         this.user = this.auth.getUser();
@@ -186,21 +188,20 @@ export class ProfilePage {
   }
 
   sendFriendRequest() {
-    /*
-    this.fbRef.ref('/users/'+this.user.uid+'/friendRequests/'+this.uid).set({
-      uid:this.uid,
-      displayName:this.displayName,
-      photo:this.profileIMG,
-      requestData: new Date().getTime(),
-      priority: (new Date().getTime()) * -1
-    });
-    */
+
     this.fbRef.ref('/users/'+this.uid+'/friendRequests/'+this.user.uid).set({
       uid:this.user.uid,
       requestDate: new Date().getTime(),
       priority: (new Date().getTime()) * -1
+    }).then(success=>{
+      this.sentFriendRequest = true;
+      //write notification to user
+      this.notify.notifyFriendRequest(this.user,this.uid);
+
+    }).catch(error=>{
+      console.log('error sendFriendRequest',error);
     });    
-    this.sentFriendRequest = true;
+    
   }
 
   getRequestedFriendsList() {

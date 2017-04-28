@@ -1,15 +1,17 @@
 <ion-menu [content]="content">
   <ion-header>
-    <ion-item color="primary">
-      <ion-avatar item-left>
-        <img [src]="profileIMG">
-      </ion-avatar>
-      <h2 item-left>
-        {{displayName}}
-      </h2>
-    </ion-item>    
+    <ion-list id="main-head">
+      <ion-item color="primary">
+        <ion-avatar item-left>
+          <img [src]="profileIMG">
+        </ion-avatar>
+        <h2>
+          {{displayName}}
+        </h2>
+      </ion-item>
+    </ion-list>
   </ion-header>  
-  <ion-content>
+  <ion-content class="white-background">
     <ion-list>
       <button ion-item *ngFor="let p of pages" (click)="openPage(p)">
         {{p.title}}
@@ -18,5 +20,4 @@
     </ion-list>
   </ion-content>
 </ion-menu>
-
 <ion-nav [root]="rootPage" #content swipeBackEnabled="false"></ion-nav>

@@ -23,7 +23,7 @@ export class NotificationsPage {
   public queryable:boolean = true;
   public notifyPerPage:number = 10;
   public lastKey:string;
-  public notificationLen:number;
+  public notificationLen:number = 1;
   public justReadArray = new Array();
 
   constructor(public navCtrl: NavController, 
@@ -34,7 +34,7 @@ export class NotificationsPage {
               public navParams: NavParams) {
 
     this.fbRef = firebase.database();
-    this.limit = new BehaviorSubject(5);
+    this.limit = new BehaviorSubject(10);
     this.user = this.auth.getUser();
 
   }
@@ -91,9 +91,14 @@ export class NotificationsPage {
     });
   }
 
-  getCheckinDetail(data) {
+  getNotifyDetail(data) {
+    if (data.type == 'friend-checkin') {
+      this.navCtrl.push(CheckinDetailPage,{checkinKey:data.checkinKey,page:'users',checkinPageId:data.from});
+    }
 
-    this.navCtrl.push(CheckinDetailPage,{checkinKey:data.checkinKey,page:'users',checkinPageId:data.from});
+    if (data.type == 'friend-request') {
+       this.navCtrl.push(FriendsPage,{mode:'requests'});
+    }
   }
 
   getTimeDiff(prevTime) {

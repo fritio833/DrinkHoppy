@@ -130,7 +130,7 @@ export class MyApp {
           if (page==='friends' && !isForeground) {
             this.presentFriendAlert(msg.raw);
           } else {
-            
+            //alert(msg.text);
             console.log('show alert');
           }
           

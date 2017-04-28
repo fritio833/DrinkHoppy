@@ -37,6 +37,9 @@ export class FriendsPage {
     this.getFriendRequests();
     this.mode = params.get('mode');
 
+    if (this.mode == 'requests')
+      this.icons = 'requests';
+
     if (this.mode == 'checkin') {
       this.icons = 'checkin';
     }
@@ -143,6 +146,7 @@ export class FriendsPage {
     //this.fbRef.ref('/users/'+uid+'/friends/'+this.user.uid).remove();
     this.getFriendRequests();    
   }
+
 
   getUserProfile(uid) {
     this.navCtrl.push(ProfilePage,{uid:uid,lookup:true});

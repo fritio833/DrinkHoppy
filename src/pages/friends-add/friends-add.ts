@@ -3,6 +3,9 @@ import { NavController, NavParams, ViewController, ToastController } from 'ionic
 
 import firebase from 'firebase';
 
+import { NotificationService } from '../../providers/notification-service';
+import { AuthService } from '../../providers/auth-service';
+
 @Component({
   selector: 'page-friends-add',
   templateUrl: 'friends-add.html'
@@ -12,14 +15,18 @@ export class FriendsAddPage {
   public uid:any;
   public friendSearch = new Array();
   public fbRef:any;
+  public user:any;
 
   constructor(public navCtrl: NavController, 
               public params: NavParams,
               public toastCtrl:ToastController,
+              public notify:NotificationService,
+              public auth:AuthService,
               public view:ViewController) {
 
     this.uid = params.get('uid');
     this.fbRef = firebase.database();
+    this.user = this.auth.getUser();
     console.log('uid',this.uid);
   }
 
@@ -37,12 +44,15 @@ export class FriendsAddPage {
   }
 
   sendFriendRequest(uid) {
-    this.fbRef.ref('/users/'+uid+'/friendRequests/'+this.uid).set({
+    this.fbRef.ref('/users/'+uid+'/friendRequests/'+this.user.uid).set({
       uid:this.uid,
       requestDate: new Date().getTime(),
       priority: (new Date().getTime()) * -1
     }).then(success=>{
       this.presentToast('Friend Request Sent');
+      this.notify.notifyFriendRequest(this.user,uid);
+    }).catch(error=>{
+      console.log('error sendFriendRequest',error);
     });
   }
 

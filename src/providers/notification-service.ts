@@ -14,6 +14,29 @@ export class NotificationService {
     this.fbRef = firebase.database();
   }
 
+  notifyFriendRequest(user,friendId) {
+
+   this.sing.getPriorityTime().subscribe(priorityTime=>{
+   console.log('got here @ friendrequest');
+   this.fbRef.ref('/notifications_users/'+friendId).push({
+        from:user.uid,
+        fromImg:user.photoURL,
+        type:'friend-request',
+        message: user.displayName + ' sent you a friend request',
+        read:false,
+        priority:priorityTime,
+        timestamp:(Number(priorityTime) * -1)
+      }).then(success=>{
+        console.log('successful notifyFriendRequest');
+      }).catch(error=>{
+        console.log('error notifyFriendRequest',error);
+      });
+   },error=>{
+     console.log('error notifyFriendRequest',error);
+   });
+    
+  }
+
   notifyFriends(user,friends,location,beer,priorityTime,checkinKey) {
     var pushToks = new Array();
     var msg = user.displayName+ ' @' + location.name;
@@ -33,13 +56,14 @@ export class NotificationService {
         priority:priorityTime,
         timestamp:(priorityTime * -1),
         checkinKey:checkinKey
+      }).then(success=>{
+        console.log('successful notify users write');
+      }).catch(error=>{
+        console.log('error',error);
       });
 
     }
 
-    if (user.photoURL == '') {
-
-    }
 
     this.fbRef.ref('/notifications/').push({
       uid:user.uid,
@@ -47,9 +71,12 @@ export class NotificationService {
       type:'friends',
       pushTokens:pushToks,
       message:msg,
-      timestam: firebase.database.ServerValue.TIMESTAMP
+      timestamp: firebase.database.ServerValue.TIMESTAMP
+    }).then(success=>{
+      console.log('successful notification write');
+    }).catch(error=>{
+      console.log('error notification write',error);
     });
-
   }
 
 }

@@ -26,16 +26,18 @@
         Requests
       </ion-segment-button>
     </ion-segment>
+    <!--
     <ion-searchbar *ngIf="icons == 'friends' || icons == 'checkin'" (ionInput)="doSearchFriends($event)"
                     debounce="1000"
                     (ionClear)="clearSearch($event)"
                     placeholder="Search Friends">
     </ion-searchbar>
+    -->
   </ion-toolbar>
 </ion-header>
 <ion-content class="white-background">
 <div [ngSwitch]="icons">
-  <ion-list *ngSwitchCase="'checkin'">
+  <ion-list *ngSwitchCase="'checkin'" no-lines>
       <ion-item *ngFor="let friend of userFriends">
         <ion-avatar item-left>
           <img *ngIf="friend.photo" [src]="friend.photo">
@@ -73,7 +75,11 @@
            <ion-icon name="trash"></ion-icon>
           Remove
         </button>
-      </ion-item-options>
+        <button ion-button (click)="getUserProfile(friend.uid)" color="check">
+           <ion-icon name="person"></ion-icon>
+          Detail
+        </button>        
+      </ion-item-options>      
       <ion-item>
         <ion-avatar item-left>
           <img *ngIf="friend.photo" [src]="friend.photo">
@@ -88,6 +94,12 @@
           Add Friend
         </button>
       </ion-item>
+      <ion-item-options side="right">
+        <button ion-button (click)="getUserProfile(friend.uid)" color="check">
+           <ion-icon name="person"></ion-icon>
+          Detail
+        </button>        
+      </ion-item-options>        
     </ion-item-sliding>
   </ion-list>  
 </div>

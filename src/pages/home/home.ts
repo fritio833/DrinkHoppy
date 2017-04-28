@@ -32,6 +32,10 @@ export class HomePage {
   public loading:any;
   public uid:any;
   public profile:any;
+  public fbRef:any;
+  public notifyCount:number;
+  public notifyColor:string = 'white';
+  public notifications:FirebaseListObservable<any>;
 
   constructor(public navCtrl: NavController, 
   	          public sing:SingletonService,
@@ -41,6 +45,7 @@ export class HomePage {
               public events:Events,
               public angFire:AngularFire,
   	          public storage:Storage) {
+    this.fbRef = firebase.database();
   }
 
   getProfileData() {
@@ -51,7 +56,7 @@ export class HomePage {
     this.storage.ready().then(()=>{
       this.storage.get('uid').then(uid=>{
         if (uid != null) {
-          this.profileRef = firebase.database().ref('users/'+uid).once('value').then(snapshot => {
+          this.fbRef.ref('users/'+uid).once('value').then(snapshot => {
             //console.log('snap',snapshot.val());
            
             this.checkinCount = snapshot.val().checkins;
@@ -64,6 +69,24 @@ export class HomePage {
             if (snapshot.val().photo!=null && snapshot.val().photo !='')
               this.profileIMG = snapshot.val().photo;
           });
+
+          // Get Notification Count
+          this.notifications = this.angFire.database.list('/notifications_users/'+ uid,{
+            query:{
+              orderByChild:'read',
+              equalTo:false
+            }
+          });
+
+          this.notifications.subscribe(resp=>{
+            console.log(resp.length);
+            this.notifyCount = resp.length;
+
+            if(this.notifyCount)
+              this.notifyColor = 'yellow';
+            else
+              this.notifyColor = 'white';
+          });          
         }
       });
     });

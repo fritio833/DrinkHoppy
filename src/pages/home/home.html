@@ -5,8 +5,10 @@
     </button>
     <ion-title>Brew Search</ion-title>
    <ion-buttons right>
-       <button ion-button icon-only (click)="showNotifications()">
-           <ion-icon name="notifications"></ion-icon>
+       <button id="notification-button" ion-button icon-only (click)="showNotifications()">
+           <ion-icon [color]="notifyColor" name="notifications">
+             <ion-badge *ngIf="notifyCount" id="notifications-badge" color="check">{{notifyCount}}</ion-badge>
+           </ion-icon>
        </button>            
     </ion-buttons>
   </ion-navbar>

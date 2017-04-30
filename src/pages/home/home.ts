@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
-import { NavController, Events, LoadingController, ToastController, ModalController } from 'ionic-angular';
+import { NavController, Events,LoadingController, ToastController, ModalController } from 'ionic-angular';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 import { Storage } from '@ionic/storage';
 
 import { SingletonService } from '../../providers/singleton-service';
+import { GoogleService } from '../../providers/google-service';
 
 import { ProfilePage } from '../profile/profile';
 import { SearchMenuPage } from '../search-menu/search-menu';
@@ -11,6 +12,11 @@ import { SearchBeerPage } from '../search-beer/search-beer';
 import { SearchLocationPage } from '../search-location/search-location';
 import { SearchBreweriesPage } from '../search-breweries/search-breweries';
 import { NotificationsPage } from '../notifications/notifications';
+import { BeerDetailPage } from '../beer-detail/beer-detail';
+import { LocationDetailPage } from '../location-detail/location-detail';
+import { LeaderboardPage } from '../leaderboard/leaderboard';
+import { PopularBeersPage } from '../popular-beers/popular-beers';
+import { PopularLocationsPage } from '../popular-locations/popular-locations';
 
 import firebase from 'firebase';
 
@@ -36,6 +42,9 @@ export class HomePage {
   public notifyCount:number;
   public notifyColor:string = 'white';
   public notifications:FirebaseListObservable<any>;
+  public mostPopularBeer:any;
+  public mostPopularLocation:any;
+  public popularLoaded:boolean = false;
 
   constructor(public navCtrl: NavController, 
   	          public sing:SingletonService,
@@ -43,6 +52,7 @@ export class HomePage {
               public loadingCtrl:LoadingController,
   	          public toastCtrl:ToastController,
               public events:Events,
+              public geo:GoogleService,
               public angFire:AngularFire,
   	          public storage:Storage) {
     this.fbRef = firebase.database();
@@ -92,6 +102,10 @@ export class HomePage {
     });
   }
 
+  getLeaderboard() {
+    this.navCtrl.push(LeaderboardPage);
+  }
+
   doSearch(page) {
 
     switch(page) {
@@ -111,11 +125,62 @@ export class HomePage {
       default: console.log('not valid search');
     }
   }  
+  
 
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad HomePage');
-    this.getProfileData();
+  getPopularAgain() {
+    let key = this.sing.geoCity.toLowerCase()+'-'+this.sing.geoState.toLowerCase()+'-'+this.sing.geoCountry.toLowerCase();
+    this.fbRef.ref('/beer_by_city/'+key).orderByChild('checkinCount').once('child_added').then(snapshot=>{
+      this.mostPopularBeer = snapshot.val();
+      this.mostPopularBeer['key'] = snapshot.key;
+    });
+
+    this.fbRef.ref('/location_by_city/'+key).orderByChild('checkinCount').once('child_added').then(snapshot=>{
+      this.mostPopularLocation = snapshot.val();
+      this.mostPopularLocation['key'] = snapshot.key;
+    });    
   }
+
+  getPopular() {
+    
+
+    this.events.subscribe('gotGeo:true',geo=>{
+      this.popularLoaded = true;
+    //console.log('key',key);
+      let key = geo.city.toLowerCase()+'-'+geo.state.toLowerCase()+'-'+geo.country.toLowerCase();
+      this.fbRef.ref('/beer_by_city/'+key).orderByChild('checkinCount').once('child_added').then(snapshot=>{
+        this.mostPopularBeer = snapshot.val();
+        this.mostPopularBeer['key'] = snapshot.key;
+      });
+
+      this.fbRef.ref('/location_by_city/'+key).orderByChild('checkinCount').once('child_added').then(snapshot=>{
+        this.mostPopularLocation = snapshot.val();
+        this.mostPopularLocation['key'] = snapshot.key;
+      });
+    });
+
+  }
+
+
+  getPopBeer(beerId) {
+    console.log('beerId',beerId);
+    this.navCtrl.push(BeerDetailPage,{beerId:beerId});
+  }
+
+  getPopLocation(placeId) {
+
+    this.geo.placeDetail(placeId).subscribe((resp)=>{
+      this.navCtrl.push(LocationDetailPage,{location:resp.result});
+    });    
+  }
+
+  getAllPopLocation() {
+    this.navCtrl.push(PopularLocationsPage);
+  }
+
+  getAllPopBeers() {
+    this.navCtrl.push(PopularBeersPage);
+  }
+
 
   presentToast(msg) {
     let toast = this.toastCtrl.create({
@@ -148,6 +213,18 @@ export class HomePage {
       content: 'Loading...'
     });
     this.loading.present();
+  }
+
+  ionViewDidLoad() {
+    console.log('ionViewDidLoad HomePage');
+    this.getPopular();
+    //this.getTopLocation();
+    this.getProfileData();
+  }
+
+  ionViewWillEnter() {
+    if (this.sing.geoCity)
+      this.getPopularAgain();
   }
 
 }

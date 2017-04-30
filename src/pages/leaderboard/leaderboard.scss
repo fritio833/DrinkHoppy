@@ -1,0 +1,15 @@
+page-leaderboard {
+  ion-chip {
+      height: inherit !important;
+      width:100px !important;
+      border-radius: 20px !important;
+
+      ion-label{
+          margin: 5px 14px !important;
+      }
+  }
+
+  .white-background {
+      background-color:#ffffff;
+  }
+}

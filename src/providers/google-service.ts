@@ -47,7 +47,7 @@ export class GoogleService {
     return this.http.get(this.googleGeocodeURL 
     	  + 'latlng=' + lat + ',' + lng + '&sensor=false&key=' + this.googleGeocodeAPIKey)
         .retryWhen(error => error.delay(500))
-        .timeout(5000,new Error('Error connecting'))
+        .timeout(10000,new Error('Error connecting'))
         .map(this.getCityState);  	
   }
 

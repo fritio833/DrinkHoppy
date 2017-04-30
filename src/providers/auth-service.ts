@@ -89,7 +89,17 @@ export class AuthService {
     let timestamp = firebase.database.ServerValue.TIMESTAMP;
     let displayName = null;
     let photoURL = null;
-    //console.log('resp',resp);
+    let userHomeTownCity = this.sing.geoCity;
+    let userHomeTownState = this.sing.geoState;
+    let userHomeTownCountry = this.sing.geoCountry;
+    let locationKey = '';
+
+    if (userHomeTownCity!=null)
+      locationKey = userHomeTownCity.toLowerCase().replace(/[^A-Z0-9]/ig, "")
+                    +'-'+userHomeTownState.toLowerCase().replace(/[^A-Z0-9]/ig, "")
+                    +'-'+userHomeTownCountry.toLowerCase();
+
+    userHomeTownCity = this.sing.geoCity;
     if (credName!=null) {
       displayName = credName;
     } else {
@@ -114,7 +124,14 @@ export class AuthService {
       emailVerified: resp.emailVerified,
       lastBeerCheckin:'',
       points:0,
-      checkins:0         
+      reputation:0,
+      checkins:0,
+      city:userHomeTownCity,
+      state:userHomeTownState,
+      country:userHomeTownCountry,
+      locationKey:locationKey,
+      banned:0,
+      role:'user'
     });
   }
    

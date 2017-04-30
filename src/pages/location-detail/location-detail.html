@@ -1,9 +1,15 @@
 <ion-header>
   <ion-navbar color="primary">
-    <ion-title>Place</ion-title>  
+    <ion-title>Place</ion-title>
+    <ion-buttons right>
+      <button ion-button icon-left (click)="save()">
+        <ion-icon name="heart"></ion-icon>
+				save
+      </button>   
+    </ion-buttons>		
   </ion-navbar>
 </ion-header>
-<ion-content>	
+<ion-content>
 	<ion-grid class="background-home" [ngStyle]="getBackgroundImg(locationPhoto)">
 		<ion-row>
 			<ion-col>

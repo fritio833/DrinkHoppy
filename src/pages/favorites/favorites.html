@@ -3,41 +3,59 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title>Favorites</ion-title>
-   <ion-buttons right>
-       <button ion-button icon-only (click)="doSearch()">
-           <ion-icon name="search"></ion-icon>
-       </button>            
-    </ion-buttons>    
+    <ion-title *ngIf="isLookup">{{displayName}}'s Favorites</ion-title>
+    <ion-title *ngIf="!isLookup">Favorites</ion-title>    
   </ion-navbar>
+  <ion-toolbar no-border-top color="primary"> 
+    <ion-segment [(ngModel)]="choice" color="white" class="toolbar">
+      <ion-segment-button icon-left role="button" color="primary" value="beerlist">
+        <ion-icon name="beer"></ion-icon>Beer List
+      </ion-segment-button>   
+      <ion-segment-button icon-left role="button" color="primary" value="locationlist" (click)="getLocFavs()">
+        <ion-icon name="compass"></ion-icon>Locations
+      </ion-segment-button>        
+    </ion-segment>
+  </ion-toolbar>  
 </ion-header>
 <ion-content class="white-background">
-<div>
-   <!---- change to android with mode=md ( android ) or mode=ios leave out for ionic to decide ---->
-  <ion-segment [(ngModel)]="choice" class="toolbar">
-    <ion-segment-button icon-left role="button" color="primary" value="beerlist">
-      <ion-icon name="beer"></ion-icon>Beer List
-    </ion-segment-button>   
-    <ion-segment-button icon-left role="button" color="primary" value="locationlist">
-      <ion-icon name="pint"></ion-icon>My Locations
-    </ion-segment-button>        
-  </ion-segment>
-</div>
-
 <div [ngSwitch]="choice">
   <ion-list *ngSwitchCase="'beerlist'">
-    <button ion-item *ngFor="let beer of favBeers | async" (click) = "getBeerActions(beer)">
-      <ion-thumbnail item-left>
-        <img [src]="beer.labels.medium" />
-      </ion-thumbnail>
-      <h2>{{ beer.name }}</h2>
-      <p>{{ beer.breweries[0].name}}</p>
-      <p>{{ beer.style.shortName }}</p>
-      <ion-icon name="more" item-right></ion-icon>
-    </button>   
+    <ion-item-sliding *ngFor="let beer of favBeers | async" (click) = "getBeerActions(beer)">
+      <ion-item-options side="left">
+        <button ion-button (click)="removeFavoriteBeer(beer)" color="dark">
+           <ion-icon name="trash"></ion-icon>
+          Remove
+        </button>      
+      </ion-item-options>       
+      <ion-item>
+        <ion-thumbnail item-left>
+          <img [src]="beer.labels.medium" />
+        </ion-thumbnail>
+        <h2>{{ beer.name }}</h2>
+        <p>{{ beer.breweries[0].name}}</p>
+        <p>{{ beer.style.shortName }}</p>
+        <ion-icon name="more" item-right></ion-icon>
+      </ion-item>
+    </ion-item-sliding>
   </ion-list>
   <ion-list *ngSwitchCase="'locationlist'">
-    Locations
+    <ion-item-sliding *ngFor="let location of favLocations | async" (click) = "getLocation(location.$key)">
+      <ion-item-options side="left">
+        <button ion-button (click)="removeFavoriteBeer(beer)" color="dark">
+           <ion-icon name="trash"></ion-icon>
+          Remove
+        </button>      
+      </ion-item-options>       
+      <ion-item text-wrap>
+        <ion-thumbnail item-left>
+          <img *ngIf="location.photo" [src]="location.photo" />
+        </ion-thumbnail>
+        <h2>{{ location.name }}</h2>
+        <p>{{ location.placeType }}</p>
+        <p>{{ location.vicinity }}</p>
+        <ion-icon name="more" item-right></ion-icon>
+      </ion-item>
+    </ion-item-sliding>
   </ion-list>  
 </div>
 

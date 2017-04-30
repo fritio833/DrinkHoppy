@@ -1,9 +1,12 @@
 import { Component } from '@angular/core';
-import { NavController, AlertController, ToastController, NavParams, ActionSheetController, LoadingController, ViewController } from 'ionic-angular';
+import { NavController, AlertController, ModalController, ToastController, NavParams, ActionSheetController, LoadingController, ViewController } from 'ionic-angular';
 import { Validators, FormBuilder } from '@angular/forms';
 import { Camera } from 'ionic-native';
 import { AuthService } from '../../providers/auth-service';
 import { ValidationService } from '../../providers/validation-service';
+import { GoogleService } from '../../providers/google-service';
+
+import { SelectLocationPage } from '../select-location/select-location';
 
 import firebase from 'firebase';
 
@@ -26,6 +29,11 @@ export class ProfileEditPage {
   public profilePictureRef: firebase.storage.Reference;
   public deleteProPictureRef: firebase.storage.Reference;
   public percentIMGLoaded:number;
+  public hometownLocation:string;
+  public userLocation:any;
+  public oldCity:string;
+  public oldState:string;
+  public profileChangedCount:number = 0;
 
   constructor(public navCtrl: NavController, 
               public view: ViewController,
@@ -34,6 +42,8 @@ export class ProfileEditPage {
               public alertCtrl: AlertController,
               public loadingCtrl:LoadingController,
               public toastCtrl:ToastController,
+              public modalCtrl: ModalController,
+              public geo:GoogleService,
               public actionCtrl:ActionSheetController,
               public params: NavParams) {
 
@@ -41,7 +51,7 @@ export class ProfileEditPage {
   	this.profileForm = this.form.group({
   	  email : ['',Validators.compose([Validators.required, 
   	              Validators.maxLength(30),
-  	              ValidationService.emailValidator])],
+  	              ValidationService.emailValidator])],                 
   	  name : ['',Validators.compose([Validators.required,
   	                  Validators.pattern('[a-zA-Z ]*'),Validators.maxLength(30)])]
   	});
@@ -62,7 +72,12 @@ export class ProfileEditPage {
         this.oldIMG = decodeURIComponent(snapshot.val().photo);
         console.log('oldImage',this.oldIMG.match(/\d{3}\/\d{3}\/\d{3}\/\d{12}\.png|PNG/g));
       }
-        
+
+      if (snapshot.val().city!=null) {
+        this.hometownLocation = snapshot.val().city + ', '+snapshot.val().state+' '+snapshot.val().country;
+        this.oldCity = snapshot.val().city;
+        this.oldState = snapshot.val().state;
+      }
       
     this.profileForm.setValue({
       name:snapshot.val().name, 
@@ -74,6 +89,22 @@ export class ProfileEditPage {
 
   close() {
   	this.view.dismiss();
+  }
+
+  changeCity() {
+
+    let modal = this.modalCtrl.create(SelectLocationPage,{response:true});
+    modal.onDidDismiss(citySet => {
+      console.log('cityState',citySet);
+      
+      if (citySet) {
+        this.userLocation = this.geo.fixCityState(citySet);
+        this.hometownLocation = this.userLocation.city + ', '+this.userLocation.state+' '+this.userLocation.country; 
+      }
+      
+    });
+    modal.present();
+
   }
 
   getImgSeqDirectory(num) {
@@ -88,6 +119,7 @@ export class ProfileEditPage {
   }
 
   saveProfile() {
+
     if (this.profileForm.valid) {
 
       let user = this.auth.getUser();
@@ -105,17 +137,39 @@ export class ProfileEditPage {
         }, function(error) {
           // An error happened.
         });        
-
-        this.presentToast('Display name has been changed');
+        this.profileChangedCount++;
 
       }
+
+      if (this.userLocation!=null) {
+        let locKey = this.userLocation.city.toLowerCase().replace(/[^A-Z0-9]/ig, "")
+                     +'-'+this.userLocation.state.toLowerCase().replace(/[^A-Z0-9]/ig, "")
+                     +'-'+this.userLocation.country.toLowerCase();
+
+        let updateLocation = {
+          city:this.userLocation.city,
+          state:this.userLocation.state,
+          country:this.userLocation.country,
+          locationKey:locKey
+        }
+
+        this.profileChangedCount++;
+        this.userRef.ref('users/' + this.uid).update(updateLocation);
+        
+      }      
 
       if (user.email.toUpperCase() !== this.profileForm.controls.email.value.toUpperCase()) {
         this.reauthEmail();
       } else {
+        if (this.profileChangedCount)
+          this.presentToast('Profile has been changed');
+
         this.view.dismiss();
       }
     }
+
+
+
   }
 
   changeEmail(password) {
@@ -129,7 +183,12 @@ export class ProfileEditPage {
         user.sendEmailVerification();
         let updateEmail = {email:this.profileForm.controls.email.value};
         this.userRef.ref('users/' + this.uid).update(updateEmail);
-        this.presentToast('Email has been changed');
+
+        if (this.profileChangedCount)
+          this.presentToast('Profile has been changed');
+        else
+         this.presentToast('Email has been changed');
+
         this.view.dismiss();    
       }).catch(error=>{
         this.presentToast(error.message);

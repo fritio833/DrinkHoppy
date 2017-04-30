@@ -55,121 +55,82 @@
       </ion-label>
        <ion-icon name="arrow-forward" item-right></ion-icon>
     </button>    
-  </ion-list> 
-<!--
-<div class="card-head">
-  <p><ion-icon name="person"></ion-icon>&nbsp;Profile</p>
-</div>
-<ion-card>
-  <ion-card-content>
-    <ion-item no-lines>
-      <span item-left id="profile-left" (click)="goToProfile()">
-        <div align="center">
-          <ion-avatar>
-            <img [src]="profileIMG">
-          </ion-avatar>
-          <p>{{displayName}}</p>
-        </div>
-      </span>
-      <span item-left id="profile-right">
-        <button ion-button icon-left round (click)="goTackMap()">
-          <ion-icon name="pin"></ion-icon>
-              {{checkinCount}} Checkins
-        </button>
-        <p *ngIf="userPoints">{{userPoints}} Points</p>
-      </span>
-    </ion-item>
-  </ion-card-content>
-</ion-card>
--->
-<!--
-<div class="card-head">
-  <p><ion-icon name="people"></ion-icon>&nbsp;Community</p>
-</div>
-<ion-card>
-  <ion-card-content>
-    <ion-grid>
-      <ion-row wrap>
-        <ion-col col-75>
-          <h4 class="center comm-label">
-            <ion-icon name="restaurant"></ion-icon>&nbsp;Most Tacked Location
-          </h4>
-          <p class="center bold">
-           Leon Pub
-          </p>
-        </ion-col>
-        <ion-col col-25>
-          <div class="center">
-            <ion-chip>
-              <button ion-button color="secondary">               
-                <ion-icon color="secondary" name="star"></ion-icon>
-              </button>
-              <ion-label>4.75</ion-label>                  
-            </ion-chip>
-          </div>
-        </ion-col>              
-      </ion-row>
-    </ion-grid>
-    <hr />
-    <ion-grid>
-      <ion-row wrap>
-        <ion-col col-75>
-          <h4 class="center comm-label">
-            <ion-icon name="pint"></ion-icon>&nbsp;Most Tacked Beer
-          </h4>
-          <p class="center bold">
-            Murphy's Irish Stout
-          </p>                
-        </ion-col>
-        <ion-col col-25>
-          <div class="center">
-            <ion-chip>
-              <button ion-button color="secondary">  
-                <ion-icon color="secondary" name="star"></ion-icon>
-              </button>
-              <ion-label>4.9</ion-label>                  
-            </ion-chip>
-          </div>
-        </ion-col>             
-      </ion-row>
-    </ion-grid>
-    <hr />
-    <ion-grid>
-      <ion-row>
-        <ion-col>
-          <div class="center num-tacks">
-           Check-ins in {{sing.geoCity}}
-          </div>
-          <div class="center">
-              <ion-chip>
-                  <ion-icon color="secondary" name="checkmark"></ion-icon>
-                <ion-label>2545</ion-label>                  
-              </ion-chip>
-          </div>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </ion-card-content>
-</ion-card>
--->
-<div class="card-head">
-  <p><ion-icon name="trophy"></ion-icon>&nbsp;Challenges</p>
-</div>
-<ion-card>
-  <ion-card-content>
-    <ion-grid>
-      <ion-row>
-        <ion-col width-25>
-          <div class="center challenge-icon">
-            <ion-icon color="danger" name="pin"></ion-icon>
-          </div>
-        </ion-col>
-        <ion-col width-75>
-          <h3 id="challenge-label" class="center">My First Check-In</h3>
-          <p class="center">Find a location and check-in to unlock this badge.</p>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </ion-card-content>
-</ion-card>
+  </ion-list>
+
+  <div class="card-head">
+    <p><ion-icon name="trophy"></ion-icon>&nbsp;Leaderboard</p>
+  </div>
+  <ion-card id="leaderboard">
+    <ion-card-content>
+      <div align="center">
+        <h2>Get on the Leaderboard</h2>
+        <p>
+           Check-in at bars, pubs, gas stations, and breweries to be ranked in the leaderboard.
+           Scores are based on beers reported in the last 30 days.  
+        </p>
+      </div>    
+    </ion-card-content>
+    <button item-right ion-button full (click)="getLeaderboard()">View Leaderboard</button>
+  </ion-card>
+
+  <div class="card-head" *ngIf="mostPopularBeer">
+    <p><ion-icon name="beer"></ion-icon>&nbsp;Most Popular Beer</p>
+  </div>
+  <ion-card id="pop-beer" *ngIf="mostPopularBeer">
+    <ion-card-header>{{mostPopularBeer.name}}</ion-card-header>
+    <ion-card-content (click)="getPopBeer(mostPopularBeer.key)">
+      <ion-item>
+        <ion-thumbnail item-left>
+          <img *ngIf="mostPopularBeer.beerLabelIcon" [src]="mostPopularBeer.beerLabelIcon">        
+        </ion-thumbnail>
+        <p>{{mostPopularBeer.brewery}}</p>
+        <p *ngIf="mostPopularBeer.style">{{mostPopularBeer.style}}</p>
+        <p>Checked in {{mostPopularBeer.checkinCount * -1}} times</p>
+        <p>in {{sing.geoCity}}, {{sing.geoState}}</p>
+      </ion-item>
+    </ion-card-content>
+     <button item-right ion-button full (click)="getAllPopBeers()">View ALL Popular Beers</button>
+  </ion-card>
+
+
+
+  <div class="card-head" *ngIf="mostPopularLocation">
+    <p><ion-icon name="compass"></ion-icon>&nbsp;Most Popular Beer Location</p>
+  </div>
+  <ion-card id="pop-location" *ngIf="mostPopularLocation">
+    <ion-card-header>{{mostPopularLocation.name}}</ion-card-header>
+    <ion-card-content (click)="getPopLocation(mostPopularLocation.key)">
+      <ion-item>
+        <ion-thumbnail item-left>
+          <img *ngIf="mostPopularLocation.photo" [src]="mostPopularLocation.photo">        
+        </ion-thumbnail>
+        <p>{{mostPopularLocation.placeType}}</p>
+        <p>{{mostPopularLocation.address}}</p>
+        <p>{{mostPopularLocation.city}}, {{mostPopularLocation.state}}</p>
+        <p>Checked in {{mostPopularLocation.checkinCount * -1}} times</p>
+      </ion-item>
+    </ion-card-content>
+    <button item-right ion-button full (click)="getAllPopLocation()">View ALL POPULAR PLACES </button>
+  </ion-card>
+
+  <div class="card-head">
+    <p><ion-icon name="trophy"></ion-icon>&nbsp;Challenges</p>
+  </div>
+  <ion-card>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col width-25>
+            <div class="center challenge-icon">
+              <ion-icon color="danger" name="pin"></ion-icon>
+            </div>
+          </ion-col>
+          <ion-col width-75>
+            <h3 id="challenge-label" class="center">My First Check-In</h3>
+            <p class="center">Find a location and check-in to unlock this badge.</p>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
 </ion-content>

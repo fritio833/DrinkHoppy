@@ -199,14 +199,20 @@ export class CheckinPage {
   }
 
   getCheckinPicSeq() {
-   return new Promise(resolve=>{
-    let checkinSeq = null;
-    this.checkinPicSeqRef.transaction(value=>{
-      checkinSeq = (value||0)+1;
-      return (value||0)+1;
-    },(complete)=>{
-      resolve(checkinSeq);
-    });
+   return new Promise((resolve,reject)=>{
+     let checkinSeq = null;
+     this.checkinPicSeqRef.transaction(value=>{
+       checkinSeq = (value||0)+1;
+       return (value||0)+1;
+      },(error,committed,snapshot)=>{        
+       if (error) {
+         reject(error);
+       } else if(committed) {
+         resolve(checkinSeq);
+       } else {
+         reject(true);
+       }
+     });
    });
   }
 
@@ -696,15 +702,23 @@ export class CheckinPage {
           this.demo.setBeerByCityDemo(locationData).subscribe(resp=>{});
           this.demo.setBeerByLocation(locationData).subscribe(resp=>{});
           this.demo.setLocation(locationData).subscribe(resp=>{});
+          this.demo.setLocationbyCityDemo(locationData).subscribe(resp=>{});
 
           //set checkin count for user
           this.demo.setCheckinUserCount(this.user.uid).subscribe(resp=>{});
-          this.demo.setUserScore(this.user.uid,this.checkinScore).subscribe(resp=>{});
+          this.demo.setUserScore(this.user.uid,this.checkinScore,locationData).subscribe(resp=>{});
         }
         // Upload Picture and save it to firebase storage
-
-        this.setCheckinData(locationData);
-
+        if (this.base64Image != null) {
+          this.setCheckinIMG().then(downloadURL=>{
+            locationData['img'] = downloadURL;
+            this.setCheckinData(locationData);
+          }).catch(error=>{
+            console.log('error uploadImg',error);
+          });
+        } else {
+          this.setCheckinData(locationData);
+        }
       });
     }
       
@@ -749,69 +763,41 @@ export class CheckinPage {
           updates['/checkin/brewery/'+ that.brewery.id+'/'+newKey] = locationData;
 
         that.fbRef.ref().update(updates).then(success=>{
-          if (that.base64Image != null) {
-            that.setCheckinIMG(newKey);
-          } else {
-            that.view.dismiss();
-            that.presentToast("Check-in was successful");
-            console.log('checkin without pic uploaded');
-            that.loading.dismiss();           
-          }
-
-          that.checkin.off();
-          newFeedRef.off();
-
+          that.view.dismiss();
+          that.presentToast("Check-in was successful");
+          that.loading.dismiss();
+          
         }).catch(error=>{
           console.log('main checkin error',error);
-        });        
+        });
+
       }).catch(error=>{
         console.log('main checkin error',error);
       });
     });        
   }
 
-  setCheckinIMG(key) {
+  setCheckinIMG() {
     let downloadURL;
-    //let fbRef = firebase.database();
+    return new Promise((resolve,reject)=>{
 
-    this.getCheckinPicSeq().then(value=>{
-      let subDir = this.getImgSeqDirectory(value);
-      this.checkinPictureRef.child(subDir.sub1)
-        .child(subDir.sub2)
-        .child(subDir.sub3)
-        .child(subDir.img)
-        .putString(this.imageToUpload,'base64',{contentType:'image/png'})
-        .then(resp=>{
-
-          downloadURL = resp.downloadURL;
-          if (downloadURL!=null) {
-            var imgUpdates = {};
-
-            imgUpdates['/checkin/feeds/'+key+'/img'] = downloadURL;
-
-            if (this.checkinType != 'brewery')
-              imgUpdates['/checkin/locations/'+this.location.place_id+'/'+key+'/img'] = downloadURL;
-
-            imgUpdates['/checkin/users/'+this.user.uid+'/'+key+'/img'] = downloadURL;
-            imgUpdates['/checkin/beers/'+this.beer.id+'/'+key+'/img'] = downloadURL;
-            
-            if (this.checkinType == 'brewery' && this.brewery != null)
-              imgUpdates['/checkin/brewery/'+this.brewery.id+'/'+key+'/img'] = downloadURL;
-            
-            this.fbRef.ref().update(imgUpdates).then(success=>{
-              this.view.dismiss();
-              this.presentToast("Check-in with Picture was successful");
-              console.log('pic uploaded');
-              this.loading.dismiss();            
-            }).catch(error=>{
-              console.log('error setCheckinIMG', error);      
-            });
-            
-          }
+      this.getCheckinPicSeq().then(value=>{
+        let subDir = this.getImgSeqDirectory(value);
+        this.checkinPictureRef.child(subDir.sub1)
+          .child(subDir.sub2)
+          .child(subDir.sub3)
+          .child(subDir.img)
+          .putString(this.imageToUpload,'base64',{contentType:'image/png'})
+          .then(resp=>{
+           resolve(resp.downloadURL);
+          }).catch(error=>{
+            console.log('error setCheckinIMG', error);
+            reject(error);
+          });            
       }).catch(error=>{
-        console.log('error setCheckinIMG', error);
-      });            
-    });    
+        console.log('error getCheckinPicSeq',error);
+      });  
+    });
   }
 
   maxText(msg) {

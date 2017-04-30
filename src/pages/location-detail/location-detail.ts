@@ -1,9 +1,10 @@
 import { Component, ViewChild, ChangeDetectorRef } from '@angular/core';
-import { NavController, NavParams, LoadingController, ModalController, Platform } from 'ionic-angular';
+import { NavController, NavParams, LoadingController, ModalController, ToastController, Platform } from 'ionic-angular';
 import { Geolocation } from 'ionic-native';
 import { Ionic2RatingModule } from 'ionic2-rating';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Storage } from '@ionic/storage';
 
 import { LocationService } from '../../providers/location-service';
 import { GoogleService } from '../../providers/google-service';
@@ -53,6 +54,9 @@ export class LocationDetailPage {
   public queryable:boolean = true;
   public localBeers:FirebaseListObservable<any>;
   public localBeerLen:number;
+  public fbRef:any;
+  public uid:any;
+
 
 
   constructor(public navCtrl:NavController, 
@@ -65,11 +69,27 @@ export class LocationDetailPage {
               public platform:Platform,
               public angFire:AngularFire,
               public cdr:ChangeDetectorRef,
+              public storage:Storage,
+              public toastCtrl:ToastController,
   	          public geo:GoogleService) {
+
+    
+
+    if (params.get('loading')!=null) {
+      params.get('loading').dismiss();
+    }
 
     this.location = params.get("location");
     this.checkinsPerPage = this.sing.checkinsPerPage;
     this.limit = new BehaviorSubject(this.checkinsPerPage);
+    this.fbRef = firebase.database();
+
+
+    this.storage.ready().then(()=>{
+      this.storage.get('uid').then(uid=>{
+        this.uid = uid;  
+      });
+    });     
     
   }
 
@@ -168,6 +188,15 @@ export class LocationDetailPage {
     this.navCtrl.push(DrinkMenuPage,{location:this.location});
   }
 
+  presentToast(msg) {
+    let toast = this.toastCtrl.create({
+      message: msg,
+      position: 'top',
+      duration: 3000
+    });
+    toast.present();
+  }   
+
   isBrewery() {
 
     this.beerAPI.findBreweriesByGeo(this.locationLat,this.locationLng,1).subscribe((brewery)=>{
@@ -245,6 +274,23 @@ export class LocationDetailPage {
       this.loading.dismiss();
    });
 
+  }
+
+  save() {
+    let locPhoto='';
+    if (this.locationPhoto != null) {
+      locPhoto = this.locationPhoto.replace(/s\d+\-w\d+/g, "s100-w100");
+    }
+
+    
+    this.fbRef.ref('/favorite_locations/'+this.uid+'/'+this.location.place_id).set({
+      photo:locPhoto,
+      name:this.location.name,
+      placeType:this.location.place_types,
+      vicinity:this.location.vicinity
+    }).then(resp=>{
+      this.presentToast(this.location.name+' saved to favorites');
+    });
   }
 
   getPlacePhotos() {

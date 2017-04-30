@@ -64,6 +64,9 @@ import { DrinkMenuPage } from '../pages/drink-menu/drink-menu';
 import { SearchMenuPage } from '../pages/search-menu/search-menu';
 import { NotificationsPage } from '../pages/notifications/notifications';
 import { LocateBeerPage } from '../pages/locate-beer/locate-beer';
+import { LeaderboardPage } from '../pages/leaderboard/leaderboard';
+import { PopularBeersPage } from '../pages/popular-beers/popular-beers';
+import { PopularLocationsPage } from '../pages/popular-locations/popular-locations';
 
 export const firebaseConfig = {
     apiKey: "AIzaSyCd-WZs4O8gNx9qVlwwyRdK6_qY60WuQl0",
@@ -140,7 +143,10 @@ const cloudSettings: CloudSettings = {
     CheckinComponent,
     SearchMenuPage,
     NotificationsPage,
-    LocateBeerPage
+    LocateBeerPage,
+    LeaderboardPage,
+    PopularBeersPage,
+    PopularLocationsPage
   ],
   imports: [
     IonicModule.forRoot(MyApp),
@@ -195,7 +201,10 @@ const cloudSettings: CloudSettings = {
     DrinkMenuPage,
     SearchMenuPage,
     NotificationsPage,
-    LocateBeerPage
+    LocateBeerPage,
+    LeaderboardPage,
+    PopularBeersPage,
+    PopularLocationsPage
   ],
   providers: [{provide: ErrorHandler, 
               useClass: IonicErrorHandler},

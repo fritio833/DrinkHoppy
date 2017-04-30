@@ -31,6 +31,10 @@ page-home {
   .card-head {
      font-size: 20px;
      padding-left: 10px;
+
+     p {
+       margin-bottom:0px !important;
+     }
   }
 
   ion-content {
@@ -102,5 +106,37 @@ page-home {
     font-size:12px;
     font-family:arial !important;
     
+  }
+
+  #leaderboard {
+
+    h2 {
+      font-weight:bold;
+      padding:5px;
+    }
+
+    h3 {
+      padding-top:5px;
+      padding-bottom:5px;
+    }
+
+    .button {
+      margin:0px !important;
+      height:4.5rem;
+    }
+  }
+
+  #pop-beer {
+    .button {
+      margin:0px !important;
+      height:4.5rem;
+    }
+  }
+
+  #pop-location {
+    .button {
+      margin:0px !important;
+      height:4.5rem;
+    }
   }
 }

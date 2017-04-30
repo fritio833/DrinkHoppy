@@ -270,23 +270,29 @@ export class SearchLocationPage {
   }
 
   getLocationDetail(location) {
-
+    let validLocation = false;
     this.showLoading('Loading. Please wait...');
     this.geo.placeDetail(location.place_id).subscribe((resp)=>{
 
       this.isBrewery(resp.result).then(status=>{
         //console.log('is brewery',status);
-        this.loading.dismiss().catch(() => {});
+        
         if (!status) {
           for (var i=0;i<resp.result.types.length;i++) {
 
-            if (resp.result.types[i].match('night_club|food|bar|grocery_or_supermarket|liquor_store|gas_station|convenience_store')) {
-                this.navCtrl.push(LocationDetailPage,{location:resp.result});
-                return;
+            if (resp.result.types[i].match('night_club|food|bar|grocery_or_supermarket|liquor_store|gas_station|convenience_store')) {                
+                this.navCtrl.push(LocationDetailPage,{location:resp.result,loading:this.loading});
+                //this.loading.dismiss().catch(() => {});               
+                validLocation = true;
+                break;
             }
           }
-          console.log(resp.result.types);
-          this.presentToast('Not a place that would sell alcoholic beverages');
+
+          if (!validLocation) {
+            console.log(resp.result.types);
+            this.presentToast('Not a place that would sell alcoholic beverages');
+            this.loading.dismiss().catch(() => {});
+          }
         }
 
       });   

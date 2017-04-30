@@ -1,0 +1,62 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>Leaderboard</ion-title>
+    <ion-buttons right>
+      <button ion-button icon-right (click)="searchFriend()">        
+        Score
+        <ion-icon name="help"></ion-icon>
+      </button>   
+    </ion-buttons>      
+  </ion-navbar>  
+  <ion-toolbar no-border-top color="primary">   
+    <ion-segment [(ngModel)]="timePeriod" color="white">
+      <ion-segment-button value="month" icon-left (click)="getMonthLeaderBoard()">
+        <ion-icon name="medal"></ion-icon>
+        This Month
+      </ion-segment-button>
+      <ion-segment-button value="overall" icon-left (click)="getOverallLeaderBoard()">
+        <ion-icon id="notification-button" name="globe" [color]="notificationColor">
+          <ion-badge id="notifications-badge" color="danger"></ion-badge>
+        </ion-icon>
+        Overall
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>  
+</ion-header>
+<ion-content class="white-background">
+<ion-list no-lines [ngSwitch]="timePeriod">  
+  <ion-item *ngFor="let user of (users | async); let i = index;" (click)="getProfile(user.uid)">
+    <ion-chip *ngIf="i == 0" item-left color="primary">
+      <ion-label>{{i+1}}</ion-label>
+      <ion-avatar>
+        <img *ngIf="user.photo" [src]="user.photo">
+        <img *ngIf="!user.photo" src="images/default-profile.png">
+      </ion-avatar>
+    </ion-chip>
+    <ion-chip *ngIf="i == 1" item-left color="danger">
+      <ion-label>{{i+1}}</ion-label>
+      <ion-avatar>
+        <img *ngIf="user.photo" [src]="user.photo">
+        <img *ngIf="!user.photo" src="images/default-profile.png">
+      </ion-avatar>
+    </ion-chip>
+    <ion-chip *ngIf="i == 2" item-left color="yellow">
+      <ion-label>{{i+1}}</ion-label>
+      <ion-avatar>
+        <img *ngIf="user.photo" [src]="user.photo">
+        <img *ngIf="!user.photo" src="images/default-profile.png">
+      </ion-avatar>
+    </ion-chip>
+    <ion-chip *ngIf="i > 2" item-left>
+      <ion-label>1234</ion-label>
+      <ion-avatar>
+        <img *ngIf="user.photo" [src]="user.photo">
+        <img *ngIf="!user.photo" src="images/default-profile.png">
+      </ion-avatar>
+    </ion-chip>
+   
+    <p item-left>{{user.name}}</p>
+    <p item-right>{{user.points * -1}}</p>
+  </ion-item>
+</ion-list>
+</ion-content>

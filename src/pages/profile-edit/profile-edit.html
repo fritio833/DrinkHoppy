@@ -29,6 +29,11 @@
       </ion-item>      
     </ion-list>
   </form>
+      <ion-item>
+        <ion-label fixed>Hometown</ion-label>
+        <ion-input type="text" [(ngModel)]="hometownLocation" disabled="true"></ion-input>
+        <button item-right ion-button (click)="changeCity()">Change</button>
+      </ion-item>
 </ion-content>
 <ion-footer>
   <button ion-button full (click)="saveProfile()">

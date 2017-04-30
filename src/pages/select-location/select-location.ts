@@ -13,12 +13,15 @@ export class SelectLocationPage {
 
   public autocompleteItems = [];
   public citiesPredictions;
-
+  public getResponse:boolean = false;
+  
   constructor(public navCtrl: NavController, 
-  	          public navParams: NavParams,
+  	          public params: NavParams,
   	          public geo: GoogleService,
   	          public sing: SingletonService,
-  	          public view: ViewController) {}
+  	          public view: ViewController) {
+    this.getResponse = params.get('response');
+  }
 
   cancel() {
     this.view.dismiss(false);
@@ -36,13 +39,18 @@ export class SelectLocationPage {
   selectCity(city) {
   	//console.log('city',city);
   	this.geo.placeDetail(city.place_id).subscribe((success)=>{
-      console.log('resp',success);  
+      // console.log('resp',success);  
   		let cityState = this.geo.fixCityState(success);
   		this.sing.selectCity = cityState.city;
   		this.sing.selectState = cityState.state;
   		this.sing.selectLat = success.result.geometry.location.lat;
   		this.sing.selectLng = success.result.geometry.location.lng;
-  		this.view.dismiss(true);
+
+      if (this.getResponse)
+        this.view.dismiss(success);
+      else
+  		  this.view.dismiss(true);
+        
   	},error=>{
       console.log('error',error);
     });

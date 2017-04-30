@@ -6,10 +6,14 @@ import firebase from 'firebase';
 
 import { SingletonService } from '../../providers/singleton-service';
 import { BreweryService } from '../../providers/brewery-service';
+import { GoogleService } from '../../providers/google-service';
+import { AuthService } from '../../providers/auth-service';
 
 import { BeerDetailPage } from '../beer-detail/beer-detail';
 import { CheckinPage } from '../checkin/checkin';
 import { LocateBeerPage } from '../locate-beer/locate-beer';
+import { BeerSuggestionPage } from '../beer-suggestion/beer-suggestion';
+import { LocationDetailPage } from '../location-detail/location-detail';
 
 
 @Component({
@@ -24,23 +28,40 @@ export class FavoritesPage {
   public favBeerRef:any;
   public favBeers: FirebaseListObservable<any>;
   public uid:any;
+  public fbRef:any;
+  public user:any;
+  public favLocations: FirebaseListObservable<any>;
+  public isLookup:boolean = false;
+  public displayName:string;
 
   constructor(public navCtrl:NavController, 
-              public navParams:NavParams,
+              public params:NavParams,
               public sing:SingletonService, 
               public storage:Storage,
               public beerAPI:BreweryService,
               public actionCtrl:ActionSheetController,
               public modalCtrl:ModalController,
               public angFire:AngularFire,
+              public auth:AuthService,
               public loadingCtrl:LoadingController,
+              public geo:GoogleService,
               public toastCtrl:ToastController) {
     this.choice = "beerlist";
+    this.fbRef = firebase.database();
+    this.user = this.auth.getUser();
+    this.isLookup = params.get('lookup');
 
-    this.storage.ready().then(()=>{
-      this.storage.get('uid').then(uid=>{
-        this.favBeers = this.angFire.database.list('/favorite_beers/'+uid+'/');      
-      });
+    if (this.isLookup) {
+      this.uid = params.get('uid');
+      this.displayName = params.get('name');
+    }  else {
+      this.uid = this.user.uid;
+    }
+
+    this.favBeers = this.angFire.database.list('/favorite_beers/'+this.uid+'/',{
+      query:{
+        orderByChild:'name'
+      }
     });    
   }
 
@@ -68,7 +89,6 @@ export class FavoritesPage {
   }  
 
   getBeerActions(beer) {
-    //console.log(beer);
     
     let actionSheet = this.actionCtrl.create({
       title: beer.name,
@@ -81,18 +101,12 @@ export class FavoritesPage {
         },{
           text: 'Locate',
           handler: () => {
-            // TODO: Find beers locally
             this.locateBeer(beer);            
           }
         },{
           text: 'Details',
           handler: () => {
             this.getBeerDetail(beer.id);
-          }
-        },{
-          text: 'Suggestions',
-          handler:() => {
-            console.log('Suggestions Clicked');
           }
         },{
           text: 'Cancel',
@@ -106,10 +120,6 @@ export class FavoritesPage {
     actionSheet.present();
   }  
 
-  removeBeerFromFavorites(beerId) {
-    
-  }
-
   presentToast(msg) {
     let toast = this.toastCtrl.create({
       message: msg,
@@ -119,27 +129,36 @@ export class FavoritesPage {
     toast.present();
   }   
 
+  getLocation(locId) {
+     this.geo.placeDetail(locId).subscribe((resp)=>{
+       //console.log('resp',resp);
+       this.navCtrl.push(LocationDetailPage,{location:resp.result});
+     });
+  }
+
   ionViewDidLoad() {
     console.log('ionViewDidLoad FavoritesPage');
     
-    console.log('favbeers',this.favBeers);
-
   }
 
   showLoading() {
     this.loading = this.loadingCtrl.create({
     });
     this.loading.present();
-  }  
+  }
 
-  ionViewWillEnter() { 
+  getLocFavs() {
+    this.favLocations = this.angFire.database.list('/favorite_locations/'+this.uid+'/',{
+      query:{
+        orderByChild:'name'
+      }
+    });
 
-     this.storage.ready().then(()=>{
-	      this.storage.get('beers').then((beerArray)=>{
-	        this.beers = beerArray;
-	      }); 
-     });
+  }
 
-  }  
-
+  removeFavoriteBeer(beer) {
+    this.fbRef.ref('/favorite_beers/'+this.uid+'/'+beer.id).remove().then(resp=>{
+      this.presentToast(beer.name + ' removed from favorites');
+    });
+  }
 }

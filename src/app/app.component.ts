@@ -89,10 +89,17 @@ export class MyApp {
         }
       });
 
+      // Get geolocation.  Sets our app.
       this.sing.getGeolocation().subscribe(resp=>{
         this.setCityState(resp);
       },error=>{
         console.log('error',error);
+        // Attempt to get geo with low accuracy
+        this.sing.getGeolocationLow().subscribe(lowResp=>{
+          this.setCityState(lowResp);
+        },error=>{
+          console.log('error',error);
+        });
       });
       
       StatusBar.styleDefault();
@@ -161,6 +168,10 @@ export class MyApp {
       .subscribe((success)=>{
       this.sing.geoCity = success.city;
       this.sing.geoState = success.state;
+      this.sing.geoCountry = success.country;
+      this.events.publish('gotGeo:true',{city:this.sing.geoCity,state:this.sing.geoState,country:this.sing.geoCountry});
+    },error=>{
+      console.log('error',error);
     });    
   }
 

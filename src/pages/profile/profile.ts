@@ -41,6 +41,7 @@ export class ProfilePage {
   public friendsRequested = new Array();
   public userIsFriend:boolean = false;
   public sentFriendRequest:boolean = false;
+  public pointsByMonth:number = 0;
 
   constructor(public navCtrl: NavController, 
               public params: NavParams, 
@@ -69,8 +70,7 @@ export class ProfilePage {
             this.getUserFriendsList();
           }
         } else {
-          this.uid = this.user.uid;
-          
+          this.uid = this.user.uid; 
         }
   }
 
@@ -86,13 +86,21 @@ export class ProfilePage {
 
         this.joinedDate = this.sing.getDateMonthDayYear(snapshot.val().dateCreated);
         this.checkinCount = snapshot.val().checkins;
-        this.points = snapshot.val().points;
+        this.points = snapshot.val().points * -1;
         
         if (!this.isLookup && this.user!=null) {
           //console.log('currUser',this.user);
           this.isEmailVerified = this.user.emailVerified;
         }
         this.loading.dismiss();            
+      });
+
+      // Get points by month
+      let timestamp = new Date().getTime();
+      let dateMonthKey = this.sing.getMonthYearKey(timestamp);
+      this.fbRef.ref('users/'+uid+'/pointsByMonth/'+dateMonthKey).on('value', snapshot => {
+        //console.log('monthPoints',snapshot.val());
+        this.pointsByMonth = snapshot.val() * -1;
       });
     } 
   }
@@ -168,7 +176,10 @@ export class ProfilePage {
   }
 
   goToFavorites() {
-    this.navCtrl.push(FavoritesPage);
+    if (this.isLookup)
+      this.navCtrl.push(FavoritesPage,{lookup:true,uid:this.uid,name:this.displayName});
+    else
+      this.navCtrl.push(FavoritesPage);
   }
 
   showLoading() {

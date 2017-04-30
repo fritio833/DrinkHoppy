@@ -22,12 +22,14 @@ export class SingletonService {
   public environment = 'dev';
   public geoCity = null;
   public geoState = null;
+  public geoCountry = null;
   public geoLat = null;
   public geoLng = null;
   public isAdmin = true;
 
   public selectCity = null;
   public selectState = null;
+  public selectCountry = null;
   public selectLat = null;
   public selectLng = null;
   public checkinsPerPage:number = 10;
@@ -70,17 +72,27 @@ export class SingletonService {
     if (this.selectCity != null && this.selectState != null) {
       loc = {city:this.selectCity,
              state:this.selectState,
+             country:this.selectCountry,
              lat:this.selectLat,
              lng:this.selectLng,
              geo:false};
     } else {
       loc = {city:this.geoCity,
              state:this.geoState,
+             country:this.geoCountry,
              lat:this.geoLat,
              lng:this.geoLng,
              geo:true};
     }
     return loc;
+  }
+
+  getLocationKey() {
+    let locObj = this.getLocation();
+    let key = locObj.city.toLowerCase().replace(/[^A-Z0-9]/ig, "")
+              +'-'+locObj.state.toLowerCase().replace(/[^A-Z0-9]/ig, "")
+              +'-'+locObj.country.toLowerCase();
+    return key;
   }
 
   getSelectCity() {
@@ -91,9 +103,26 @@ export class SingletonService {
     }
   }
 
+  getSelectState() {
+    if (this.selectState != null) {
+      return this.selectState;
+    } else {
+      return this.geoState;
+    }
+  }
+
+  getSelectCountry() {
+    if (this.selectCountry != null) {
+      return this.selectCountry;
+    } else {
+      return this.geoCountry;
+    }
+  }    
+
   setCurrentLocation() {
     this.selectCity = null;
     this.selectState = null;
+    this.selectCountry = null;
     this.selectLat = null;
     this.selectLng = null;
   }
@@ -205,7 +234,15 @@ export class SingletonService {
     var date = a.getDate();
 
     return month + ' ' + date + ', ' + year;
-  }  
+  }
+
+  getMonthYearKey(timestamp) {
+    var a = new Date(timestamp);
+    var year = a.getFullYear();
+    var month = a.getMonth()+1;
+
+    return month + '-' + year;    
+  } 
 
   getFormattedTime (fourDigitTime) {
       var hours24 = parseInt(fourDigitTime.substring(0, 2),10);
@@ -255,10 +292,26 @@ export class SingletonService {
           console.log('geo high accuracy');
           return coords;
         } else  
-          throw Observable.throw('Geolocation Timeout');
+          throw Observable.throw('Geolocation High Accuracy Timeout');
       })
       .retryWhen(error => error.delay(1000))
-      .timeout(10000)
+      .timeout(10000);
+  }
+
+  getGeolocationLow() {
+    let options = {timeout: 30000, enableHighAccuracy: false, maximumAge:3000};
+
+    return Observable.fromPromise(Geolocation.getCurrentPosition(options))
+      .map(location => location.coords)
+      .map(coords => {
+        if (coords.latitude){
+          console.log('geo low accuracy');
+          return coords;
+        } else  
+          throw Observable.throw('Geolocation Low Accuracy Timeout');
+      })
+      .retryWhen(error => error.delay(1000))
+      .timeout(30000);
   }
 
   setCheckinTime(time,beerId) {

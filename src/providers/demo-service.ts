@@ -3,6 +3,8 @@ import { Observable } from 'rxjs/Observable';
 import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 
+import { SingletonService } from './singleton-service';
+
 import firebase from 'firebase';
 
 @Injectable()
@@ -10,7 +12,7 @@ export class DemoService {
 
   public fbRef:any;
 
-  constructor(public http: Http) {
+  constructor(public sing: SingletonService) {
     console.log('Hello DemoService Provider');
     this.fbRef = firebase.database();
   }
@@ -40,11 +42,18 @@ export class DemoService {
           };
           return newBeer;
         }
-      },(complete)=>{
-         let cityKey = data.city.toLowerCase()+'-'+data.state.toLowerCase()+'-'+data.country.toLowerCase();
-         this.fbRef.ref('/beers/'+data.beerId+'/cities/'+cityKey).transaction(value=>{
-          return (value||0)+1;
-         });
+      },(error,committed,snapshot)=>{
+
+        if (error) {
+           observer.error(error);
+        } else if (committed) {
+          let cityKey = data.city.toLowerCase().replace(/[^A-Z0-9]/ig, "")
+                        +'-'+data.state.toLowerCase().replace(/[^A-Z0-9]/ig, "")
+                        +'-'+data.country.toLowerCase();
+          this.fbRef.ref('/beers/'+data.beerId+'/cities/'+cityKey).transaction(value=>{
+            return (value||0)+1;
+          });
+        }
       });
       observer.next(true);
     });
@@ -55,20 +64,37 @@ export class DemoService {
       this.fbRef.ref('/users/'+uid+'/checkins').transaction(value=>{
           //value.cities[]       
           return (value||0)+1;
-      },(complete)=>{
-
       });
       observer.next(true);
     });    
   }
 
-  setUserScore(uid,score) {
+  setUserScore(uid,score,data) {
     return new Observable(observer => {
-      this.fbRef.ref('/users/'+uid+'/points').transaction(value=>{
-          //value.cities[]       
-          return (value||0)+score;
-      },(complete)=>{
-
+      this.fbRef.ref('/users/'+uid+'/points').transaction(value=>{    
+          return (value||0)-score;
+      },(error,committed,snapshot)=>{
+        if (error) {
+          observer.error(error);
+        } else if (committed) {
+          let timestamp = new Date().getTime();
+          let dateKey = this.sing.getMonthYearKey(timestamp);
+          console.log('hello',dateKey);
+          this.fbRef.ref('/leaderboard/'+dateKey+'/'+uid).transaction(value=>{
+            if (value) {
+              value.points-=score;
+              return value;
+            } else { 
+              let user = {
+                uid:data.uid,
+                photo:data.userIMG,
+                name:data.userName,
+                points:score * -1
+              }
+              return user;
+            }
+          });
+        }
       });
       observer.next(true);
     });
@@ -99,10 +125,13 @@ export class DemoService {
           }
           return locData;          
         }
-      },(complete)=>{
+      },(error,committed,snapshot)=>{
+        if (error)
+          observer.error(error);
 
+        if(committed)
+          observer.next(true);
       });
-      observer.next(true);
     });    
   }
   setBeerByLocation(data) {
@@ -138,41 +167,93 @@ export class DemoService {
               };
               return newBeer;
             }
-          },(complete)=>{
-
-            if (data.servingStyleName !=null && data.servingStyleName!=''){
-              this.fbRef.ref('/location_menu/'+data.placeId+'/beers/'+data.beerId+'/servingStyle/'+data.servingStyleName)
-                .transaction(value=>{
-                  if (value) {
-                    value.uid = data.uid;
-                    value.reported++;
-                    value.timestamp = firebase.database.ServerValue.TIMESTAMP;
-                    return value;
-                  } else {
-                    let newServStyle = {
-                      uid:data.uid,
-                      timestamp:firebase.database.ServerValue.TIMESTAMP,
-                      reported: 1
+          },(error,committed,snapshot)=>{
+            if (error) {
+              observer.error(error);
+            } else if (committed) { 
+              if (data.servingStyleName !=null && data.servingStyleName!=''){
+                this.fbRef.ref('/location_menu/'+data.placeId+'/beers/'+data.beerId+'/servingStyle/'+data.servingStyleName)
+                  .transaction(value=>{
+                    if (value) {
+                      value.uid = data.uid;
+                      value.reported++;
+                      value.timestamp = firebase.database.ServerValue.TIMESTAMP;
+                      return value;
+                    } else {
+                      let newServStyle = {
+                        uid:data.uid,
+                        timestamp:firebase.database.ServerValue.TIMESTAMP,
+                        reported: 1
+                      }
+                      return newServStyle;
                     }
-                    return newServStyle;
-                  }
-              });
-            }
+                  },(error,committed,snapshot)=>{
+                    if(error)
+                      observer.error(error);
+                    if(committed)
+                      observer.next(true);
+                  });
+                }
+             }
           });
         });
-
       }
-      observer.next(true);
+    });
+  }
+
+  setLocationbyCityDemo(data) {
+    console.log('i got here location city demo');
+    return new Observable(observer => {
+      let cityKey = data.city.toLowerCase().replace(/[^A-Z0-9]/ig, "")
+                    +'-'+data.state.toLowerCase().replace(/[^A-Z0-9]/ig, "")
+                    +'-'+data.country.toLowerCase();
+      let beerCityRef = '';
+      this.fbRef.ref('/location_by_city/'+cityKey+'/'+data.placeId).transaction(value=>{
+        if (value) {          
+          value.checkinCount--;
+          value.timestamp = firebase.database.ServerValue.TIMESTAMP;
+          value.photo = data.photo;    
+          return value;
+        } else {
+            let location = {
+              name:data.name,
+              placeId:data.placeId,
+              address:data.address,
+              city:data.city,
+              state:data.state,
+              zip:data.zip,
+              photo:data.photo,
+              timestamp:firebase.database.ServerValue.TIMESTAMP,
+              uid:data.uid,
+              lat:data.lat,
+              lng:data.lng,
+              checkinCount:-1,
+              isBrewery:data.isBrewery,
+              placeType:data.placeType
+            }
+            return location;
+        }
+      },(error,committed,snapshot)=>{
+
+        if (committed)
+          observer.next(true);
+
+        if (error)
+          observer.error(error);
+      });
+      
     });
   }
 
   setBeerByCityDemo(data) {
     return new Observable(observer => {
-      let cityKey = data.city.toLowerCase()+'-'+data.state.toLowerCase()+'-'+data.country.toLowerCase();
+      let cityKey = data.city.toLowerCase().replace(/[^A-Z0-9]/ig, "")
+                    +'-'+data.state.toLowerCase().replace(/[^A-Z0-9]/ig, "")
+                    +'-'+data.country.toLowerCase();
       let beerCityRef = '';
       this.fbRef.ref('/beer_by_city/'+cityKey+'/'+data.beerId).transaction(value=>{
         if (value) {          
-          value.checkinCount++;
+          value.checkinCount--;
           //value.cities[]         
           return value;
         } else {
@@ -188,43 +269,51 @@ export class DemoService {
             style:data.beerStyleShortName,
             brewery:data.breweryShortName,
             breweryIMG:data.breweryImages,
-            checkinCount:1
+            checkinCount:-1
           };
           return newBeer;
         }
-      },(complete)=>{
+      },(error,committed,snapshot)=>{
+        if (error) {
 
-        this.fbRef.ref('/beer_by_city/'+cityKey+'/'+data.beerId+'/locations/'+data.placeId).transaction(value=>{
-          if (value) {
-            value.checkinCount++;
-            value.photo = data.photo;
-            value.timestamp = firebase.database.ServerValue.TIMESTAMP;
-            value.uid = data.uid;
-            return value;
-          } else {
-            let location = {
-              name:data.name,
-              placeId:data.placeId,
-              address:data.address,
-              city:data.city,
-              state:data.state,
-              zip:data.zip,
-              photo:data.photo,
-              timestamp:firebase.database.ServerValue.TIMESTAMP,
-              uid:data.uid,
-              lat:data.lat,
-              lng:data.lng,
-              checkinCount:1,
-              placeType:data.placeType
+          observer.error(error);
+
+        } else if (committed) {  
+          this.fbRef.ref('/beer_by_city/'+cityKey+'/'+data.beerId+'/locations/'+data.placeId).transaction(value=>{
+            if (value) {
+              value.checkinCount++;
+              value.photo = data.photo;
+              value.timestamp = firebase.database.ServerValue.TIMESTAMP;
+              value.uid = data.uid;
+              return value;
+            } else {
+              let location = {
+                name:data.name,
+                placeId:data.placeId,
+                address:data.address,
+                city:data.city,
+                state:data.state,
+                zip:data.zip,
+                photo:data.photo,
+                timestamp:firebase.database.ServerValue.TIMESTAMP,
+                uid:data.uid,
+                lat:data.lat,
+                lng:data.lng,
+                checkinCount:1,
+                isBrewery:data.isBrewery,
+                placeType:data.placeType
+              }
+              return location;
             }
-            return location;
-          }
-        });
-
+          },(error,committed,snapshot)=>{
+             if (error)
+               observer.error(error);
+            
+             if (committed)
+               observer.next(true);
+          });
+        }
       });
-
-      
-      observer.next(true);
     });
   }
 

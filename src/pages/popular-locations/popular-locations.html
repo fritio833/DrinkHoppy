@@ -1,0 +1,19 @@
+<ion-header>
+  <ion-navbar  color="primary">
+    <ion-title>{{sing.geoCity}}'s Popular Locations</ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content>
+  <ion-item *ngFor="let location of locations | async" (click)="getLocation(location)">
+    <ion-thumbnail item-left>
+      <img *ngIf="placeIMGS[location.$key]" [src]='placeIMGS[location.$key]'>
+    </ion-thumbnail>
+    <h2>{{location.name}}</h2>
+    <p>{{location.address}}</p>
+    <p>{{location.city}},{{location.state}}</p>
+    <p>{{location.placeType}}</p>
+    <p>Number Check-ins: <b>{{location.checkinCount * -1}}</b></p>
+    <p>{{distance[location.$key]}} miles</p>
+    <ion-icon name="arrow-forward" item-right></ion-icon> 
+  </ion-item>
+</ion-content>

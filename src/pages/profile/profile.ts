@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, ModalController, AlertController, LoadingController, NavParams } from 'ionic-angular';
+import { NavController, ModalController, ToastController, AlertController, LoadingController, NavParams } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import { Geolocation } from 'ionic-native';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
@@ -42,6 +42,7 @@ export class ProfilePage {
   public userIsFriend:boolean = false;
   public sentFriendRequest:boolean = false;
   public pointsByMonth:number = 0;
+  public reputation:number = 0;
 
   constructor(public navCtrl: NavController, 
               public params: NavParams, 
@@ -52,6 +53,7 @@ export class ProfilePage {
               public auth:AuthService,
               public angFire:AngularFire,
               public notify:NotificationService,
+              public toastCtrl:ToastController,
               public storage:Storage) {
 
         this.user = this.auth.getUser();
@@ -62,7 +64,7 @@ export class ProfilePage {
 
         if (this.isLookup) {
           this.uid = params.get('uid');
-          //console.log('uid ' + this.uid + ' - ' + this.user.uid);
+
           if (this.uid === this.user.uid)
             this.isLookup = false;  // Can't friend myself
           else {
@@ -86,7 +88,9 @@ export class ProfilePage {
 
         this.joinedDate = this.sing.getDateMonthDayYear(snapshot.val().dateCreated);
         this.checkinCount = snapshot.val().checkins;
+        this.reputation = snapshot.val().reputation;
         this.points = snapshot.val().points * -1;
+        console.log('rep',this.reputation);
         
         if (!this.isLookup && this.user!=null) {
           //console.log('currUser',this.user);
@@ -98,9 +102,10 @@ export class ProfilePage {
       // Get points by month
       let timestamp = new Date().getTime();
       let dateMonthKey = this.sing.getMonthYearKey(timestamp);
-      this.fbRef.ref('users/'+uid+'/pointsByMonth/'+dateMonthKey).on('value', snapshot => {
-        //console.log('monthPoints',snapshot.val());
-        this.pointsByMonth = snapshot.val() * -1;
+      this.fbRef.ref('leaderboard/'+dateMonthKey+'/'+uid).on('value', snapshot => {
+
+        if (snapshot.hasChildren())
+          this.pointsByMonth = snapshot.val().points * -1
       });
     } 
   }
@@ -187,7 +192,62 @@ export class ProfilePage {
       content: 'Loading...'
     });
     this.loading.present();
-  }   
+  }
+
+  repUp() {
+
+    this.fbRef.ref('/users/'+this.uid+'/reppedMe/'+this.user.uid).transaction(value=>{
+      return true
+    },(error,committed,snapshot)=>{
+
+      if (error) {
+        if ((<Error>error).message === 'permission_denied') {
+          console.log('permission_denied');
+          this.presentToast("You already repped " + this.displayName);
+        } else
+          console.log('error',error);
+      }
+
+      if (committed) {
+        this.fbRef.ref('/users/'+this.uid+'/reputation').transaction(value=>{
+          this.presentToast("Positive Reputation Given to " + this.displayName);
+          return (value||0)+1;
+        });        
+      }
+    });
+  }
+
+  repDown() {
+
+    this.fbRef.ref('/users/'+this.uid+'/reppedMe/'+this.user.uid).transaction(value=>{
+      return true
+    },(error,committed,snapshot)=>{
+
+      if (error) {
+        if ((<Error>error).message === 'permission_denied') {
+          console.log('permission_denied');
+          this.presentToast("You already repped " + this.displayName);
+        } else
+          console.log('error',error);
+      }
+
+      if (committed) {
+        this.fbRef.ref('/users/'+this.uid+'/reputation').transaction(value=>{
+          this.presentToast("Negative Reputation Given to " + this.displayName);
+          return (value||0)-1;
+        });        
+      }
+    });    
+  }
+
+  presentToast(msg) {
+    let toast = this.toastCtrl.create({
+      message: msg,
+      position: 'top',
+      duration: 3000
+    });
+    toast.present();
+  }
 
   presentAlert() {
     let alert = this.alertCtrl.create({

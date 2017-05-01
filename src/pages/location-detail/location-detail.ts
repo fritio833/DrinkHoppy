@@ -75,10 +75,6 @@ export class LocationDetailPage {
 
     
 
-    if (params.get('loading')!=null) {
-      params.get('loading').dismiss();
-    }
-
     this.location = params.get("location");
     this.checkinsPerPage = this.sing.checkinsPerPage;
     this.limit = new BehaviorSubject(this.checkinsPerPage);
@@ -429,6 +425,11 @@ export class LocationDetailPage {
     }
 
     this.location.place_types = ptypes.replace(/,\s*$/, "").replace(/_/g, " ");
+
+    if (this.params.get('loading')!=null) {
+      this.params.get('loading').dismiss();
+    }
+    
   }
 
   

@@ -124,7 +124,7 @@ export class CheckinPage {
 
       // fix beers with no images
       if (!this.beer.hasOwnProperty('labels')) {
-        this.beer['labels'] = {medium:''};
+        this.beer['labels'] = {medium:'',icon:'',large:''};
       }
     }
   }   
@@ -680,6 +680,12 @@ export class CheckinPage {
             locationData['breweryId'] = this.beer.breweries[0].id;
             locationData['breweryName'] = this.beer.breweries[0].name;
             locationData['breweryShortName'] = this.beer.breweries[0].nameShortDisplay;
+            console.log('brewery beer',this.brewery);
+
+            if (this.brewery != null && this.brewery.hasOwnProperty('locationTypeDisplay'))
+              locationData['breweryType'] = this.brewery.locationTypeDisplay;
+            else
+              locationData['breweryType'] = '';
 
             if (this.beer.breweries[0].hasOwnProperty('images'))
               locationData['breweryImages'] = this.beer.breweries[0].images;              
@@ -703,6 +709,7 @@ export class CheckinPage {
           this.demo.setBeerByLocation(locationData).subscribe(resp=>{});
           this.demo.setLocation(locationData).subscribe(resp=>{});
           this.demo.setLocationbyCityDemo(locationData).subscribe(resp=>{});
+          this.demo.setBreweryByCity(locationData).subscribe(resp=>{});
 
           //set checkin count for user
           this.demo.setCheckinUserCount(this.user.uid).subscribe(resp=>{});

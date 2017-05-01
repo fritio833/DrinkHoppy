@@ -18,16 +18,16 @@
       </ion-item>
     </ion-card-content>
   </ion-card>
-	<ion-item *ngFor="let location of locations | async" (click)="getLocation(location)">
+	<ion-item *ngFor="let location of locations | async" (click)="getLocation(location)" text-wrap>
+
 			<ion-thumbnail item-left>
         <img *ngIf="placeIMGS[location.$key]" [src]='placeIMGS[location.$key]'>
 			</ion-thumbnail>
       <h2>{{location.name}}</h2>
+      <p>{{location.placeType}}</p>
       <p>{{location.address}}</p>
       <p>{{location.city}},{{location.state}}</p>
-      <p>{{location.placeType}}</p>
       <p>Last Seen: {{sing.getDateMonthDayYear(location.timestamp)}}</p>
-      <p>Number Check-ins: <b>{{location.checkinCount}}</b></p>
-      <h3 item-right>{{distance[location.$key]}} miles</h3>
+      <p>Check-ins: <b>{{location.checkinCount}}</b> &#8226; {{distance[location.$key]}} miles</p>
 	</ion-item> 
 </ion-content>

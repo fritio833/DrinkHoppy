@@ -86,17 +86,6 @@ export class BreweryDetailPage {
     } else {
     	this.breweryBeers = new Array();
     }
-    //console.log('brewery',this.brewery);
-
-    this.checkins =  this.angFire.database.list('/checkin/brewery/'+this.brewery.id,{
-      query:{
-        orderByChild:'dateCreated'
-      }
-    }).map((array) => array.reverse()) as FirebaseListObservable<any[]>;;
-
-    this.checkins.subscribe(resp=>{
-      this.checkinLen = resp.length;
-    });
 
   }
 
@@ -114,6 +103,7 @@ export class BreweryDetailPage {
   
 
   getCheckIns() {
+
     this.checkins =  this.angFire.database.list('/checkin/brewery/'+this.brewery.id,{
       query:{
         orderByChild:'priority',
@@ -297,6 +287,8 @@ export class BreweryDetailPage {
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad BreweryDetailPage');
+
+    this.getCheckIns();
 
     // get rating from google places
     if (this.location != null && this.location.hasOwnProperty('rating'))

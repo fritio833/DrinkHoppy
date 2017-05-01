@@ -1,3 +1,12 @@
 page-popular-beers {
-
+  .white-background {
+      background-color:#ffffff;
+  }
+  .sub-header {
+    min-height: 40px !important;
+    
+    .toolbar-title {
+      font-size: 1.5rem !important;
+    }
+  }  
 }

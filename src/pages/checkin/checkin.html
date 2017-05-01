@@ -19,7 +19,7 @@
     <ion-item>
       <span item-left>
         <ion-thumbnail>
-          <img [src]="beer.labels.medium" *ngIf="beer.labels.medium!=null && beer.labels.medium!=''" />
+          <img [src]="beer.labels.medium" *ngIf="beer.labels!=null && beer.labels.medium!=null && beer.labels.medium!=''" />
         </ion-thumbnail>
       </span>
       <span id="beer-header-info" item-left>

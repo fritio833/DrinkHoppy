@@ -97,7 +97,7 @@ export class FriendsPage {
       return;
          
     if (evt.target.value.length > 2) {
-      console.log('evt',evt.target.value);
+
       this.userFriends = new Array();
       let userRef = firebase.database();
       userName = evt.target.value.toLowerCase();
@@ -108,7 +108,7 @@ export class FriendsPage {
         //console.log('snap',snapshot.val().uid);
         // console.log('snapname: ' + snapName + ' patter: ' + pattern);                                
 
-        userRef.ref('/users/'+snapshot.val().uid).on('value',userSnap=>{
+        userRef.ref('/users/'+snapshot.val().uid).orderByChild('name').on('value',userSnap=>{
           console.log('user',userSnap.val());
           
           let snapName = userSnap.val().name.toLowerCase();

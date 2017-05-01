@@ -17,6 +17,7 @@ import { ProfilePage } from '../pages/profile/profile';
 import { Storage } from '@ionic/storage';
 import { SearchMenuPage } from '../pages/search-menu/search-menu';
 import { FriendsPage } from '../pages/friends/friends';
+import { FeedsPage } from '../pages/feeds/feeds';
 
 
 
@@ -60,6 +61,7 @@ export class MyApp {
       { title: 'Search', component: SearchMenuPage },
       { title: 'Favorites', component: FavoritesPage },
       { title: 'Friends', component: FriendsPage },
+      { title: 'Feeds', component: FeedsPage },
       { title: 'Profile', component: ProfilePage }
     ];
 

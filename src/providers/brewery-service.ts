@@ -119,6 +119,24 @@ export class BreweryService {
            .map(res => res.json());    
   }
 
+  getRandomBeers(page?) {
+
+    let _page = '';
+    let _filter = '';
+
+    if (page!=null)
+      _page = '&p=' + page;
+
+    return this.http.get(this.breweryDbUrl 
+           + 'beers/?key=' 
+           + this.breweryDbAPI
+           + _page
+           +'&randomCount=10&availableId=1&order=random&withBreweries=Y')
+           .retryWhen(error => error.delay(500))
+           .timeout(5000)
+           .map(res => res.json());      
+  }
+
   // NOT BEING USED
   /*
   findBreweriesByCity(city) {

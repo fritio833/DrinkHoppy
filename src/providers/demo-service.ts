@@ -23,9 +23,21 @@ export class DemoService {
       this.fbRef.ref('/beers/'+data.beerId).transaction(value=>{
         if (value) {          
           value.checkinCount++;
-          //value.cities[]         
+
+          if (data.beerRating) {
+            value.checkinRating+=data.beerRating;
+            value.checkinRatingCount++;
+          }
           return value;
         } else {
+
+          let checkRating = 0;
+          let checkRatingCount = 0;
+
+          if (data.beerRating) {
+            checkRating = data.beerRating;
+            checkRatingCount = 1;
+          }
           let newBeer = {
             name:data.beerDisplayName,
             img:data.beerIMG,
@@ -39,6 +51,8 @@ export class DemoService {
             beerLabelMedium:data.beerLabelMedium,
             beerLabelLarge:data.beerLabelLarge,           
             checkinCount:1,
+            checkinRating:checkRating,
+            checkinRatingCount:checkRatingCount
           };
           return newBeer;
         }
@@ -52,10 +66,71 @@ export class DemoService {
                         +'-'+data.country.toLowerCase();
           this.fbRef.ref('/beers/'+data.beerId+'/cities/'+cityKey).transaction(value=>{
             return (value||0)+1;
+          },(error,committed,snapshot)=>{
+            if (error) {
+              observer.error(error);
+            } else if (committed) {
+              this.fbRef.ref('/users/'+data.uid+'/beersRated/'+data.beerId).transaction(value=>{
+
+                let beer = {
+                  beerRating:data.beerRating,
+                  timestamp:firebase.database.ServerValue.TIMESTAMP
+                }                   
+                return beer;
+              },(error,committed,snapshot)=>{  // Unique Counts and Ratings
+                
+                if (error) {
+                  console.log('error setBeerDemo',error);  //User found, don't increment unique counts
+                  observer.next(true);
+                } else if (committed) {
+                   this.fbRef.ref('/beers/'+data.beerId).transaction(value=>{
+                       if (value) {
+                         if (value.uniqueCheckin==null) {
+                           value['uniqueCheckin'] = 0;
+                           value['uniqueCheckinRating']=0;
+                           value['uniqueCheckinRatingCount']=0;
+                         }
+
+                         value['uniqueCheckin']++;
+
+                         if (data.beerRating) {
+                           value['uniqueCheckinRating']+=data.beerRating;
+                           value['uniqueCheckinRatingCount']++;
+                         }
+                         return value;
+                       } else {
+                         let checkIn = new Object();
+                         //(value.uniqueCheckin||0) = 1;
+                         checkIn['uniqueCheckin'] = 1;
+                         if (data.beerRating) {       
+                           checkIn['uniqueCheckinRating']=data.beerRating;
+                           checkIn['uniqueCheckinRatingCount'] = 1;
+                         } else {
+                           checkIn['uniqueCheckinRating'] = 0;
+                           checkIn['uniqueCheckinRatingCount'] = 0;                           
+                         }
+                         return checkIn;
+                       }
+                   },(error,committed,snapshot)=>{
+
+                     if (error) {
+                       console.log('error setBeerDemo',error);
+                     }
+                     if (committed) { // Increment Unique Beers
+                       console.log('unique checked in');
+                       this.fbRef.ref('/users/'+data.uid+'/numOfUniqueBeers/').transaction(value=>{
+                         return (value||0)+1;
+                       });
+                     }
+                      observer.next(true);
+                   });
+                }
+              });
+            }
           });
         }
       });
-      observer.next(true);
+     
     });
   }
 
@@ -201,8 +276,81 @@ export class DemoService {
     });
   }
 
+  setBreweryByCity(data) {
+
+    return new Observable(observer => {
+      let cityKey = data.city.toLowerCase().replace(/[^A-Z0-9]/ig, "")
+                    +'-'+data.state.toLowerCase().replace(/[^A-Z0-9]/ig, "")
+                    +'-'+data.country.toLowerCase();
+      let beerCityRef = '';
+      this.fbRef.ref('/brewery_by_city/'+cityKey+'/'+data.breweryId).transaction(value=>{
+        if (value) {          
+          value.checkinCount--;
+          value.timestamp = firebase.database.ServerValue.TIMESTAMP;
+          value.photo = data.photo;
+          value.breweryImages = data.breweryImages;
+          return value;
+        } else {
+            let location = {
+              name:data.breweryName,
+              placeId:data.placeId,
+              breweryId:data.breweryId,
+              breweryType:data.breweryType,
+              address:data.address,
+              city:data.city,
+              state:data.state,
+              zip:data.zip,
+              breweryImages:data.breweryImages,
+              photo:data.photo,
+              timestamp:firebase.database.ServerValue.TIMESTAMP,
+              uid:data.uid,
+              lat:data.lat,
+              lng:data.lng,
+              checkinCount:-1
+            }
+           
+            return location;
+        }
+      },(error,committed,snapshot)=>{
+
+        if (committed) {
+           this.fbRef.ref('/users/'+data.uid+'/breweriesVisited/'+data.breweryId).transaction(value=>{
+              if (value) {
+                value.checkedIn++;
+                return value;
+              } else {
+                let location = {
+                  name:data.breweryName,
+                  placeId:data.placeId,
+                  breweryId:data.breweryId,
+                  breweryType:data.breweryType,
+                  breweryImages:data.breweryImages,
+                  photo:data.photo,
+                  checkedIn:1,
+                  timestamp:firebase.database.ServerValue.TIMESTAMP
+                }
+                this.incrementUserBreweryVisited(data.uid);
+                return location;                
+              }
+           });
+        }
+          observer.next(true);
+
+        if (error)
+          observer.error(error);
+      });
+    });
+
+  }
+
+  incrementUserBreweryVisited(uid) {
+     this.fbRef.ref('/users/'+uid+'/uniqueBreweriesVisited/').transaction(value=>{
+       return (value||0)+1;
+     });
+  }
+
   setLocationbyCityDemo(data) {
-    console.log('i got here location city demo');
+
     return new Observable(observer => {
       let cityKey = data.city.toLowerCase().replace(/[^A-Z0-9]/ig, "")
                     +'-'+data.state.toLowerCase().replace(/[^A-Z0-9]/ig, "")

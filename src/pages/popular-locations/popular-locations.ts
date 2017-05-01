@@ -50,7 +50,7 @@ export class PopularLocationsPage {
         for (var i=0;i<this.locationsLen;i++) {
           let locPoint = {lat:geo.latitude,lng:geo.longitude};
           let userPoint = {lat:resp[i].lat,lng:resp[i].lng};             
-          this.placeIMGS[resp[i].$key] = this.getThumbnail(resp[i].photo);
+          this.placeIMGS[resp[i].$key] = this.geo.getThumbnail(resp[i].photo,100);
           let dist = this.geo.getDistance(locPoint,userPoint,true);
           this.distance[resp[i].$key] = Math.round(dist * 10) / 10;
         }

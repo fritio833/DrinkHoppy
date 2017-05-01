@@ -48,7 +48,7 @@
       </ion-avatar>
     </ion-chip>
     <ion-chip *ngIf="i > 2" item-left>
-      <ion-label>1234</ion-label>
+      <ion-label>{{i+1}}</ion-label>
       <ion-avatar>
         <img *ngIf="user.photo" [src]="user.photo">
         <img *ngIf="!user.photo" src="images/default-profile.png">

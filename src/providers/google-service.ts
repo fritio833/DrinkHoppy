@@ -286,6 +286,13 @@ export class GoogleService {
 
   }
   */
+
+  getThumbnail(picURL,size) {
+
+    let thumb = picURL.replace(/s\d+\-w\d+/g, "s"+size+"-w"+100);
+    return thumb;
+  }
+
   placeDetail(placeId) {
     return this.http.get(this.googlePlacesURL + 'details/json?placeid='
         + placeId

@@ -63,7 +63,10 @@ export class CheckinDetailPage {
     this.checkinKey = params.get('checkinKey');
     this.checkinPageId = params.get('checkinPageId');
 
-    this.checkinRef = firebase.database().ref('checkin/'+this.page +'/'+this.checkinPageId+'/'+this.checkinKey);
+    if (this.page == 'feeds')
+      this.checkinRef = firebase.database().ref('checkin/feeds/'+this.checkinKey);
+    else
+      this.checkinRef = firebase.database().ref('checkin/'+this.page +'/'+this.checkinPageId+'/'+this.checkinKey);
     /*
     console.log('page',this.page);   
     console.log('checkinPageId',this.checkinPageId);

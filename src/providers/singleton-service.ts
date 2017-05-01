@@ -19,7 +19,7 @@ export class SingletonService {
   public realName:string = '';
   public token:string = '';
   public description:string = '';
-  public environment = 'dev';
+  public environment = 'production';
   public geoCity = null;
   public geoState = null;
   public geoCountry = null;

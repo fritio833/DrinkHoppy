@@ -1,0 +1,18 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>    
+    <ion-title>Feeds</ion-title>  
+  </ion-navbar>
+</ion-header>
+<ion-content>
+  <div>
+    <div *ngFor="let check of feeds | async">
+        <checkin [checkin]="check" page="feeds" id="check.$key"></checkin>
+    </div>
+  </div>
+  <ion-infinite-scroll (ionInfinite)="getMoreCheckins($event)">
+		<ion-infinite-scroll-content></ion-infinite-scroll-content>
+	</ion-infinite-scroll>   
+</ion-content>

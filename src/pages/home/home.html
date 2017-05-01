@@ -54,7 +54,14 @@
         Find Bars
       </ion-label>
        <ion-icon name="arrow-forward" item-right></ion-icon>
-    </button>    
+    </button>
+    <button ion-item (click)="randomBeers()">
+      <ion-label>
+        <ion-icon name="help-circle"></ion-icon>
+        Random Beer
+      </ion-label>
+       <ion-icon name="arrow-forward" item-right></ion-icon>
+    </button>       
   </ion-list>
 
   <div class="card-head">
@@ -77,33 +84,32 @@
     <p><ion-icon name="beer"></ion-icon>&nbsp;Most Popular Beer</p>
   </div>
   <ion-card id="pop-beer" *ngIf="mostPopularBeer">
-    <ion-card-header>{{mostPopularBeer.name}}</ion-card-header>
+    <ion-card-header>{{sing.geoCity}}, {{sing.geoState}}</ion-card-header>
     <ion-card-content (click)="getPopBeer(mostPopularBeer.key)">
       <ion-item>
         <ion-thumbnail item-left>
           <img *ngIf="mostPopularBeer.beerLabelIcon" [src]="mostPopularBeer.beerLabelIcon">        
         </ion-thumbnail>
+        <h2>{{mostPopularBeer.name}}</h2>
         <p>{{mostPopularBeer.brewery}}</p>
         <p *ngIf="mostPopularBeer.style">{{mostPopularBeer.style}}</p>
         <p>Checked in {{mostPopularBeer.checkinCount * -1}} times</p>
-        <p>in {{sing.geoCity}}, {{sing.geoState}}</p>
       </ion-item>
     </ion-card-content>
      <button item-right ion-button full (click)="getAllPopBeers()">View ALL Popular Beers</button>
   </ion-card>
 
-
-
   <div class="card-head" *ngIf="mostPopularLocation">
     <p><ion-icon name="compass"></ion-icon>&nbsp;Most Popular Beer Location</p>
   </div>
   <ion-card id="pop-location" *ngIf="mostPopularLocation">
-    <ion-card-header>{{mostPopularLocation.name}}</ion-card-header>
+    <ion-card-header>{{sing.geoCity}}, {{sing.geoState}}</ion-card-header>
     <ion-card-content (click)="getPopLocation(mostPopularLocation.key)">
       <ion-item>
         <ion-thumbnail item-left>
           <img *ngIf="mostPopularLocation.photo" [src]="mostPopularLocation.photo">        
         </ion-thumbnail>
+        <h2>{{mostPopularLocation.name}}</h2>
         <p>{{mostPopularLocation.placeType}}</p>
         <p>{{mostPopularLocation.address}}</p>
         <p>{{mostPopularLocation.city}}, {{mostPopularLocation.state}}</p>

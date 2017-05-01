@@ -130,10 +130,20 @@ export class FavoritesPage {
   }   
 
   getLocation(locId) {
-     this.geo.placeDetail(locId).subscribe((resp)=>{
-       //console.log('resp',resp);
-       this.navCtrl.push(LocationDetailPage,{location:resp.result});
-     });
+     
+    this.showLoading();
+
+    this.geo.placeDetail(locId).subscribe((resp)=>{
+      //console.log('resp',resp);
+      this.navCtrl.push(LocationDetailPage,{location:resp.result,loading:this.loading});
+    },error=>{
+      console.log('error',error);
+    });
+     
+  }
+
+  ignoreMe() {
+    console.log('yolo');
   }
 
   ionViewDidLoad() {

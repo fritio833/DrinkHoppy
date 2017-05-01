@@ -37,12 +37,13 @@
   </div>
   <ion-list *ngIf="totalResults > 0">
     <button ion-item *ngFor="let beer of beers" (click) = "getBeerDetail(beer.id)">
-      <ion-avatar item-left>
-      	<img [src]="beer.labels.icon" />
-      </ion-avatar>
+      <ion-thumbnail item-left>
+        <img *ngIf="beer.labels" [src]="beer.labels.icon">
+        <img *ngIf="!beer.labels && beer.breweries && beer.breweries.length && beer.breweries[0].images" [src]="beer.breweries[0].images.icon">
+      </ion-thumbnail>
       <h2>{{ beer.name }}</h2>
-      <p>{{ beer.breweries[0].name }}</p>
-      <p>{{ beer.style.shortName}}</p>
+      <p *ngIf="beer.breweries">{{ beer.breweries[0].name}}</p>
+      <p *ngIf="beer.style">{{ beer.style.shortName}}</p>
       <ion-icon name="arrow-forward" item-right></ion-icon>
     </button>
     <button ion-item>

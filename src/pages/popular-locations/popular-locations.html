@@ -1,9 +1,12 @@
 <ion-header>
   <ion-navbar  color="primary">
-    <ion-title>{{sing.geoCity}}'s Popular Locations</ion-title>
+    <ion-title>Popular Locations</ion-title>
   </ion-navbar>
+  <ion-toolbar class="sub-header" color="light">
+    <ion-title>{{sing.geoCity}}, {{sing.geoState}}</ion-title>
+  </ion-toolbar>
 </ion-header>
-<ion-content>
+<ion-content class="white-background">
   <ion-item *ngFor="let location of locations | async" (click)="getLocation(location)">
     <ion-thumbnail item-left>
       <img *ngIf="placeIMGS[location.$key]" [src]='placeIMGS[location.$key]'>

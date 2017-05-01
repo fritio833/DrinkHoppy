@@ -72,8 +72,7 @@ export class SearchBeerPage {
   }
   
   clearSearch(event){
-    //console.log('clear',event);
-    //console.log(this.showNoResults +'-'+this.totalResults);
+
     this.showNoResults = false;
   	this.qSearchBeer = '';
     this.totalResults = 0;
@@ -87,7 +86,6 @@ export class SearchBeerPage {
       return;
 
     this.showNoResults = false;
-
     this.currentPage = 1;
 
     if (evt.target.value.length > 2) {
@@ -105,8 +103,9 @@ export class SearchBeerPage {
 	        //console.log(this.beers);
 	        this.qSearchBeer = evt.target.value;
           if (this.totalResults)
-	          this.loadBeers(this.beers);
-          console.log('beers',this.beers);
+	          this.beers = beer.data;
+           
+          console.log('beers1',this.beers);
           this.loading.dismiss();          
 	    },error=>{
         console.log('error',error);
@@ -129,7 +128,8 @@ export class SearchBeerPage {
     setTimeout(() => {
       this.beerAPI.loadBeerByName(this.qSearchBeer,this.currentPage,this.filter).subscribe((beer)=>{
         let beersNext:any;
-        beersNext = this.fixBeers(beer.data);
+
+        beersNext = beer.data;
 
         for (var i = 0; i < beersNext.length; i++) {
           this.beers.push(beersNext[i]);
@@ -164,10 +164,11 @@ export class SearchBeerPage {
         this.showLoading();
         this.beerAPI.loadBeerByName(this.qSearchBeer,this.currentPage,this.filter).subscribe(beer => {
             if (beer.hasOwnProperty('data')) { 
-              this.beers = beer;
+              this.beers = beer.data;
               this.numberOfPages = beer.numberOfPages;
+              this.totalResults = beer.totalResults;
               //console.log(this.beers);
-              this.loadBeers(this.beers);
+              //this.loadBeers(this.beers);
             } else {
               this.beers = new Array();
               this.presentToast("Sorry. No beers found.")

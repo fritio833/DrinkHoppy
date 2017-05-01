@@ -1,9 +1,12 @@
 <ion-header>
   <ion-navbar  color="primary">
-    <ion-title>{{sing.geoCity}}'s Popular Beers</ion-title>
+    <ion-title>Popular Beers</ion-title>
   </ion-navbar>
+  <ion-toolbar class="sub-header" color="light">
+    <ion-title>{{sing.geoCity}}, {{sing.geoState}}</ion-title>
+  </ion-toolbar>  
 </ion-header>
-<ion-content>
+<ion-content class="white-background">
   <ion-item *ngFor="let beer of beers | async" (click)="getBeerActions(beer)">
     <ion-thumbnail item-left>
       <img *ngIf="beer.img" [src]="beer.img">

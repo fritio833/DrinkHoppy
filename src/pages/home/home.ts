@@ -5,6 +5,7 @@ import { Storage } from '@ionic/storage';
 
 import { SingletonService } from '../../providers/singleton-service';
 import { GoogleService } from '../../providers/google-service';
+import { BreweryService } from '../../providers/brewery-service';
 
 import { ProfilePage } from '../profile/profile';
 import { SearchMenuPage } from '../search-menu/search-menu';
@@ -17,6 +18,7 @@ import { LocationDetailPage } from '../location-detail/location-detail';
 import { LeaderboardPage } from '../leaderboard/leaderboard';
 import { PopularBeersPage } from '../popular-beers/popular-beers';
 import { PopularLocationsPage } from '../popular-locations/popular-locations';
+import { RandomBeersPage } from '../random-beers/random-beers';
 
 import firebase from 'firebase';
 
@@ -51,6 +53,7 @@ export class HomePage {
               public modalCtrl:ModalController,
               public loadingCtrl:LoadingController,
   	          public toastCtrl:ToastController,
+              public beerAPI:BreweryService,
               public events:Events,
               public geo:GoogleService,
               public angFire:AngularFire,
@@ -99,6 +102,14 @@ export class HomePage {
           });          
         }
       });
+    });
+  }
+
+  randomBeers() {
+    this.showLoading();
+    this.beerAPI.getRandomBeers().subscribe(beers=>{
+      this.navCtrl.push(RandomBeersPage,{beers:beers,loading:this.loading});
+      //console.log('beers',beers);
     });
   }
 
@@ -155,6 +166,9 @@ export class HomePage {
       this.fbRef.ref('/location_by_city/'+key).orderByChild('checkinCount').once('child_added').then(snapshot=>{
         this.mostPopularLocation = snapshot.val();
         this.mostPopularLocation['key'] = snapshot.key;
+        if (this.mostPopularLocation['photo']!=null) {
+          this.mostPopularLocation['photo'] = this.geo.getThumbnail(this.mostPopularLocation['photo'],100);
+        }
       });
     });
 

@@ -154,7 +154,11 @@ export class ProfileEditPage {
         }
 
         this.profileChangedCount++;
-        this.userRef.ref('users/' + this.uid).update(updateLocation);
+        this.userRef.ref('users/' + this.uid).update(updateLocation).then(value=>{
+          console.log('profileChanged success');
+        }).catch(error=>{
+          console.log('error profileChanged',error);
+        });
         
       }      
 
@@ -192,7 +196,7 @@ export class ProfileEditPage {
         this.view.dismiss();    
       }).catch(error=>{
         this.presentToast(error.message);
-        console.log('error',error);
+        console.log('error updateEmail',error);
       });
       
     }, error=> {

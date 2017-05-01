@@ -17,21 +17,41 @@
 </ion-header>
 <ion-content>
 	<ion-item id="profile-avatar" color="check">
-		<div align="center">
-			<ion-avatar item-right>
-				<img [src]="profileIMG">
-			</ion-avatar>
-			<p>{{displayName}}</p>
-		</div>
+		<ion-grid>
+			<ion-row>
+				<ion-col>
+					<div class="repme" align="center" *ngIf="isLookup">
+                      <button ion-button icon-only large clear (click)="repDown()">
+                        <ion-icon color="white" name="thumbs-down"></ion-icon>
+                      </button>
+					</div>
+				</ion-col>
+				<ion-col>
+					<div align="center">
+						<ion-avatar item-right>
+							<img [src]="profileIMG">
+						</ion-avatar>
+						<p>{{displayName}}</p>
+					</div>
+				</ion-col>
+				<ion-col>
+					<div class="repme" align="center" *ngIf="isLookup" (click)="repUp()">
+                      <button ion-button icon-only large clear>
+                        <ion-icon color="white" name="thumbs-up"></ion-icon>
+                      </button>
+					</div>
+				</ion-col>
+			</ion-row>
+		</ion-grid>
 		<div *ngIf="isLookup && !sentFriendRequest && !userIsFriend" align="center">
-      <button ion-button (click)="sendFriendRequest()">
-        Send Friend Request
-      </button>
-		</div>
-		<div *ngIf="isLookup && sentFriendRequest && !userIsFriend" align="center">
-      <button ion-button>
-         Request Sent
-      </button>
+			<button ion-button (click)="sendFriendRequest()">
+				Send Friend Request
+			</button>
+				</div>
+				<div *ngIf="isLookup && sentFriendRequest && !userIsFriend" align="center">
+			<button ion-button>
+				Request Sent
+			</button>
 		</div>
 	</ion-item>
 	<ion-item>
@@ -51,6 +71,12 @@
 			Points This Month
 		</ion-label>
 		<h2 item-right>{{pointsByMonth}}</h2>
+	</ion-item>
+	<ion-item>
+		<ion-label>
+			Reputation
+		</ion-label>
+		<h2 item-right>{{reputation}}</h2>
 	</ion-item>	
 	<ion-item>
 		<ion-label>

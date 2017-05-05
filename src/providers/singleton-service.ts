@@ -19,7 +19,7 @@ export class SingletonService {
   public realName:string = '';
   public token:string = '';
   public description:string = '';
-  public environment = 'production';
+  public environment = 'dev';
   public geoCity = null;
   public geoState = null;
   public geoCountry = null;
@@ -35,6 +35,8 @@ export class SingletonService {
   public checkinsPerPage:number = 10;
   public checkBeerArray = new Array();
   
+  public popularLoaded:boolean = false;
+
   // App configuration.  API keys, webservice url, etc. 
   public breweryDbAPIKey:string = '3c7ec73417afb44ae7a4450482f99d70';
   public databaseServiceUrl:string = 'bender/';
@@ -44,9 +46,9 @@ export class SingletonService {
   public googleStaticMapAPIKey: string = 'AIzaSyCDIPt-NJwC23kzmYJ5ZTYTMd9brpBVbCk';
 
   //Testing. Dev Flags to simulate geolocation
-  public test = true;
-  //public lat = 0;
-  //public lng = 0;
+  public test = false;
+  public lat = 0;
+  public lng = 0;
 
   //ABC Liquore Store 1930 Thomasville Rd, Tallahassee FL
   //public lat = 30.466237;
@@ -57,8 +59,8 @@ export class SingletonService {
   //public lng = -84.286296;
 
   //McGuire's Pensacola
-  public lat = 30.418049;
-  public lng = -87.202452;
+  //public lat = 30.418049;
+  //public lng = -87.202452;
 
   //Pug Mahone's
   //public lat = 30.464105;

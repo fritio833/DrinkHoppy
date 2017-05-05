@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-navbar  color="primary">
+  <ion-navbar color="primary">
 		<button ion-button menuToggle>
 				<ion-icon name="menu"></ion-icon>
 		</button>
@@ -74,6 +74,12 @@
 	</ion-item>
 	<ion-item>
 		<ion-label>
+			Unique Beers Checked-In
+		</ion-label>
+		<h2 item-right>{{numOfUniqueBeers}}</h2>
+	</ion-item>		
+	<ion-item>
+		<ion-label>
 			Reputation
 		</ion-label>
 		<h2 item-right>{{reputation}}</h2>
@@ -93,6 +99,12 @@
 		  No. Send Verify Email
 		</button>
 	</ion-item>
+	<ion-item *ngIf="uniqueBreweries" (click)="viewVisitedBreweries()">
+		<ion-label>
+			Brewery Checked-Ins ({{uniqueBreweries}})
+		</ion-label>
+		<ion-icon name="arrow-forward" item-right></ion-icon>
+	</ion-item>		
 	<button ion-item (click)="goToFavorites()">
 		<ion-label>
 			<ion-icon name="search"></ion-icon>

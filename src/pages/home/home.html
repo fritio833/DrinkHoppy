@@ -81,16 +81,17 @@
   </ion-card>
 
   <div class="card-head" *ngIf="mostPopularBeer">
-    <p><ion-icon name="beer"></ion-icon>&nbsp;Most Popular Beer</p>
+    <p><ion-icon name="beer"></ion-icon>&nbsp;#1 Beer in {{sing.getSelectCity()}}</p>
   </div>
   <ion-card id="pop-beer" *ngIf="mostPopularBeer">
-    <ion-card-header>{{sing.geoCity}}, {{sing.geoState}}</ion-card-header>
+    <!-- <ion-card-header>{{sing.geoCity}}, {{sing.geoState}}</ion-card-header> -->
     <ion-card-content (click)="getPopBeer(mostPopularBeer.key)">
       <ion-item>
         <ion-thumbnail item-left>
           <img *ngIf="mostPopularBeer.beerLabelIcon" [src]="mostPopularBeer.beerLabelIcon">        
         </ion-thumbnail>
         <h2>{{mostPopularBeer.name}}</h2>
+        <p *ngIf="mostPopularBeer.rating"><rating [(ngModel)]="mostPopularBeer.rating" readOnly="true" max="5"></rating></p>
         <p>{{mostPopularBeer.brewery}}</p>
         <p *ngIf="mostPopularBeer.style">{{mostPopularBeer.style}}</p>
         <p>Checked in {{mostPopularBeer.checkinCount * -1}} times</p>
@@ -100,16 +101,17 @@
   </ion-card>
 
   <div class="card-head" *ngIf="mostPopularLocation">
-    <p><ion-icon name="compass"></ion-icon>&nbsp;Most Popular Beer Location</p>
+    <p><ion-icon name="compass"></ion-icon>&nbsp;#1 Place in {{sing.getSelectCity()}}</p>
   </div>
   <ion-card id="pop-location" *ngIf="mostPopularLocation">
-    <ion-card-header>{{sing.geoCity}}, {{sing.geoState}}</ion-card-header>
+    <!-- <ion-card-header>{{sing.geoCity}}, {{sing.geoState}}</ion-card-header> -->
     <ion-card-content (click)="getPopLocation(mostPopularLocation.key)">
       <ion-item>
         <ion-thumbnail item-left>
           <img *ngIf="mostPopularLocation.photo" [src]="mostPopularLocation.photo">        
         </ion-thumbnail>
         <h2>{{mostPopularLocation.name}}</h2>
+        <p *ngIf="mostPopularLocation.rating"><rating [(ngModel)]="mostPopularLocation.rating" readOnly="true" max="5"></rating></p>
         <p>{{mostPopularLocation.placeType}}</p>
         <p>{{mostPopularLocation.address}}</p>
         <p>{{mostPopularLocation.city}}, {{mostPopularLocation.state}}</p>

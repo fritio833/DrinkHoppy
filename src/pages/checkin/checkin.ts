@@ -67,6 +67,7 @@ export class CheckinPage {
   public fbRef:any;
   public checkinUsers = new Array();
   public notifyFriends:boolean;
+  public successfulCheckin:boolean = false;
 
   constructor(public navCtrl: NavController, 
   	          public params: NavParams,
@@ -540,7 +541,6 @@ export class CheckinPage {
 
     //console.log('currtime',currentTime);
     //console.log('prevTime',prevTime);
-
    if (this.sing.canCheckIn(this.beer.id)) {
       return true;
     } else {
@@ -563,6 +563,7 @@ export class CheckinPage {
     this.sing.setCheckinTime(new Date().getTime(),this.beer.id);
 
     let locationData:any = {};
+    let locationRating = 0;
 
     this.showLoading();
 
@@ -575,161 +576,260 @@ export class CheckinPage {
     //console.log('checkin',this.location);
 
     if (this.location!=null) {
-
-      this.geo.reverseGeocodeLookup(this.location.geometry.location.lat,this.location.geometry.location.lng)
-      .subscribe((success)=> {
-
-        this.checkinScore += 25;  // base checkin point 
-        if (this.base64Image != null) // picture taken. Plus 10 points
-          this.checkinScore += 10;        
-
-        if (this.socialMessage.length > 10)
-          this.checkinScore += 10;
-
-        if (this.beerRating!=0 && this.beerRating!=null)
-            this.checkinScore += 5; // gave rating +5
-
-        if (this.servingStyleName != null)
-          this.checkinScore += 5; // set beer container. +5  
+      this.setCheckinLocation();
+    } else {
+      this.setCheckinWithNoLocation();
+    }
       
-        locationData = {
-          uid:this.user.uid,
-          userIMG:this.user.photoURL,
-          userName:this.user.displayName,
-          breweryId:'',
-          breweryDBId:'',
-          placeId:this.location.place_id,
-          name:this.location.name,
-          photo:this.location.url,
-          placeType:this.location.place_types,
-          lat:this.location.geometry.location.lat,
-          lng:this.location.geometry.location.lng,
-          address:success.address,
-          city:success.city,
-          state:success.state,
-          zip:success.zip,
-          country:success.country,
-          comments:this.socialMessage,
-          friends:this.checkinUsers,
-          img:'',
-          isBrewery:'N'
-        }
+  }
 
-        // Google inserts maps image.  We want to remove it.
-        if (locationData['photo'].indexOf('maps') != -1) {
-          locationData['photo'] = '';
-        }
+  setCheckinWithNoLocation() {
+      let beerData:any = {};
+      this.successfulCheckin = true;
+      this.loading.dismiss().catch(()=>{});
 
+      beerData = {
+        uid:this.user.uid,
+        userIMG:this.user.photoURL,
+        userName:this.user.displayName,
+        breweryId:'',
+        breweryDBId:'',
+        placeId:'',
+        name:'',
+        photo:'',
+        placeType:'',
+        lat:'',
+        lng:'',
+        address:'',
+        city:'',
+        state:'',
+        zip:'',
+        locationRating:'',
+        country:'',
+        comments:this.socialMessage,
+        friends:this.checkinUsers,
+        img:'',
+        isBrewery:'N'
+      }
 
-        if (this.checkinType == 'brewery') {
-          locationData['breweryDBId'] = this.brewery.id;
-          locationData['address'] = this.brewery.streetAddress;
-          locationData['zip'] = this.brewery.postalCode;
-          locationData['isBrewery'] = 'Y';
-        }
+      this.setBeerData(beerData);
 
-        if (this.beer != null) {
+      this.sing.getGeolocation().subscribe(geo=>{
+        console.log('geo',geo);
 
-          locationData['beerId'] = this.beer.id;
-          locationData['beerName'] = this.beer.name;
-          locationData['beerDisplayName'] = this.beer.nameDisplay;
-          locationData['beerStyleName'] = '';
-          locationData['beerStyleShortName'] = '';
+           this.geo.reverseGeocodeLookup(geo.latitude,geo.longitude).subscribe((success) => { 
+             
+              beerData['address'] = success.address;
+              beerData['city'] = success.city;
+              beerData['state'] = success.state;
+              beerData['zip'] = success.zip;
+              beerData['lat'] = geo.latitude;
+              beerData['lng'] = geo.longitude;
 
-          if (this.beer.hasOwnProperty('labels')) {
-            locationData['beerLabels'] = this.beer.labels;
-            locationData['beerLabelIcon'] = this.beer.labels.icon;
-            locationData['beerLabelMedium'] = this.beer.labels.medium;
-            locationData['beerLabelLarge'] = this.beer.labels.large;
+              this.demo.setBeerDemo(beerData).subscribe(resp=>{});
 
-            if (this.beer.labels.hasOwnProperty('medium'))
-              locationData['beerIMG'] = this.beer.labels.medium;
-            else
-              locationData['beerIMG'] = '';
+              // Upload Picture and save it to firebase storage
+              if (this.base64Image != null) {
+                this.setCheckinIMG().then(downloadURL=>{
+                  beerData['img'] = downloadURL;
+                  this.setCheckinData(beerData);
+                }).catch(error=>{
+                  console.log('error uploadImg',error);
+                });
+              } else {
+                this.setCheckinData(beerData);
+              }              
+           },error=>{
+             console.log('error reverseGeocodeLookup',error);
+             this.loading.dismiss();             
+           }); 
 
-          } else {
-            locationData['beerLabels'] = '';
-            locationData['beerIMG'] = '';
-            locationData['beerLabelIcon'] = '';
-            locationData['beerLabelMedium'] = '';
-            locationData['beerLabelLarge'] = '';            
-          }
-
-          if (this.beer.hasOwnProperty('style')) {
-            locationData['beerStyleName'] = this.beer.style.name;
-            locationData['beerStyleShortName'] = this.beer.style.shortName;
-            locationData['beerCategoryName'] = this.beer.style.category.name;
-          }
-
-          if (this.beer.hasOwnProperty('abv'))
-            locationData['beerABV'] = this.beer.abv;
-          else
-            locationData['beerABV'] = '';
-
-          if (this.beer.hasOwnProperty('ibu'))
-            locationData['beerIBU'] = this.beer.ibu;
-          else
-            locationData['beerIBU'] = '';        
-
-          if (this.beerRating!=0 && this.beerRating!=null) {
-            locationData['beerRating'] = this.beerRating;
-          } else
-            locationData['beerRating'] = '';
-
-          if (this.beer.hasOwnProperty('breweries')) {
-            locationData['breweryId'] = this.beer.breweries[0].id;
-            locationData['breweryName'] = this.beer.breweries[0].name;
-            locationData['breweryShortName'] = this.beer.breweries[0].nameShortDisplay;
-            console.log('brewery beer',this.brewery);
-
-            if (this.brewery != null && this.brewery.hasOwnProperty('locationTypeDisplay'))
-              locationData['breweryType'] = this.brewery.locationTypeDisplay;
-            else
-              locationData['breweryType'] = '';
-
-            if (this.beer.breweries[0].hasOwnProperty('images'))
-              locationData['breweryImages'] = this.beer.breweries[0].images;              
-            else
-              locationData['breweryImages'] = '';
-
-          } else {
-            locationData['breweryName'] = '';
-            locationData['breweryShortName'] = '';
-            locationData['breweryImages'] = '';           
-          }
-          
-          if (this.servingStyleName != null)
-            locationData['servingStyleName'] = this.servingStyleName;
-          else
-            locationData['servingStyleName'] = '';
-
-          //set demographics for beer && set beer for locations
-          this.demo.setBeerDemo(locationData).subscribe(resp=>{});  
-          this.demo.setBeerByCityDemo(locationData).subscribe(resp=>{});
-          this.demo.setBeerByLocation(locationData).subscribe(resp=>{});
-          this.demo.setLocation(locationData).subscribe(resp=>{});
-          this.demo.setLocationbyCityDemo(locationData).subscribe(resp=>{});
-          this.demo.setBreweryByCity(locationData).subscribe(resp=>{});
-
-          //set checkin count for user
-          this.demo.setCheckinUserCount(this.user.uid).subscribe(resp=>{});
-          this.demo.setUserScore(this.user.uid,this.checkinScore,locationData).subscribe(resp=>{});
-        }
+      },error=>{
+        // Failed to find geo location.
         // Upload Picture and save it to firebase storage
         if (this.base64Image != null) {
           this.setCheckinIMG().then(downloadURL=>{
-            locationData['img'] = downloadURL;
-            this.setCheckinData(locationData);
+            beerData['img'] = downloadURL;
+            this.setCheckinData(beerData);
           }).catch(error=>{
             console.log('error uploadImg',error);
           });
         } else {
-          this.setCheckinData(locationData);
-        }
-      });
-    }
-      
+          this.setCheckinData(beerData);
+        } 
+      });     
   }
+
+  setCheckinLocation() {
+    let locationData:any = {};
+    let locationRating = 0;
+
+    this.geo.reverseGeocodeLookup(this.location.geometry.location.lat,this.location.geometry.location.lng)
+    .subscribe((success)=> {
+
+      this.checkinScore += 25;  // base checkin point 
+      if (this.base64Image != null) // picture taken. Plus 10 points
+        this.checkinScore += 10;        
+
+      if (this.socialMessage.length > 10)
+        this.checkinScore += 10;
+
+      if (this.beerRating!=0 && this.beerRating!=null)
+          this.checkinScore += 5; // gave rating +5
+
+      if (this.servingStyleName != null)
+        this.checkinScore += 5; // set beer container. +5
+
+      if (this.location.hasOwnProperty('rating'))
+        locationRating = this.location.rating;
+    
+      locationData = {
+        uid:this.user.uid,
+        userIMG:this.user.photoURL,
+        userName:this.user.displayName,
+        breweryId:'',
+        breweryDBId:'',
+        placeId:this.location.place_id,
+        name:this.location.name,
+        photo:this.location.url,
+        placeType:this.location.place_types,
+        lat:this.location.geometry.location.lat,
+        lng:this.location.geometry.location.lng,
+        address:success.address,
+        city:success.city,
+        state:success.state,
+        zip:success.zip,
+        locationRating:locationRating,
+        country:success.country,
+        comments:this.socialMessage,
+        friends:this.checkinUsers,
+        img:'',
+        isBrewery:'N'
+      }
+
+      // Google inserts maps image.  We want to remove it.
+      if (locationData['photo'].indexOf('maps') != -1) {
+        locationData['photo'] = '';
+      }
+
+      if (this.checkinType == 'brewery') {
+        locationData['breweryDBId'] = this.brewery.id;
+        locationData['address'] = this.brewery.streetAddress;
+        locationData['zip'] = this.brewery.postalCode;
+        locationData['isBrewery'] = 'Y';
+      }
+
+      if (this.beer != null) {
+
+        this.setBeerData(locationData);
+
+        //console.log('locData',locationData);
+        //set demographics for beer && set beer for locations
+        this.demo.setBeerDemo(locationData).subscribe(resp=>{});  
+        this.demo.setBeerByCityDemo(locationData).subscribe(resp=>{});
+        this.demo.setBeerByLocation(locationData).subscribe(resp=>{});
+        this.demo.setLocation(locationData).subscribe(resp=>{});
+        this.demo.setLocationbyCityDemo(locationData).subscribe(resp=>{});
+        this.demo.setBreweryByCity(locationData).subscribe(resp=>{});
+
+        //set checkin count for user
+        this.demo.setCheckinUserCount(this.user.uid).subscribe(resp=>{});
+        this.demo.setUserScore(this.user.uid,this.checkinScore,locationData).subscribe(resp=>{});
+      }
+      // Upload Picture and save it to firebase storage
+      if (this.base64Image != null) {
+        this.setCheckinIMG().then(downloadURL=>{
+          locationData['img'] = downloadURL;
+          this.setCheckinData(locationData);
+        }).catch(error=>{
+          console.log('error uploadImg',error);
+        });
+      } else {
+        this.setCheckinData(locationData);
+      }
+    },error=>{
+      console.log('error reverseGeocodeLookup',error);
+      this.loading.dismiss();
+    });
+  }
+
+  setBeerData(beerData) {
+
+        beerData['beerId'] = this.beer.id;
+        beerData['beerName'] = this.beer.name;
+        beerData['beerDisplayName'] = this.beer.nameDisplay;
+        beerData['beerStyleName'] = '';
+        beerData['beerStyleShortName'] = '';
+
+        if (this.beer.hasOwnProperty('labels')) {
+          beerData['beerLabels'] = this.beer.labels;
+          beerData['beerLabelIcon'] = this.beer.labels.icon;
+          beerData['beerLabelMedium'] = this.beer.labels.medium;
+          beerData['beerLabelLarge'] = this.beer.labels.large;
+
+          if (this.beer.labels.hasOwnProperty('medium'))
+            beerData['beerIMG'] = this.beer.labels.medium;
+          else
+            beerData['beerIMG'] = '';
+
+        } else {
+          beerData['beerLabels'] = '';
+          beerData['beerIMG'] = '';
+          beerData['beerLabelIcon'] = '';
+          beerData['beerLabelMedium'] = '';
+          beerData['beerLabelLarge'] = '';            
+        }
+
+        if (this.beer.hasOwnProperty('style')) {
+          beerData['beerStyleName'] = this.beer.style.name;
+          beerData['beerStyleShortName'] = this.beer.style.shortName;
+          beerData['beerCategoryName'] = this.beer.style.category.name;
+        }
+
+        if (this.beer.hasOwnProperty('abv'))
+          beerData['beerABV'] = this.beer.abv;
+        else
+          beerData['beerABV'] = '';
+
+        if (this.beer.hasOwnProperty('ibu'))
+          beerData['beerIBU'] = this.beer.ibu;
+        else
+          beerData['beerIBU'] = '';        
+
+        if (this.beerRating!=0 && this.beerRating!=null) {
+          beerData['beerRating'] = this.beerRating;
+        } else
+          beerData['beerRating'] = '';
+
+        if (this.beer.hasOwnProperty('breweries')) {
+          beerData['breweryId'] = this.beer.breweries[0].id;
+          beerData['breweryName'] = this.beer.breweries[0].name;
+          beerData['breweryShortName'] = this.beer.breweries[0].nameShortDisplay;
+          console.log('brewery beer',this.brewery);
+
+          if (this.brewery != null && this.brewery.hasOwnProperty('locationTypeDisplay'))
+            beerData['breweryType'] = this.brewery.locationTypeDisplay;
+          else
+            beerData['breweryType'] = '';
+
+          if (this.beer.breweries[0].hasOwnProperty('images'))
+            beerData['breweryImages'] = this.beer.breweries[0].images;              
+          else
+            beerData['breweryImages'] = '';
+
+        } else {
+          beerData['breweryName'] = '';
+          beerData['breweryShortName'] = '';
+          beerData['breweryImages'] = '';           
+        }
+        
+        if (this.servingStyleName != null)
+          beerData['servingStyleName'] = this.servingStyleName;
+        else
+          beerData['servingStyleName'] = '';
+
+  }
+
 
   setCheckinData(locationData) {
 
@@ -760,7 +860,7 @@ export class CheckinPage {
           that.notify.notifyFriends(that.user,that.checkinUsers,that.location,that.beer,negativeTimestamp,newKey);
         }      
 
-        if (that.checkinType != 'brewery') 
+        if (that.checkinType != 'brewery' && that.location != null) 
           updates['/checkin/locations/'+that.location.place_id+'/'+newKey] = locationData;
 
         updates['/checkin/users/'+that.user.uid+'/'+newKey] = locationData;
@@ -770,16 +870,19 @@ export class CheckinPage {
           updates['/checkin/brewery/'+ that.brewery.id+'/'+newKey] = locationData;
 
         that.fbRef.ref().update(updates).then(success=>{
-          that.view.dismiss();
-          that.presentToast("Check-in was successful");
-          that.loading.dismiss();
+          //that.view.dismiss();
+          //that.presentToast("Check-in was successful");
+          that.successfulCheckin = true;
+          that.loading.dismiss().catch(()=>{});;
           
         }).catch(error=>{
           console.log('main checkin error',error);
+          that.loading.dismiss().catch(()=>{});;
         });
 
       }).catch(error=>{
         console.log('main checkin error',error);
+        that.loading.dismiss().catch(()=>{});
       });
     });        
   }

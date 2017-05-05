@@ -294,6 +294,7 @@ export class GoogleService {
   }
 
   placeDetail(placeId) {
+
     return this.http.get(this.googlePlacesURL + 'details/json?placeid='
         + placeId
         + '&key=' + this.googlePlacesAPIKey)

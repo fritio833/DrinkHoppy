@@ -14,6 +14,7 @@ import { CheckinPage } from '../checkin/checkin';
 import { LocateBeerPage } from '../locate-beer/locate-beer';
 import { BeerSuggestionPage } from '../beer-suggestion/beer-suggestion';
 import { LocationDetailPage } from '../location-detail/location-detail';
+import { BreweryDetailPage } from '../brewery-detail/brewery-detail'; 
 
 
 @Component({
@@ -129,13 +130,16 @@ export class FavoritesPage {
     toast.present();
   }   
 
-  getLocation(locId) {
+  getLocation(locKey) {
      
     this.showLoading();
 
-    this.geo.placeDetail(locId).subscribe((resp)=>{
-      //console.log('resp',resp);
+    console.log(locKey);
+
+    this.geo.placeDetail(locKey).subscribe((resp)=>{
+
       this.navCtrl.push(LocationDetailPage,{location:resp.result,loading:this.loading});
+
     },error=>{
       console.log('error',error);
     });

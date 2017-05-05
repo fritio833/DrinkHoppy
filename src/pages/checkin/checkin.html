@@ -9,6 +9,7 @@
   </ion-navbar>
 </ion-header>
 <ion-content class="white-background">
+<div *ngIf="!successfulCheckin">
   <div id="choose-beer" *ngIf="beer==null">
     <button ion-item (click)="selectBeer()" text-wrap>      
       <label>Select a Beer for {{locationName}}</label>
@@ -147,4 +148,17 @@
       </button>
   </ion-item>
   <button *ngIf="beer" class="chk-btn" ion-button color="check" full (click)="doCheckin()">Check-in</button>
+</div>
+<div *ngIf="successfulCheckin">
+  <ion-card>
+    <ion-card-header>Check-in successful</ion-card-header>
+    <ion-card-content>
+      <p>
+        You earned {{checkinScore}} points.  Earn more points by entering a beer rating, comment, picture, and
+        if the beer is a bottle or can.
+      </p>
+    </ion-card-content>
+  </ion-card>
+  <button *ngIf="beer" class="chk-btn" ion-button color="check" full (click)="cancel()">Close</button>
+</div>
 </ion-content>

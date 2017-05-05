@@ -6,6 +6,7 @@ import { Storage } from '@ionic/storage';
 import { SingletonService } from '../../providers/singleton-service';
 import { GoogleService } from '../../providers/google-service';
 import { BreweryService } from '../../providers/brewery-service';
+import { DemoService } from '../../providers/demo-service';
 
 import { ProfilePage } from '../profile/profile';
 import { SearchMenuPage } from '../search-menu/search-menu';
@@ -46,7 +47,6 @@ export class HomePage {
   public notifications:FirebaseListObservable<any>;
   public mostPopularBeer:any;
   public mostPopularLocation:any;
-  public popularLoaded:boolean = false;
 
   constructor(public navCtrl: NavController, 
   	          public sing:SingletonService,
@@ -55,6 +55,7 @@ export class HomePage {
   	          public toastCtrl:ToastController,
               public beerAPI:BreweryService,
               public events:Events,
+              public demo:DemoService,
               public geo:GoogleService,
               public angFire:AngularFire,
   	          public storage:Storage) {
@@ -69,19 +70,6 @@ export class HomePage {
     this.storage.ready().then(()=>{
       this.storage.get('uid').then(uid=>{
         if (uid != null) {
-          this.fbRef.ref('users/'+uid).once('value').then(snapshot => {
-            //console.log('snap',snapshot.val());
-           
-            this.checkinCount = snapshot.val().checkins;
-
-            let date = new Date(snapshot.val().dateCreated);
-            this.joinedDate = date.toDateString();
-            this.joinedDate = this.joinedDate.substring(4,this.joinedDate.length);
-            this.displayName = snapshot.val().name;
-            this.userPoints = snapshot.val().points;
-            if (snapshot.val().photo!=null && snapshot.val().photo !='')
-              this.profileIMG = snapshot.val().photo;
-          });
 
           // Get Notification Count
           this.notifications = this.angFire.database.list('/notifications_users/'+ uid,{
@@ -92,7 +80,7 @@ export class HomePage {
           });
 
           this.notifications.subscribe(resp=>{
-            console.log(resp.length);
+
             this.notifyCount = resp.length;
 
             if(this.notifyCount)
@@ -109,7 +97,9 @@ export class HomePage {
     this.showLoading();
     this.beerAPI.getRandomBeers().subscribe(beers=>{
       this.navCtrl.push(RandomBeersPage,{beers:beers,loading:this.loading});
-      //console.log('beers',beers);
+    },error=>{
+      console.log('error getRandomBeers',error);
+      this.loading.dismiss();
     });
   }
 
@@ -136,33 +126,25 @@ export class HomePage {
       default: console.log('not valid search');
     }
   }  
-  
 
-  getPopularAgain() {
-    let key = this.sing.geoCity.toLowerCase()+'-'+this.sing.geoState.toLowerCase()+'-'+this.sing.geoCountry.toLowerCase();
-    this.fbRef.ref('/beer_by_city/'+key).orderByChild('checkinCount').once('child_added').then(snapshot=>{
-      this.mostPopularBeer = snapshot.val();
-      this.mostPopularBeer['key'] = snapshot.key;
-    });
 
-    this.fbRef.ref('/location_by_city/'+key).orderByChild('checkinCount').once('child_added').then(snapshot=>{
-      this.mostPopularLocation = snapshot.val();
-      this.mostPopularLocation['key'] = snapshot.key;
-    });    
-  }
-
-  getPopular() {
-    
-
-    this.events.subscribe('gotGeo:true',geo=>{
-      this.popularLoaded = true;
-    //console.log('key',key);
-      let key = geo.city.toLowerCase()+'-'+geo.state.toLowerCase()+'-'+geo.country.toLowerCase();
+  getPopularBeer() {
+      let location = this.sing.getLocation();
+      let key = location.city.toLowerCase()+'-'+location.state.toLowerCase()+'-'+location.country.toLowerCase();
       this.fbRef.ref('/beer_by_city/'+key).orderByChild('checkinCount').once('child_added').then(snapshot=>{
         this.mostPopularBeer = snapshot.val();
         this.mostPopularBeer['key'] = snapshot.key;
+        this.mostPopularBeer['rating']=0; 
+        //console.log(this.mostPopularBeer);
+        this.demo.getBeerRating(snapshot.key).subscribe(beerRating=>{
+          this.mostPopularBeer['rating'] = beerRating;
+        });
       });
+  }
 
+  getPopularLocation() {
+      let location = this.sing.getLocation();
+      let key = location.city.toLowerCase()+'-'+location.state.toLowerCase()+'-'+location.country.toLowerCase();
       this.fbRef.ref('/location_by_city/'+key).orderByChild('checkinCount').once('child_added').then(snapshot=>{
         this.mostPopularLocation = snapshot.val();
         this.mostPopularLocation['key'] = snapshot.key;
@@ -170,13 +152,26 @@ export class HomePage {
           this.mostPopularLocation['photo'] = this.geo.getThumbnail(this.mostPopularLocation['photo'],100);
         }
       });
+  }
+
+  getPopular() {
+    
+    
+    this.events.subscribe('gotGeo:true',geo=>{
+
+      this.getPopularBeer();
+      this.getPopularLocation();
+      this.sing.popularLoaded = true;
     });
 
+    if (this.sing.popularLoaded) {
+      this.getPopularBeer();
+      this.getPopularLocation();      
+    }
   }
 
 
   getPopBeer(beerId) {
-    console.log('beerId',beerId);
     this.navCtrl.push(BeerDetailPage,{beerId:beerId});
   }
 
@@ -231,14 +226,14 @@ export class HomePage {
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad HomePage');
-    this.getPopular();
-    //this.getTopLocation();
     this.getProfileData();
   }
 
+  
   ionViewWillEnter() {
-    if (this.sing.geoCity)
-      this.getPopularAgain();
+    console.log('ionViewWillEnter HomePage');
+    this.getPopular();
+    
   }
-
+  
 }

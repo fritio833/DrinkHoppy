@@ -69,6 +69,7 @@ import { PopularBeersPage } from '../pages/popular-beers/popular-beers';
 import { PopularLocationsPage } from '../pages/popular-locations/popular-locations';
 import { RandomBeersPage } from '../pages/random-beers/random-beers';
 import { FeedsPage } from '../pages/feeds/feeds';
+import { BreweryVisitsPage } from '../pages/brewery-visits/brewery-visits';
 
 export const firebaseConfig = {
     apiKey: "AIzaSyCd-WZs4O8gNx9qVlwwyRdK6_qY60WuQl0",
@@ -150,7 +151,8 @@ const cloudSettings: CloudSettings = {
     PopularBeersPage,
     PopularLocationsPage,
     RandomBeersPage,
-    FeedsPage
+    FeedsPage,
+    BreweryVisitsPage
   ],
   imports: [
     IonicModule.forRoot(MyApp),
@@ -210,7 +212,8 @@ const cloudSettings: CloudSettings = {
     PopularBeersPage,
     PopularLocationsPage,
     RandomBeersPage,
-    FeedsPage
+    FeedsPage,
+    BreweryVisitsPage
   ],
   providers: [{provide: ErrorHandler, 
               useClass: IonicErrorHandler},

@@ -66,13 +66,14 @@
   </ion-item>
   <ion-item class="botton-border-item" *ngIf="beerRating">
     
-    <!--
-    <rating item-left class="check-rating" [(ngModel)]="beerRating" readOnly="true" max="5"></rating>
-    -->
+
+    <rating item-right class="check-rating" [(ngModel)]="beerRating" readOnly="true" max="5"></rating>
+   <!--
     <ion-chip item-right>
       <ion-icon name="star" color="check"></ion-icon>
         <ion-label>{{beerRating}} stars</ion-label>
-    </ion-chip>    
+    </ion-chip>
+    -->    
   </ion-item>
   <ion-item *ngIf="check.friends">
     <h2>Friends Tagged</h2>

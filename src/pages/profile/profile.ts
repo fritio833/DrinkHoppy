@@ -6,13 +6,14 @@ import { AngularFire, FirebaseListObservable } from 'angularfire2';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import { SingletonService } from '../../providers/singleton-service';
-import { FavoritesPage } from '../favorites/favorites';
-import { ProfileEditPage } from '../profile-edit/profile-edit';
-
 import { AuthService } from '../../providers/auth-service';
 import { NotificationService } from '../../providers/notification-service';
 
 import firebase from 'firebase';
+
+import { FavoritesPage } from '../favorites/favorites';
+import { ProfileEditPage } from '../profile-edit/profile-edit';
+import { BreweryVisitsPage } from '../brewery-visits/brewery-visits';
 
 @Component({
   selector: 'page-profile',
@@ -43,6 +44,8 @@ export class ProfilePage {
   public sentFriendRequest:boolean = false;
   public pointsByMonth:number = 0;
   public reputation:number = 0;
+  public numOfUniqueBeers:number = 0;
+  public uniqueBreweries:number = 0;
 
   constructor(public navCtrl: NavController, 
               public params: NavParams, 
@@ -76,6 +79,10 @@ export class ProfilePage {
         }
   }
 
+  viewVisitedBreweries() {
+    this.navCtrl.push(BreweryVisitsPage,{lookup:this.isLookup,uid:this.uid,name:this.displayName});
+  }
+
   getUserProfile(uid) {
 
     this.showLoading();
@@ -89,6 +96,8 @@ export class ProfilePage {
         this.joinedDate = this.sing.getDateMonthDayYear(snapshot.val().dateCreated);
         this.checkinCount = snapshot.val().checkins;
         this.reputation = snapshot.val().reputation;
+        this.numOfUniqueBeers = snapshot.val().numOfUniqueBeers;
+        this.uniqueBreweries = snapshot.val().uniqueBreweriesVisited;
         this.points = snapshot.val().points * -1;
         console.log('rep',this.reputation);
         

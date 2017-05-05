@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, ModalController, LoadingController, Platform } from 'ionic-angular';
+import { NavController, NavParams, ModalController, LoadingController, ToastController, Platform } from 'ionic-angular';
+import { Storage } from '@ionic/storage';
+import firebase from 'firebase';
 import { GoogleService } from '../../providers/google-service';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -39,7 +41,9 @@ export class BreweryDetailPage {
   public checkinsPerPage:number;
   public limit:any;
   public lastKey:string;
-  public queryable:boolean = true;  
+  public queryable:boolean = true;
+  public fbRef:any;
+  public uid:any;
 
   constructor(public navCtrl: NavController, 
               public params: NavParams,
@@ -48,6 +52,8 @@ export class BreweryDetailPage {
               public platform: Platform,
               public angFire: AngularFire,
               public sing: SingletonService,
+              public storage: Storage,
+              public toastCtrl:ToastController,
               public modalCtrl:ModalController) {
 
   	this.brewery = params.get('brewery');
@@ -55,9 +61,15 @@ export class BreweryDetailPage {
     this.location = params.get('place');
     //console.log('place',this.location);
     //console.log('brewery',this.brewery);
-
+    this.fbRef = firebase.database();
     this.checkinsPerPage = sing.checkinsPerPage;
-    this.limit = new BehaviorSubject(this.checkinsPerPage);    
+    this.limit = new BehaviorSubject(this.checkinsPerPage);
+
+    this.storage.ready().then(()=>{
+      this.storage.get('uid').then(uid=>{
+        this.uid = uid;  
+      });
+    });      
 
     if (this.brewery.hasOwnProperty('brewery')) {
       this.breweryDescription = this.brewery.brewery.description;
@@ -89,7 +101,33 @@ export class BreweryDetailPage {
 
   }
 
+  presentToast(msg) {
+    let toast = this.toastCtrl.create({
+      message: msg,
+      position: 'top',
+      duration: 3000
+    });
+    toast.present();
+  }   
 
+
+  save() {
+    let locPhoto='';
+    if (this.locationPhoto != null) {
+      locPhoto = this.locationPhoto.replace(/s\d+\-w\d+/g, "s100-w100");
+    }
+
+    
+    this.fbRef.ref('/favorite_locations/'+this.uid+'/'+this.location.place_id).set({
+      photo:locPhoto,
+      name:this.brewery.name,
+      placeType:this.brewery.name,
+      vicinity:this.location.vicinity,
+      isBrewery:'Y'
+    }).then(resp=>{
+      this.presentToast(this.location.name+' saved to favorites');
+    });
+  }
 
   viewMap() {
     let modal = this.modalCtrl.create(LocationMapPage,

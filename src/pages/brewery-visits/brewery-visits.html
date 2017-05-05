@@ -1,0 +1,24 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title *ngIf="!isLookup">Brewery Check-Ins</ion-title>
+    <ion-title *ngIf="isLookup">{{displayName}} Brewery Check-Ins</ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content class="white-background">
+  <ion-item *ngFor="let brewery of breweries | async" (click)="getBreweryDetail(brewery.breweryId,brewery.name)">
+    <ion-thumbnail item-left>
+      <img *ngIf="brewery.photo" [src]="brewery.photo">
+    </ion-thumbnail>
+    <h2>{{brewery.name}}</h2>
+    <p>
+      <ion-avatar>
+        <img *ngIf="brewery.breweryImages" [src]="brewery.breweryImages.icon">
+      </ion-avatar>
+    </p>
+    <p>
+      {{brewery.breweryType}}
+    </p>
+    <p>Checked-In: {{brewery.checkedIn}}</p>
+    <ion-icon name="arrow-forward" item-right></ion-icon>
+  </ion-item>
+</ion-content>

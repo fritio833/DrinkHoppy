@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 
 import { Platform, MenuController, Events, Nav, AlertController,ToastController } from 'ionic-angular';
-import { StatusBar, Splashscreen, Geolocation } from 'ionic-native';
+import { StatusBar, Splashscreen } from 'ionic-native';
 import { Push, PushToken } from '@ionic/cloud-angular';
 import firebase from 'firebase';
 
@@ -171,7 +171,10 @@ export class MyApp {
       this.sing.geoCity = success.city;
       this.sing.geoState = success.state;
       this.sing.geoCountry = success.country;
-      this.events.publish('gotGeo:true',{city:this.sing.geoCity,state:this.sing.geoState,country:this.sing.geoCountry});
+      setTimeout(()=>{
+        this.events.publish('gotGeo:true',{city:this.sing.geoCity,state:this.sing.geoState,country:this.sing.geoCountry});
+      },2000);
+      
     },error=>{
       console.log('error',error);
     });    
@@ -185,7 +188,7 @@ export class MyApp {
 
     if (uid != null) {
       this.fbRef.ref('users/'+uid).on('value',snapshot => {
-        console.log('snap',snapshot.val());
+        //console.log('snap',snapshot.val());
       
         this.displayName = snapshot.val().name;
 
@@ -211,8 +214,8 @@ export class MyApp {
   }
 
   presentFriendAlert(msg) {
-    let img = msg.additionalData['image'];
-    let uid = msg.additionalData['id'];
+    //let img = msg.additionalData['image'];
+    //let uid = msg.additionalData['id'];
     let alertContent = msg.message;
     let alert = this.alertCtrl.create({
       title: 'Friend Checked-In',

@@ -46,7 +46,7 @@
           Remove
         </button>      
       </ion-item-options>       
-      <ion-item text-wrap (click)="getLocation(location.$key)" (dblclick)="ignoreMe()">
+      <ion-item text-wrap (click)="getLocation(location.$key)">
         <ion-thumbnail item-left>
           <img *ngIf="location.photo" [src]="location.photo" />
         </ion-thumbnail>

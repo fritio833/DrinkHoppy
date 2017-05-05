@@ -1,6 +1,6 @@
 {
   "name": "ionic-hello-world",
-  "author": "Ionic Framework",
+  "author": "Ryan Fried",
   "homepage": "http://ionicframework.com/",
   "private": true,
   "scripts": {
@@ -24,8 +24,6 @@
     "@ionic/cloud-angular": "^0.12.0",
     "@ionic/storage": "1.1.7",
     "@types/google-maps": "^3.2.0",
-    "angular-swing": "^1.0.0",
-    "angular2-swing": "^0.10.0",
     "angularfire2": "^2.0.0-beta.8",
     "firebase": "^3.7.4",
     "ionic-angular": "2.0.0-rc.6",
@@ -50,5 +48,5 @@
     "cordova-plugin-splashscreen"
   ],
   "cordovaPlatforms": [],
-  "description": "Bender-Test: An Ionic project"
+  "description": "Brew Search - Helping people discover craft beers and breweries"
 }

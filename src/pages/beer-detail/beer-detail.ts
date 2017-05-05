@@ -1,18 +1,23 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, ToastController, ModalController } from 'ionic-angular';
+import { NavController, NavParams, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Ionic2RatingModule } from 'ionic2-rating';
+import { Observable } from 'rxjs/Observable';
 
 import { BreweryService } from '../../providers/brewery-service';
 import { SingletonService } from '../../providers/singleton-service';
+import { GoogleService } from '../../providers/google-service';
+import { DemoService } from '../../providers/demo-service';
+
 import { Beer } from '../../models/beer';
 
 import { LoginPage } from '../login/login';
 import { ReviewBeerPage } from '../review-beer/review-beer';
 import { CheckinPage } from '../checkin/checkin';
 import { LocateBeerPage } from '../locate-beer/locate-beer';
+import { BreweryDetailPage } from '../brewery-detail/brewery-detail';
 
 
 
@@ -36,11 +41,13 @@ export class BeerDetailPage {
   public checkins:FirebaseListObservable<any>;
   public checkinLen:number;
   public uid:any;
+  public loading:any;
   public beerLoaded:boolean = false;
   public checkinsPerPage:number;
   public limit:any;
   public lastKey:string;
-  public queryable:boolean = true;  
+  public queryable:boolean = true;
+  public beerRating:any;
 
   constructor( public navCtrl: NavController, 
                public navParams: NavParams, 
@@ -49,11 +56,14 @@ export class BeerDetailPage {
                public toastCtrl:ToastController, 
                public sing:SingletonService,
                public angFire:AngularFire,
+               public geo:GoogleService,
+               public demo:DemoService,
+               public loadingCtrl:LoadingController,
                public modalCtrl:ModalController) {
 
     this.beerId = navParams.get('beerId');
     this.checkinsPerPage = this.sing.checkinsPerPage;
-    this.limit = new BehaviorSubject(this.checkinsPerPage);    
+    this.limit = new BehaviorSubject(this.checkinsPerPage);
     //this.getLikeBeer(this.beerId);
 
     this.storage.ready().then(()=>{
@@ -133,6 +143,9 @@ export class BeerDetailPage {
     console.log('ionViewDidLoad BeerDetailPage');
 
     this.getCheckIns();
+    this.demo.getBeerRating(this.beerId).subscribe(beerRating => {
+      this.beerRating = beerRating;
+    });
 
     this.beerAPI.loadBeerById(this.beerId).subscribe(beer => {
       this.beer = beer;
@@ -205,24 +218,96 @@ export class BeerDetailPage {
 
      let beerRatingTotal:number = 0;
      this.beerReviewCount = 0;
-     /*
-     this.db.getBeerReviewsById(this.beerId).subscribe(success=>{
+  }
 
-      this.beerReviews = success.data;
+  getBrewery() {
+    //console.log('brewery',this.beer['breweries'].id);
 
-      for (let i = 0; i < this.beerReviews.length; i++) {
+    let foundBrewpub:number = -1;
+    let breweryId = '';
+    let breweryName = ''
+    if (Array.isArray(this.beer['breweries'])) {
+      console.log('brewery beer',this.beer['breweries'][0].id);
+      breweryId = this.beer['breweries'][0].id;
+      breweryName = this.beer['breweries'][0].name;
+    }
 
-        if (parseInt(this.beerReviews[i].beer_rating)) {
-          beerRatingTotal += parseInt(this.beerReviews[i].beer_rating);
-          this.beerReviewCount++;  
+    this.showLoading('Loading Brewery...');
+    
+    if (breweryId.length) {
+
+      this.beerAPI.loadBreweryLocations(breweryId).subscribe((success)=>{
+
+        for (let i = 0; i < success.data.length; i++) {
+          // Brewpubs get thes prioirty, or tasting rooms that's open to the public
+          if (success.data[i].locationType == 'brewpub' || success.data[i].openToPublic == 'Y') {
+            foundBrewpub = i;
+            break;
+          }
         }
-      }
 
-      this.overallBeerRating = beerRatingTotal  / this.beerReviewCount;
+        if (foundBrewpub == -1) {
+          foundBrewpub = 0;
+        }
 
+        console.log('breweries returned',success);
+        
+        this.getBreweryFromGoogle(breweryName,
+                                  success.data[foundBrewpub].latitude,
+                                  success.data[foundBrewpub].longitude).subscribe(resp=>{
+          console.log('data',resp['result']);
+          
+          this.beerAPI.loadLocationById(success.data[foundBrewpub].id).subscribe((pub)=>{
+                  
+            this.beerAPI.loadBreweryBeers(pub.data.breweryId).subscribe((beers)=>{
 
+                this.loading.dismiss();
+                this.navCtrl.push(BreweryDetailPage,{brewery:pub.data,beers:beers,place:resp['result']});
+            },error=>{
+              console.log('error',error);
+              this.loading.dismiss().catch(() => {});
+              this.presentToast('Could not connect. Check connection.');
+            });
+            
+          },error=>{
+            console.log('error',error);
+            this.loading.dismiss().catch(() => {});
+            this.presentToast('Could not connect. Check connection.');
+          });
+        });
+        
+      },error=>{
+        console.log('error',error);
+        this.loading.dismiss().catch(() => {});
+        this.presentToast('Could not connect. Check connection.');
+      }); 
+    }
+  }
+
+  getBreweryFromGoogle(breweryName,lat,lng) {
+    //console.log('brewery',brewery);
+    let _breweryName = encodeURIComponent(breweryName);
+
+    return new Observable(observer=>{
+      this.geo.getPlaceByOrigin(_breweryName,lat,lng).subscribe(pub=>{
+        if (pub.results.length) {
+          //Get place detail
+          this.geo.placeDetail(pub.results[0].place_id).subscribe(detail=>{
+            //console.log('detail',detail);
+            observer.next(detail);
+          });
+        } else {
+          observer.next(false);
+        }
+      });      
     });
-    */
+  }
+
+  showLoading(msg) {
+    this.loading = this.loadingCtrl.create({
+      content: msg
+    });
+    this.loading.present();
   }
 
   removeBeerFromFavorites(beerId) {

@@ -37,19 +37,20 @@ page-beer-detail {
       margin-top:20px;
     }
 
-	ul {
-	  padding: 0px;
+  ul {
+    padding: 0px;
+    margin: 5px 0px;
 
-	  &.rating li {
-	    padding: 5px 10px;
-	    background: none;
-	    color: #ffb400;
+    &.rating li {
+      padding: 2px 2px !important;
+      background: none;
+      color: orange;
 
-	    ion-icon {
-	      font-size: 25px;
-	    }
-	  }
-	}
+      ion-icon {
+        font-size: 18px;
+      }
+    }
+  }
 
   ion-col {
     padding:0px !important;

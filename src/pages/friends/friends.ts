@@ -201,21 +201,25 @@ export class FriendsPage {
   getUserFriends() {
     var userRef = firebase.database();
     this.userFriends = new Array();
+
+    
     this.fbRef.ref('/users/'+this.user.uid+'/friends')
       .orderByChild('priority')
       .on('child_added',snapshot=>{
 
       let user = userRef.ref('/users/'+snapshot.key);
       let fn = user.once('value').then(userSnap=>{
-        //console.log('user',userSnap.val());
-        this.userFriends.push({
-          uid:userSnap.val().uid,
-          name:userSnap.val().name,
-          photo:userSnap.val().photo,
-          pushToken:userSnap.val().pushToken,
-          checked:false,
-          dateAccept:this.sing.getDateMonthDayYear(snapshot.val().acceptDate)
-        })
+        //console.log('user WTF',userSnap.val());
+        if (userSnap.val()!=null) {
+          this.userFriends.push({
+            uid:userSnap.val().uid,
+            name:userSnap.val().name,
+            photo:userSnap.val().photo,
+            pushToken:userSnap.val().pushToken,
+            checked:false,
+            dateAccept:this.sing.getDateMonthDayYear(snapshot.val().acceptDate)
+          });
+        }
       });
     });
   }

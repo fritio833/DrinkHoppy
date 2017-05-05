@@ -1,5 +1,20 @@
 page-home {
 
+  ul {
+    padding: 0px;
+    margin: 5px 0px;
+
+    &.rating li {
+      padding: 2px 2px !important;
+      background: none;
+      color: orange;
+
+      ion-icon {
+        font-size: 14px;
+      }
+    }
+  }
+  
   .center {
     text-align:center;
   }

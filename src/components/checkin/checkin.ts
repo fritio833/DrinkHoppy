@@ -9,8 +9,8 @@ import { CheckinDetailPage } from '../../pages/checkin-detail/checkin-detail';
 
 @Component({
   selector: 'checkin',
-  templateUrl: 'checkin.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  templateUrl: 'checkin.html'
+  //changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 

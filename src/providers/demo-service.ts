@@ -120,6 +120,9 @@ export class DemoService {
                        console.log('unique checked in');
                        this.fbRef.ref('/users/'+data.uid+'/numOfUniqueBeers/').transaction(value=>{
                          return (value||0)+1;
+                       },(error,committed,snapshot)=>{
+                         if (error)
+                           console.log('error setUniqueBeers',error);
                        });
                      }
                       observer.next(true);
@@ -139,6 +142,10 @@ export class DemoService {
       this.fbRef.ref('/users/'+uid+'/checkins').transaction(value=>{
           //value.cities[]       
           return (value||0)+1;
+      },(error,committed,snapshot)=>{
+        if (error) {
+          console.log('error setCheckinUserCount',error);
+        }
       });
       observer.next(true);
     });    
@@ -168,6 +175,10 @@ export class DemoService {
               }
               return user;
             }
+          },(error,committed,snapshot)=>{
+            if (error) {
+              console.log('error setUserScore',error);
+            }
           });
         }
       });
@@ -180,6 +191,7 @@ export class DemoService {
       this.fbRef.ref('/locations/'+data.placeId).transaction(value=>{
         if (value) {
           value.photo = data.photo;
+          value.rating = data.locationRating;
           value.checkinCount++;
           return value;
         } else {
@@ -196,6 +208,7 @@ export class DemoService {
             state:data.state,
             zip:data.zip,
             country:data.country,
+            rating:data.locationRating,
             checkinCount:1
           }
           return locData;          
@@ -209,6 +222,7 @@ export class DemoService {
       });
     });    
   }
+
   setBeerByLocation(data) {
     return new Observable(observer => {
 
@@ -289,6 +303,7 @@ export class DemoService {
           value.timestamp = firebase.database.ServerValue.TIMESTAMP;
           value.photo = data.photo;
           value.breweryImages = data.breweryImages;
+          value.rating = data.locationRating;
           return value;
         } else {
             let location = {
@@ -300,6 +315,7 @@ export class DemoService {
               city:data.city,
               state:data.state,
               zip:data.zip,
+              rating:data.locationRating,
               breweryImages:data.breweryImages,
               photo:data.photo,
               timestamp:firebase.database.ServerValue.TIMESTAMP,
@@ -313,7 +329,7 @@ export class DemoService {
         }
       },(error,committed,snapshot)=>{
 
-        if (committed) {
+        if (committed && data.isBrewery =='Y') {
            this.fbRef.ref('/users/'+data.uid+'/breweriesVisited/'+data.breweryId).transaction(value=>{
               if (value) {
                 value.checkedIn++;
@@ -332,6 +348,10 @@ export class DemoService {
                 this.incrementUserBreweryVisited(data.uid);
                 return location;                
               }
+           },(error,committed,snapshot)=>{
+             if (error) {
+               console.log('error setBreweryByCity',error);
+             }
            });
         }
           observer.next(true);
@@ -346,6 +366,10 @@ export class DemoService {
   incrementUserBreweryVisited(uid) {
      this.fbRef.ref('/users/'+uid+'/uniqueBreweriesVisited/').transaction(value=>{
        return (value||0)+1;
+     },(error,committed,snapshot)=>{
+       if (error) {
+         console.log('error incrementUserBreweryVisited',error);
+       }
      });
   }
 
@@ -360,7 +384,8 @@ export class DemoService {
         if (value) {          
           value.checkinCount--;
           value.timestamp = firebase.database.ServerValue.TIMESTAMP;
-          value.photo = data.photo;    
+          value.photo = data.photo;
+          value.rating = data.locationRating;   
           return value;
         } else {
             let location = {
@@ -371,6 +396,7 @@ export class DemoService {
               state:data.state,
               zip:data.zip,
               photo:data.photo,
+              rating:data.locationRating,
               timestamp:firebase.database.ServerValue.TIMESTAMP,
               uid:data.uid,
               lat:data.lat,
@@ -391,6 +417,32 @@ export class DemoService {
       });
       
     });
+  }
+
+  getBeerRating(beerId) {
+    return new Observable(observable=>{
+      this.fbRef.ref('/beers/'+beerId).once('value').then(snapshot=>{
+        //console.log('snapshot',snapshot.val());
+        if (snapshot!=null) {
+          let rating = snapshot.val().uniqueCheckinRating;
+          let ratingCount = snapshot.val().uniqueCheckinRatingCount;
+          let beerRating = rating / ratingCount;
+          observable.next(beerRating);
+        } else {
+          observable.next(0);
+        }
+        //observable.next(true);
+      }).catch(error=>{
+        let errorMessage = (<Error>error).message;
+         console.log('error',errorMessage);
+         if (errorMessage.includes('uniqueCheckinRating')) {
+           observable.next(0);
+         } else {
+           observable.error(error);
+         }
+
+      });
+    });    
   }
 
   setBeerByCityDemo(data) {
@@ -433,6 +485,7 @@ export class DemoService {
               value.photo = data.photo;
               value.timestamp = firebase.database.ServerValue.TIMESTAMP;
               value.uid = data.uid;
+              value.rating = data.locationRating;
               return value;
             } else {
               let location = {
@@ -448,6 +501,7 @@ export class DemoService {
                 lat:data.lat,
                 lng:data.lng,
                 checkinCount:1,
+                rating:data.locationRating,
                 isBrewery:data.isBrewery,
                 placeType:data.placeType
               }

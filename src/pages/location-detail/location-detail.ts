@@ -283,7 +283,8 @@ export class LocationDetailPage {
       photo:locPhoto,
       name:this.location.name,
       placeType:this.location.place_types,
-      vicinity:this.location.vicinity
+      vicinity:this.location.vicinity,
+      isBrewery:'N'
     }).then(resp=>{
       this.presentToast(this.location.name+' saved to favorites');
     });

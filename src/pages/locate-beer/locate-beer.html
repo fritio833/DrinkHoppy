@@ -13,13 +13,20 @@
           <img [src]="beer?.labels.medium" />
         </ion-thumbnail>
         <h3>{{beer.name}}</h3>
+        <p *ngIf="beerRating"><rating [(ngModel)]="beerRating" readOnly="true" max="5"></rating></p>
         <p>{{beer?.breweries[0].name}}</p>
         <p>{{beer?.style.shortName}}</p>        
       </ion-item>
     </ion-card-content>
   </ion-card>
+  <ion-card *ngIf="!beersFound">
+    <ion-card-header><h2>Sorry!</h2></ion-card-header>
+    <ion-card-content>
+       We couldn't locate {{beer.name}} in your area. Beer isn't distributed here, 
+       or nobody checked in {{beer.name}}.
+    </ion-card-content>
+  </ion-card>
 	<ion-item *ngFor="let location of locations | async" (click)="getLocation(location)" text-wrap>
-
 			<ion-thumbnail item-left>
         <img *ngIf="placeIMGS[location.$key]" [src]='placeIMGS[location.$key]'>
 			</ion-thumbnail>

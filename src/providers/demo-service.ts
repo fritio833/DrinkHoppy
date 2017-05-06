@@ -426,12 +426,18 @@ export class DemoService {
         if (snapshot!=null) {
           let rating = snapshot.val().uniqueCheckinRating;
           let ratingCount = snapshot.val().uniqueCheckinRatingCount;
-          let beerRating = rating / ratingCount;
-          observable.next(beerRating);
+
+          if (rating == 0 )
+            observable.next(0);
+          else {
+            let beerRating = rating / ratingCount;
+
+            observable.next(beerRating);
+          }
         } else {
           observable.next(0);
         }
-        //observable.next(true);
+
       }).catch(error=>{
         let errorMessage = (<Error>error).message;
          console.log('error',errorMessage);

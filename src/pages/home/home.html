@@ -63,7 +63,25 @@
        <ion-icon name="arrow-forward" item-right></ion-icon>
     </button>       
   </ion-list>
-
+  <div class="card-head">
+    <p><ion-icon name="people"></ion-icon>&nbsp;Upcoming Event</p>
+  </div>
+  <ion-card id="leaderboard" (click)="getBeerEventInfo()">
+      <div align="center">
+        <h2>Emerald Coast Beer Festival</h2>
+        <p>Pensacola, FL USA &#8226; 9/8/2017</p>
+      </div>      
+      <ion-item text-wrap>
+        <ion-thumbnail item-left>
+        <img src='images/beerfest.png'>
+        </ion-thumbnail>
+        <p>
+          There are seven different rooms and two courtyards, 
+            each dedicated to its own unique style of entertainment. This is the best street party in Pensacola!    
+        </p>
+      </ion-item>
+    <button ion-button full>View Event</button>
+  </ion-card>
   <div class="card-head">
     <p><ion-icon name="trophy"></ion-icon>&nbsp;Leaderboard</p>
   </div>

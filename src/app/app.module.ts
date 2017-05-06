@@ -5,6 +5,7 @@ import { MyApp } from './app.component';
 import { Ionic2RatingModule } from 'ionic2-rating';
 import { AngularFireModule, AuthProviders, AuthMethods } from 'angularfire2';
 import { CloudSettings, CloudModule } from '@ionic/cloud-angular';
+import { PhotoViewer } from '@ionic-native/photo-viewer';
 
 import { FbProvider } from '../providers/fb-provider';
 import { BreweryService } from '../providers/brewery-service';
@@ -18,6 +19,7 @@ import { DemoService } from '../providers/demo-service';
 import { NotificationService } from '../providers/notification-service';
 
 import { CheckinComponent } from '../components/checkin/checkin';
+import { AbsoluteDrag } from '../components/absolute-drag/absolute-drag';
 
 import { HelloIonicPage } from '../pages/hello-ionic/hello-ionic';
 import { ItemDetailsPage } from '../pages/item-details/item-details';
@@ -70,6 +72,8 @@ import { PopularLocationsPage } from '../pages/popular-locations/popular-locatio
 import { RandomBeersPage } from '../pages/random-beers/random-beers';
 import { FeedsPage } from '../pages/feeds/feeds';
 import { BreweryVisitsPage } from '../pages/brewery-visits/brewery-visits';
+import { EventInfoPage } from '../pages/event-info/event-info';
+import { EventMapPage } from '../pages/event-map/event-map';
 
 export const firebaseConfig = {
     apiKey: "AIzaSyCd-WZs4O8gNx9qVlwwyRdK6_qY60WuQl0",
@@ -102,6 +106,7 @@ const cloudSettings: CloudSettings = {
   declarations: [
     MyApp,
     HelloIonicPage,
+    AbsoluteDrag,
     ItemDetailsPage,
     ListPage,
     CreateAccountPage,
@@ -152,7 +157,9 @@ const cloudSettings: CloudSettings = {
     PopularLocationsPage,
     RandomBeersPage,
     FeedsPage,
-    BreweryVisitsPage
+    BreweryVisitsPage,
+    EventInfoPage,
+    EventMapPage
   ],
   imports: [
     IonicModule.forRoot(MyApp),
@@ -213,12 +220,15 @@ const cloudSettings: CloudSettings = {
     PopularLocationsPage,
     RandomBeersPage,
     FeedsPage,
-    BreweryVisitsPage
+    BreweryVisitsPage,
+    EventInfoPage,
+    EventMapPage
   ],
   providers: [{provide: ErrorHandler, 
               useClass: IonicErrorHandler},
               BreweryService,
               Storage,
+              PhotoViewer,
               FbProvider,
               SingletonService,
               AuthService,

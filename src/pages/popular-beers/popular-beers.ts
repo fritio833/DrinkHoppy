@@ -1,11 +1,13 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams, ActionSheetController, LoadingController, ModalController } from 'ionic-angular';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
+import { Observable } from 'rxjs/Observable';
 
 import firebase from 'firebase';
 
 import { SingletonService } from '../../providers/singleton-service';
 import { BreweryService } from '../../providers/brewery-service';
+import { DemoService } from '../../providers/demo-service';
 
 import { BeerDetailPage } from '../beer-detail/beer-detail';
 import { CheckinPage } from '../checkin/checkin';
@@ -19,6 +21,7 @@ export class PopularBeersPage {
 
   public beers:FirebaseListObservable<any>;
   public loading:any;
+  public beerRatings = new Array();
 
   constructor(public navCtrl: NavController, 
               public navParams: NavParams, 
@@ -26,18 +29,21 @@ export class PopularBeersPage {
               public beerAPI:BreweryService,
               public modalCtrl:ModalController,
               public loadingCtrl:LoadingController,
+              public demo:DemoService,
               public actionCtrl:ActionSheetController,
               public sing:SingletonService) {}
 
   getPopularBeers() {
 
     let key = this.sing.getLocationKey();
+    let beerRatingObjservable = new Array();
     console.log('locObj',key);
     this.beers = this.angFire.database.list('/beer_by_city/'+key,{
       query: {
-        orderByChild: 'checkinCount'
+        orderByChild: 'checkinCount',
+        limitToFirst: 20
       }
-    });  
+    });
   }
 
   getBeerDetail(beerDbId) {

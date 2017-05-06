@@ -5,6 +5,8 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import { SingletonService } from '../../providers/singleton-service';
 import { GoogleService } from '../../providers/google-service';
+import { DemoService } from '../../providers/demo-service';
+
 import { LocationDetailPage } from '../location-detail/location-detail';
 
 import firebase from 'firebase';
@@ -25,11 +27,14 @@ export class LocateBeerPage {
   public queryable:boolean = true;
   public placeIMGS = new Array();
   public distance = new Array();
+  public beersFound = false;
+  public beerRating:any;
 
   constructor(public navCtrl: NavController, 
               public params: NavParams,
               public geo: GoogleService,
               public angFire: AngularFire,
+              public demo: DemoService,
               public sing:SingletonService) {
     this.beer = params.get('beer');
     this.fbRef = firebase.database();
@@ -38,6 +43,13 @@ export class LocateBeerPage {
 
   getBeerLocations() {
     let locKey = '';
+
+    console.log('beer',this.beer);
+    this.demo.getBeerRating(this.beer.id).subscribe(rating=>{
+      console.log('rating',rating);
+      this.beerRating = rating;
+    });
+
     this.sing.getGeolocation().subscribe(geo=>{
       console.log('geo',geo);
       this.geoLocation = this.geo.getCityState
@@ -58,6 +70,10 @@ export class LocateBeerPage {
          this.locations.subscribe(resp=>{
 
            this.locationsLen = resp.length;
+
+           if (this.locationsLen) {
+             this.beersFound = true;
+           }
 
            for (var i=0;i<this.locationsLen;i++) {
              let locPoint = {lat:geo.latitude,lng:geo.longitude};

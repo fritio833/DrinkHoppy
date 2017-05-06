@@ -102,7 +102,7 @@ export class MyApp {
         },error=>{
           console.log('error',error);
         });
-      });
+      });    
       
       StatusBar.styleDefault();
       Splashscreen.hide();

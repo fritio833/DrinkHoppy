@@ -97,6 +97,17 @@ export class BreweryService {
     }
   }
 
+  findBeerByName(name) {
+    return this.http.get(this.breweryDbUrl 
+           + 'search/?key=' 
+           + this.breweryDbAPI 
+           + '&q=' + name
+           + '&withBreweries=Y&type=beer')
+           .retryWhen(error => error.delay(500))
+           .timeout(5000)
+           .map(res => res.json());
+  }
+
   findBreweriesByName(name) {
     return this.http.get(this.breweryDbUrl 
            + 'search/?key=' 

@@ -36,7 +36,8 @@ export class PopularLocationsPage {
     console.log('locObj',key);
     this.locations = this.angFire.database.list('/location_by_city/'+key,{
       query: {
-        orderByChild: 'checkinCount'
+        orderByChild: 'checkinCount',
+        limitToFirst: 20
       }
     }); 
 

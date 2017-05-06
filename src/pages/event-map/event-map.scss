@@ -1,0 +1,39 @@
+page-event-map {
+  #festival-map {
+      width:700rem !important;
+      max-width:700rem !important;
+  }
+
+    .full-page-width {
+        width: 100%;
+        overflow: hidden;
+        height: 800px;
+    }
+    .center-content-container {
+        width:600px;
+        height:800px;
+        margin: 0 auto;
+        padding:0px;
+    }
+
+    .extended-content-container {
+        width: 500%;
+        margin-left: -200%;
+        padding: 0px;
+    }
+
+    .extended-content {
+        width:100%;
+        height: 500px;
+        text-align:center;
+
+        img {
+            width:100rem !important;
+            max-width:100rem !important;            
+        }
+    }
+
+    .white-background {
+        background-color:#ffffff;
+    }
+}

@@ -1,0 +1,104 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>Event Map</ion-title>
+    <ion-buttons right>
+        <button ion-button icon-left (click)="getMap(null)">
+          <ion-icon name="map"></ion-icon>
+          Map
+        </button>
+    </ion-buttons>    
+  </ion-navbar>
+  <ion-toolbar no-border-top color="primary"> 
+    <ion-segment [(ngModel)]="choice" color="white" class="toolbar">
+      <ion-segment-button icon-left role="button" color="primary" value="breweries">
+        <ion-icon name="pint"></ion-icon>Breweries
+      </ion-segment-button>   
+      <ion-segment-button icon-left role="button" color="primary" value="beers">
+        <ion-icon name="beer"></ion-icon>Beers
+      </ion-segment-button>
+      <ion-segment-button icon-left role="button" color="primary" value="vendors">
+        <ion-icon name="restaurant"></ion-icon>Vendors
+      </ion-segment-button>              
+    </ion-segment>
+  </ion-toolbar>   
+</ion-header>
+<ion-content fullscreen class="white-background">
+<ion-item>
+  <ion-thumbnail item-left>
+    <img src="images/beerfest.png">
+  </ion-thumbnail>
+  <h2>Emeral Coast Beer Festival</h2>
+  <p>87 Breweries</p>
+  <p>430 Beers</p>
+</ion-item>
+<div [ngSwitch]="choice">
+  <ion-list *ngSwitchCase="'breweries'">
+    <ion-list-header>Breweries</ion-list-header>
+    <ion-item>
+      <ion-thumbnail item-left>
+        <img src="https://s3.amazonaws.com/brewerydbapi/brewery/O0JDg5/upload_ihppsC-icon.png">
+      </ion-thumbnail>
+      <h2>40 Arpent Brewing Co.</h2>
+      <p>Map# 60</p>
+      <p>Micro Brewery</p>
+      <p>Arabi, Louisiana</p>
+      <ion-icon item-right name="more"></ion-icon>
+    </ion-item>
+    <ion-item (click)="getBeerActions()">
+      <ion-thumbnail item-left>
+        <img src="https://s3.amazonaws.com/brewerydbapi/brewery/BBE5WM/upload_6HsKvN-icon.png">
+      </ion-thumbnail>
+      <h2>Abita Brewing Co.</h2>
+      <p>Map# 17</p>
+      <p>Micro Brewery</p>
+      <p>Covington, Louisiana</p>
+      <ion-icon item-right name="more"></ion-icon>
+    </ion-item>
+    <ion-item>
+      <ion-thumbnail item-left>
+        <img src="https://s3.amazonaws.com/brewerydbapi/brewery/tYf3W8/upload_G5touV-icon.png">
+      </ion-thumbnail>
+      <h2>Angry Orchard Cider Company</h2>
+      <p>Map# 46</p>
+      <p>Micro Brewery</p>
+      <p>Cincinnati, OH</p>
+      <ion-icon item-right name="more"></ion-icon>
+    </ion-item>
+    <ion-list-header>Homebrew Clubs</ion-list-header>
+    <ion-item>
+      <ion-thumbnail item-left>
+        <img src="">
+      </ion-thumbnail>
+      <h2>Home Brewers Underground</h2>
+      <p>Map# 16</p>
+      <p>Pensacola, FL</p>
+      <ion-icon item-right name="more"></ion-icon>
+    </ion-item>
+    <ion-item>
+      <ion-thumbnail item-left>
+        <img src="https://firebasestorage.googleapis.com/v0/b/bender-1487426215149.appspot.com/o/img%2Fescambiabay.jpg?alt=media&token=920db3c2-9c89-468a-bfbb-faffbacbac39">
+      </ion-thumbnail>
+      <h2>Escambia Bay Homebrewers</h2>
+      <p>Map# 50</p>
+      <p>Pensacola, FL</p>
+      <ion-icon item-right name="more"></ion-icon>
+    </ion-item>    
+  </ion-list>
+  <ion-list *ngSwitchCase="'beers'">
+     <ion-list-header>Brewery Beers</ion-list-header>
+      <button ion-item *ngFor="let beer of eventBeers" (click) = "getBeerDetail(beer.id)">
+        <ion-thumbnail item-left>
+          <img *ngIf="beer.labels" [src]="beer.labels.icon">
+          <img *ngIf="!beer.labels && beer.breweries && beer.breweries.length && beer.breweries[0].images" [src]="beer.breweries[0].images.icon">
+        </ion-thumbnail>
+        <h2>{{ beer.name }}</h2>
+        <p *ngIf="beer.breweries">{{ beer.breweries[0].name}}</p>
+        <p *ngIf="beer.style">{{ beer.style.shortName}}</p>
+        <ion-icon name="arrow-forward" item-right></ion-icon>
+      </button>     
+  </ion-list>
+  <ion-list *ngSwitchCase="'vendors'">
+    Vendors
+  </ion-list>    
+</div>  
+</ion-content>

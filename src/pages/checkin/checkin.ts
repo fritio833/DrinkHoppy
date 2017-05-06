@@ -4,6 +4,7 @@ import { Slides, NavParams, ViewController, LoadingController, AlertController, 
 
 import { Geolocation, SocialSharing, Camera } from 'ionic-native';
 import { Ionic2RatingModule } from 'ionic2-rating';
+import { Storage } from '@ionic/storage';
 
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 import firebase from 'firebase';
@@ -84,6 +85,7 @@ export class CheckinPage {
               public actionCtrl:ActionSheetController,
               public angFire:AngularFire,
               public demo:DemoService,
+              public storage:Storage,
               public loadingCtrl:LoadingController) {
 
     this.beer = params.get('beer');
@@ -539,8 +541,8 @@ export class CheckinPage {
   // Also, prevent code from bugging out doing mutiple checkins.
   canCheckIn() {
 
-    //console.log('currtime',currentTime);
-    //console.log('prevTime',prevTime);
+   
+
    if (this.sing.canCheckIn(this.beer.id)) {
       return true;
     } else {
@@ -835,56 +837,42 @@ export class CheckinPage {
 
     var offsetRef = firebase.database().ref(".info/serverTimeOffset");
     var that = this;
+    var writeCheckinListender;
     
 
-    offsetRef.on("value", function(snap) {
+    offsetRef.once("value").then(snap=> {
       var offset = snap.val();
+      var updates = {};
+      var newKey;
+      var newFeedRef;      
       var negativeTimestamp = (new Date().getTime() + offset) * -1; // for ordering new checkins first
       var timestamp = new Date().getTime() + offset;
       locationData['dateCreated'] = timestamp;
       locationData['priority'] = negativeTimestamp;
-      //console.log('locData',locationData);
-     
-      //that.checkin.push(locationData);
-      var newKey;
-      var newFeedRef;
       
       newFeedRef = that.checkin.ref('/checkin/feeds/').push(locationData);
 
-      newFeedRef.then(resp=>{
+      newKey = newFeedRef.key;
 
-        newKey = newFeedRef.key;
-        var updates = {};
+      if (that.checkinType != 'brewery' && that.location != null) 
+        updates['/checkin/locations/'+that.location.place_id+'/'+newKey] = locationData;
 
-        if (that.notifyFriends) {
-          that.notify.notifyFriends(that.user,that.checkinUsers,that.location,that.beer,negativeTimestamp,newKey);
-        }      
+      updates['/checkin/users/'+that.user.uid+'/'+newKey] = locationData;
+      updates['/checkin/beers/'+that.beer.id+'/'+newKey] = locationData;
 
-        if (that.checkinType != 'brewery' && that.location != null) 
-          updates['/checkin/locations/'+that.location.place_id+'/'+newKey] = locationData;
+      if (that.checkinType == 'brewery' && that.brewery != null)
+        updates['/checkin/brewery/'+ that.brewery.id+'/'+newKey] = locationData;
 
-        updates['/checkin/users/'+that.user.uid+'/'+newKey] = locationData;
-        updates['/checkin/beers/'+that.beer.id+'/'+newKey] = locationData;
-
-        if (that.checkinType == 'brewery' && that.brewery != null)
-          updates['/checkin/brewery/'+ that.brewery.id+'/'+newKey] = locationData;
-
-        that.fbRef.ref().update(updates).then(success=>{
-          //that.view.dismiss();
-          //that.presentToast("Check-in was successful");
-          that.successfulCheckin = true;
-          that.loading.dismiss().catch(()=>{});;
-          
-        }).catch(error=>{
-          console.log('main checkin error',error);
-          that.loading.dismiss().catch(()=>{});;
-        });
-
-      }).catch(error=>{
-        console.log('main checkin error',error);
+      that.fbRef.ref().update(updates).then(success=>{
+        that.successfulCheckin = true;
         that.loading.dismiss().catch(()=>{});
+              
+      }).catch(error=>{
+        console.log('error',error);
       });
-    });        
+      
+    }); 
+      
   }
 
   setCheckinIMG() {

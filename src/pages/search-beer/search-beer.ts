@@ -90,7 +90,8 @@ export class SearchBeerPage {
 
     if (evt.target.value.length > 2) {
       this.showLoading();
-	    this.beerAPI.loadBeerByName(evt.target.value).subscribe(beer => {
+	    this.beerAPI.findBeerByName(evt.target.value).subscribe(beer => {
+          console.log('searchReturn',beer);
 	        this.beers = beer;
 	        this.numberOfPages = beer.numberOfPages;
           
@@ -162,6 +163,8 @@ export class SearchBeerPage {
           filter.isOrganic != null) {
         this.filter = filter;
         this.showLoading();
+        this.qSearchBeer = '';
+        this.clearSearch(null);
         this.beerAPI.loadBeerByName(this.qSearchBeer,this.currentPage,this.filter).subscribe(beer => {
             if (beer.hasOwnProperty('data')) { 
               this.beers = beer.data;

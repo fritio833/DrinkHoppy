@@ -20,6 +20,7 @@ import { LeaderboardPage } from '../leaderboard/leaderboard';
 import { PopularBeersPage } from '../popular-beers/popular-beers';
 import { PopularLocationsPage } from '../popular-locations/popular-locations';
 import { RandomBeersPage } from '../random-beers/random-beers';
+import { EventInfoPage } from '../event-info/event-info';
 
 import firebase from 'firebase';
 
@@ -170,6 +171,9 @@ export class HomePage {
     }
   }
 
+ getBeerEventInfo() {
+   this.navCtrl.push(EventInfoPage);
+ }
 
   getPopBeer(beerId) {
     this.navCtrl.push(BeerDetailPage,{beerId:beerId});
@@ -227,6 +231,7 @@ export class HomePage {
   ionViewDidLoad() {
     console.log('ionViewDidLoad HomePage');
     this.getProfileData();
+    
   }
 
   

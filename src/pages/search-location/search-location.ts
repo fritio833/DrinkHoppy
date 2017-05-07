@@ -182,17 +182,36 @@ export class SearchLocationPage {
 
     this.showLoading('Loading. Please wait...');
 
-    Geolocation.getCurrentPosition().then((resp) => {
+    if (this.searchType == 'nearbysearch' || !this.sing.isSelectedLocation()) {
+      Geolocation.getCurrentPosition().then((resp) => {
 
-      this.geoLat = resp.coords.latitude;
-      this.geoLng = resp.coords.longitude;
+        this.geoLat = resp.coords.latitude;
+        this.geoLng = resp.coords.longitude;
+        this.setLocal(this.geoLat,this.geoLng);
+        
+      }).catch((error) => {
+        this.presentToast('Could not connect. Check connection.');
+        this.loading.dismiss().catch(() => {});      
+        console.log('Error getting location', error);
+      });
+    } else {
+      // Selection based on city selected out of town
+      this.setLocal(this.sing.selectLat,this.sing.selectLng);
+    }
 
+  }
+
+  setLocal(lat,lng) {
       if (this.searchType == 'textsearch') {
 
-           this.geo.reverseGeocodeLookup(resp.coords.latitude,resp.coords.longitude)
+           this.geo.reverseGeocodeLookup(lat,lng)
              .subscribe((success)=>{
-              this.sing.geoCity = success.city;
-              this.sing.geoState = success.state;
+
+              if (!this.sing.isSelectedLocation) {
+                this.sing.geoCity = success.city;
+                this.sing.geoState = success.state;
+              }
+
               this.geo.searchByPlaceType(success.city+' '+success.state,this.placeType)
                 .subscribe((locs)=>{
                   //console.log(success); 
@@ -213,7 +232,7 @@ export class SearchLocationPage {
 
       } else {
 
-        this.geo.placesNearByRadius(this.geoLat,this.geoLng)
+        this.geo.placesNearByRadius(lat,lng)
           .subscribe((success)=>{
              
              this.locations = this.fixLocations(success.results);
@@ -225,13 +244,6 @@ export class SearchLocationPage {
             this.loading.dismiss().catch(() => {});
           });
       }
-       
-    }).catch((error) => {
-      this.presentToast('Could not connect. Check connection.');
-      this.loading.dismiss().catch(() => {});      
-      console.log('Error getting location', error);
-    });
-
   }
 
   getMoreLocal(infiniteScroll) {
@@ -368,7 +380,7 @@ export class SearchLocationPage {
 
           this.placeType = this.filter.placeType;
 
-          this.geo.searchByPlaceType(this.sing.geoCity+' '+this.sing.geoState,
+          this.geo.searchByPlaceType(this.sing.getSelectCity()+' '+this.sing.getSelectState(),
                                       this.filter.placeType,
                                       this.filter).subscribe((resp)=>{
              this.locations = [];
@@ -436,6 +448,7 @@ export class SearchLocationPage {
         
 
     }).catch((error) => {
+      this.loading.dismiss().catch(() => {});
       console.log('Error getting location');      
     });
   }
@@ -497,15 +510,17 @@ export class SearchLocationPage {
 
     let myLatLng = new google.maps.LatLng(myLat,myLng);
 
-    var userMarker = new google.maps.Marker({
-        position: myLatLng,
-        map: this.map,
-        title: 'My Current Location',
-        animation: google.maps.Animation.DROP,
-        icon: im
-    });
-    this.markers.push(userMarker);    
+    if (!this.sing.isSelectedLocation()) {
+      var userMarker = new google.maps.Marker({
+          position: myLatLng,
+          map: this.map,
+          title: 'My Current Location',
+          animation: google.maps.Animation.DROP,
+          icon: im
+      });
 
+      this.markers.push(userMarker);    
+    }
     var bounds = new google.maps.LatLngBounds();
     for (var i = 0; i < this.markers.length; i++) {
       bounds.extend(this.markers[i].getPosition());

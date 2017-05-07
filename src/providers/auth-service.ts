@@ -95,9 +95,7 @@ export class AuthService {
     let locationKey = '';
 
     if (userHomeTownCity!=null)
-      locationKey = userHomeTownCity.toLowerCase().replace(/[^A-Z0-9]/ig, "")
-                    +'-'+userHomeTownState.toLowerCase().replace(/[^A-Z0-9]/ig, "")
-                    +'-'+userHomeTownCountry.toLowerCase();
+      locationKey = this.sing.getCityStateKey(userHomeTownCity,userHomeTownState,userHomeTownCountry);
 
     userHomeTownCity = this.sing.geoCity;
     if (credName!=null) {

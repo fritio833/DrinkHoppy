@@ -91,18 +91,7 @@ export class MyApp {
         }
       });
 
-      // Get geolocation.  Sets our app.
-      this.sing.getGeolocation().subscribe(resp=>{
-        this.setCityState(resp);
-      },error=>{
-        console.log('error',error);
-        // Attempt to get geo with low accuracy
-        this.sing.getGeolocationLow().subscribe(lowResp=>{
-          this.setCityState(lowResp);
-        },error=>{
-          console.log('error',error);
-        });
-      });    
+      this.setLocation();
       
       StatusBar.styleDefault();
       Splashscreen.hide();
@@ -165,15 +154,33 @@ export class MyApp {
     });
   }
 
+  setLocation() {
+      // Get geolocation.  Sets our app.
+      this.sing.getGeolocation().subscribe(resp=>{
+        this.setCityState(resp);
+      },error=>{
+        console.log('error',error);
+        // Attempt to get geo with low accuracy
+        this.sing.getGeolocationLow().subscribe(lowResp=>{
+          this.setCityState(lowResp);
+        },error=>{
+          console.log('error',error);
+          this.presentNoGPSAlert();
+        });
+      }); 
+  }
+
   setCityState(coords) {
     this.geo.reverseGeocodeLookup(coords.latitude,coords.longitude)
       .subscribe((success)=>{
       this.sing.geoCity = success.city;
       this.sing.geoState = success.state;
       this.sing.geoCountry = success.country;
+      this.sing.geoLat = coords.latitude;
+      this.sing.geoLng = coords.longitude;
       setTimeout(()=>{
         this.events.publish('gotGeo:true',{city:this.sing.geoCity,state:this.sing.geoState,country:this.sing.geoCountry});
-      },2000);
+      },1000);
       
     },error=>{
       console.log('error',error);
@@ -230,6 +237,31 @@ export class MyApp {
     });
     alert.present();
   }
+
+  presentNoGPSAlert() {
+    //let img = msg.additionalData['image'];
+    //let uid = msg.additionalData['id'];
+    let alert = this.alertCtrl.create({
+      title: 'Failed to Get Location',
+      message: 'Turn on GPS or have internet connection',
+      buttons: [
+        {
+           text: 'Retry',
+           handler: () => {
+              //console.log('Cancel clicked');
+              this.setLocation();
+           }          
+        },{
+           text: 'Close',
+           role: 'cancel',
+           handler: () => {
+              console.log('Cancel clicked');
+           }
+        }
+      ]
+    });
+    alert.present();
+  }  
 
   ionOpen() {
     console.log('menu open');

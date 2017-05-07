@@ -58,7 +58,7 @@
   <ion-list>
     <ion-item>
       <p *ngIf="searchType=='nearbysearch'">Sorted by proximity in {{sing.geoCity}}</p>
-      <p *ngIf="searchType=='textsearch'">{{fixPlaceType(placeType)}} in {{sing.geoCity}}</p>
+      <p *ngIf="searchType=='textsearch'">{{fixPlaceType(placeType)}} in {{sing.getSelectCity()}}</p>
     </ion-item>
     <button ion-item *ngFor="let location of locations; let i = index;" (click) = "getLocationDetail(location)">
       <h2 class="loc-name">

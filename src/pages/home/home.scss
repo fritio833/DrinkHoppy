@@ -38,6 +38,14 @@ page-home {
 	  background-size: cover;
 	  background-color: #000000;
     background-position: center center;
+    height:150px !important;
+  }
+
+  #city-select {
+    position: absolute !important;
+    top:110px;
+    right:10px
+
   }
 
   #find-drinks-button {

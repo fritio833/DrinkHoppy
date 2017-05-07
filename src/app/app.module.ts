@@ -19,7 +19,6 @@ import { DemoService } from '../providers/demo-service';
 import { NotificationService } from '../providers/notification-service';
 
 import { CheckinComponent } from '../components/checkin/checkin';
-import { AbsoluteDrag } from '../components/absolute-drag/absolute-drag';
 
 import { HelloIonicPage } from '../pages/hello-ionic/hello-ionic';
 import { ItemDetailsPage } from '../pages/item-details/item-details';
@@ -106,7 +105,6 @@ const cloudSettings: CloudSettings = {
   declarations: [
     MyApp,
     HelloIonicPage,
-    AbsoluteDrag,
     ItemDetailsPage,
     ListPage,
     CreateAccountPage,

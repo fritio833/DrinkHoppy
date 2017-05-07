@@ -91,9 +91,9 @@ export class SingletonService {
 
   getLocationKey() {
     let locObj = this.getLocation();
-    let key = locObj.city.toLowerCase().replace(/[^A-Z0-9]/ig, "")
-              +'-'+locObj.state.toLowerCase().replace(/[^A-Z0-9]/ig, "")
-              +'-'+locObj.country.toLowerCase();
+    let key = locObj.city.toLowerCase().replace(/\s|\#|\[|\]|\$|\./g, "")
+              +'-'+locObj.state.toLowerCase().replace(/\s|\#|\[|\]|\$|\./g, "")
+              +'-'+locObj.country.toLowerCase().replace(/\s|\#|\[|\]|\$|\./g, "");
     return key;
   }
 
@@ -119,14 +119,43 @@ export class SingletonService {
     } else {
       return this.geoCountry;
     }
-  }    
+  }
 
-  setCurrentLocation() {
+  hasLocation() {
+    if (this.selectCity!=null || this.geoCity!=null)
+      return true;
+    else
+      return false;
+  }
+
+  isSelectedLocation() {
+    if (this.selectCity!=null)
+      return true;
+    else
+      return false;
+  }
+
+  setCurrentLocation(geo) {
+    this.selectCity = geo.city;
+    this.selectState = geo.state;
+    this.selectCountry = geo.country;
+    this.selectLat = geo.lat;
+    this.selectLng = geo.lng;
+  }
+
+  setLocationToGeo() {
     this.selectCity = null;
     this.selectState = null;
     this.selectCountry = null;
     this.selectLat = null;
-    this.selectLng = null;
+    this.selectLng = null;    
+  }
+
+  getCityStateKey(city,state,country) {
+    // Remove special characters that would cause firebase to crash
+    return city.toLowerCase().replace(/\s|\#|\[|\]|\$|\./g, "")
+                        +'-'+state.toLowerCase().replace(/\s|\#|\[|\]|\$|\./g, "")
+                        +'-'+country.toLowerCase().replace(/\s|\#|\[|\]|\$|\./g, "");
   }
 
   timeDifference(current, previous, short?) {
@@ -297,7 +326,7 @@ export class SingletonService {
           throw Observable.throw('Geolocation High Accuracy Timeout');
       })
       .retryWhen(error => error.delay(1000))
-      .timeout(10000);
+      .timeout(5000);
   }
 
   getGeolocationLow() {
@@ -313,7 +342,7 @@ export class SingletonService {
           throw Observable.throw('Geolocation Low Accuracy Timeout');
       })
       .retryWhen(error => error.delay(1000))
-      .timeout(30000);
+      .timeout(10000);
   }
 
   setCheckinTime(time,beerId) {

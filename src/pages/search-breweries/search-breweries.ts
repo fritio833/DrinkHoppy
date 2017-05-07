@@ -391,8 +391,8 @@ export class SearchBreweriesPage {
 
     }
 
-    if (this.sing.getLocation().geo) {
-
+    if (!this.sing.isSelectedLocation()) {
+      console.log('lat lng',this.sing.geoLat + ' - ' + this.sing.geoLng);
       myLatLng = new google.maps.LatLng(this.sing.geoLat,this.sing.geoLng);
 
       var userMarker = new google.maps.Marker({
@@ -520,10 +520,14 @@ export class SearchBreweriesPage {
   }   
 
   showInfoWindow(brewery) {
+    let message = '';
+
+    if (brewery.brewery.images.icon!=null)
+      message = '<div align="center"><img src="' + brewery.brewery.images.icon + '"/></div>';
 
     let alert = this.alertCtrl.create({
       title: brewery.brewery.name,
-      message: '<div align="center"><img src="' + brewery.brewery.images.icon + '"/></div>',
+      message: message,
       buttons: [
         {
           text: 'Close',

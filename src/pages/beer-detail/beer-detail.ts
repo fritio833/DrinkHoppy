@@ -310,24 +310,6 @@ export class BeerDetailPage {
     this.loading.present();
   }
 
-  removeBeerFromFavorites(beerId) {
-       
-      this.storage.get("beers").then((beerArray)=>{   
-
-        for (let i = 0; i < beerArray.length; i++) {
-        
-          if (beerArray[i].id == beerId ){
-            this.presentToast(beerArray[i].name + " removed from favorites.");
-            beerArray.splice(i,1);
-            this.storage.set('beers',beerArray);
-
-            return;
-          }
-        }          
-
-      });
-  }
-
   doLogin() {
 
     this.navCtrl.push(LoginPage);

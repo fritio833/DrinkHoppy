@@ -78,8 +78,9 @@ export class GoogleService {
         location.city = loc.results[0].address_components[i].short_name;
 
       // Get State
-      if (loc.results[0].address_components[i].types[0] == "administrative_area_level_1")
+      if (loc.results[0].address_components[i].types[0] == "administrative_area_level_1") {
         location.state = loc.results[0].address_components[i].short_name;
+      }
 
       // Get zip
       if (loc.results[0].address_components[i].types[0] == "postal_code")
@@ -107,8 +108,13 @@ export class GoogleService {
                       state:'',
                       zip:'',
                       county:'',
-                      country:''
+                      country:'',
+                      lat:'',
+                      lng:''
     };
+
+    location.lat = loc.result.geometry.location.lat;
+    location.lng = loc.result.geometry.location.lng;
 
     for (let i = 0; i < loc.result.address_components.length; i++) {
 

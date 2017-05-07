@@ -61,9 +61,8 @@ export class DemoService {
         if (error) {
            observer.error(error);
         } else if (committed) {
-          let cityKey = data.city.toLowerCase().replace(/[^A-Z0-9]/ig, "")
-                        +'-'+data.state.toLowerCase().replace(/[^A-Z0-9]/ig, "")
-                        +'-'+data.country.toLowerCase();
+
+          let cityKey =  this.sing.getCityStateKey(data.city,data.state,data.country);
           this.fbRef.ref('/beers/'+data.beerId+'/cities/'+cityKey).transaction(value=>{
             return (value||0)+1;
           },(error,committed,snapshot)=>{
@@ -293,9 +292,8 @@ export class DemoService {
   setBreweryByCity(data) {
 
     return new Observable(observer => {
-      let cityKey = data.city.toLowerCase().replace(/[^A-Z0-9]/ig, "")
-                    +'-'+data.state.toLowerCase().replace(/[^A-Z0-9]/ig, "")
-                    +'-'+data.country.toLowerCase();
+
+      let cityKey =  this.sing.getCityStateKey(data.city,data.state,data.country);              
       let beerCityRef = '';
       this.fbRef.ref('/brewery_by_city/'+cityKey+'/'+data.breweryId).transaction(value=>{
         if (value) {          
@@ -376,9 +374,8 @@ export class DemoService {
   setLocationbyCityDemo(data) {
 
     return new Observable(observer => {
-      let cityKey = data.city.toLowerCase().replace(/[^A-Z0-9]/ig, "")
-                    +'-'+data.state.toLowerCase().replace(/[^A-Z0-9]/ig, "")
-                    +'-'+data.country.toLowerCase();
+
+      let cityKey = this.sing.getCityStateKey(data.city,data.state,data.country);
       let beerCityRef = '';
       this.fbRef.ref('/location_by_city/'+cityKey+'/'+data.placeId).transaction(value=>{
         if (value) {          
@@ -453,9 +450,8 @@ export class DemoService {
 
   setBeerByCityDemo(data) {
     return new Observable(observer => {
-      let cityKey = data.city.toLowerCase().replace(/[^A-Z0-9]/ig, "")
-                    +'-'+data.state.toLowerCase().replace(/[^A-Z0-9]/ig, "")
-                    +'-'+data.country.toLowerCase();
+
+      let cityKey = this.sing.getCityStateKey(data.city,data.state,data.country);              
       let beerCityRef = '';
       this.fbRef.ref('/beer_by_city/'+cityKey+'/'+data.beerId).transaction(value=>{
         if (value) {          

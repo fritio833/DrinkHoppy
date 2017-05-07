@@ -5,6 +5,7 @@ import { Camera } from 'ionic-native';
 import { AuthService } from '../../providers/auth-service';
 import { ValidationService } from '../../providers/validation-service';
 import { GoogleService } from '../../providers/google-service';
+import { SingletonService } from '../../providers/singleton-service';
 
 import { SelectLocationPage } from '../select-location/select-location';
 
@@ -23,7 +24,6 @@ export class ProfileEditPage {
   public displayName:string;
   public loading:any;
   public imageToUpload:string;
-  public oldIMG:string;
   public userRef:any;
   public profilePicSeqRef:any;
   public profilePictureRef: firebase.storage.Reference;
@@ -44,6 +44,7 @@ export class ProfileEditPage {
               public toastCtrl:ToastController,
               public modalCtrl: ModalController,
               public geo:GoogleService,
+              public sing:SingletonService,
               public actionCtrl:ActionSheetController,
               public params: NavParams) {
 
@@ -65,12 +66,9 @@ export class ProfileEditPage {
   loadProfileData() {
     this.showLoading();
     this.profileRef = firebase.database().ref('users/'+this.uid).once('value').then(snapshot => {
-      console.log('snap',snapshot.val());
       this.displayName = snapshot.val().name;
       if (snapshot.val().photo!=null && snapshot.val().photo !='') {
         this.profileIMG = snapshot.val().photo;
-        this.oldIMG = decodeURIComponent(snapshot.val().photo);
-        console.log('oldImage',this.oldIMG.match(/\d{3}\/\d{3}\/\d{3}\/\d{12}\.png|PNG/g));
       }
 
       if (snapshot.val().city!=null) {
@@ -107,15 +105,12 @@ export class ProfileEditPage {
 
   }
 
-  getImgSeqDirectory(num) {
-    let str:String = String(num);
-    var pad = "000000000000";
-    var ans = pad.substring(0, pad.length - str.length) + str;
-    let sub1 = ans.substring(0,3);
-    let sub2 = ans.substring(3,6);
-    let sub3 = ans.substring(6,9);
-    let img = ans+'.png';
-    return {sub1:sub1,sub2:sub2,sub3:sub3,img:img}; 
+  getImgSeqDirectory() {
+
+    let sub = this.uid.substring(this.uid.length - 4,this.uid.length);
+    let img = this.uid+'.png';
+    return {sub:sub,img:img};
+    
   }
 
   saveProfile() {
@@ -142,9 +137,8 @@ export class ProfileEditPage {
       }
 
       if (this.userLocation!=null) {
-        let locKey = this.userLocation.city.toLowerCase().replace(/[^A-Z0-9]/ig, "")
-                     +'-'+this.userLocation.state.toLowerCase().replace(/[^A-Z0-9]/ig, "")
-                     +'-'+this.userLocation.country.toLowerCase();
+
+        let locKey =  this.sing.getCityStateKey(this.userLocation.city,this.userLocation.state,this.userLocation.country);
 
         let updateLocation = {
           city:this.userLocation.city,
@@ -171,9 +165,6 @@ export class ProfileEditPage {
         this.view.dismiss();
       }
     }
-
-
-
   }
 
   changeEmail(password) {
@@ -202,7 +193,6 @@ export class ProfileEditPage {
     }, error=> {
       console.log('error',error);
       this.presentToast(error.message);
-      // An error happened.
     });    
   }
 
@@ -213,18 +203,6 @@ export class ProfileEditPage {
       duration: 3000
     });
     toast.present();
-  }    
-
-  getProfilePicSeq() {
-   return new Promise(resolve=>{
-    let checkinSeq = null;
-    this.profilePicSeqRef.transaction(value=>{
-      checkinSeq = (value||0)+1;
-      return (value||0)+1;
-    },(complete)=>{
-      resolve(checkinSeq);
-    });
-   });
   }
 
   takePicture(sourceType) {
@@ -248,43 +226,30 @@ export class ProfileEditPage {
         let user = this.auth.getUser();
 
         if (this.profileIMG != null) {
-          this.getProfilePicSeq().then(value=>{
-            let subDir = this.getImgSeqDirectory(value);
 
-            this.profilePictureRef.child(subDir.sub1)
-              .child(subDir.sub2)
-              .child(subDir.sub3)
-              .child(subDir.img)
-              .putString(this.imageToUpload,'base64',{contentType:'image/png'})
-              .then(resp=>{
-              
-              let photoURL = {photo:resp.downloadURL};
-              this.userRef.ref('users/' + this.uid).update(photoURL);
-             
-              let pictToDelete = this.oldIMG.match(/\d{3}\/\d{3}\/\d{3}\/\d{12}\.png|PNG/g);
+          let subDir = this.getImgSeqDirectory();
 
-              if (pictToDelete.length && this.oldIMG.search(/firebasestorage/) !== -1) {
-                this.deleteProPictureRef.child(pictToDelete[0]).delete().then(delResp=>{
-                  this.oldIMG = decodeURIComponent(resp.downloadURL);
-                }).catch(error=>{
-                  console.log('error',error);
-                });
-              }
+          this.profilePictureRef.child(subDir.sub).child(subDir.img)
+            .putString(this.imageToUpload,'base64',{contentType:'image/png'})
+            .then(resp=>{
+            
+            let photoURL = {photo:resp.downloadURL};
+            this.userRef.ref('users/' + this.uid).update(photoURL);
 
-              user.updateProfile({
-                photoURL: resp.downloadURL
-              }).then(resp=> {
-                // Update successful.
-                console.log('resp',resp);
-              }, function(error) {
-                // An error happened.
-                console.log('error',error);
-              });
-
-              this.presentToast("Avatar has been changed");
-              this.loading.dismiss(); 
+            user.updateProfile({
+              photoURL: resp.downloadURL
+            }).then(resp=> {
+              // Update successful.
+              console.log('resp',resp);
+            }, function(error) {
+              // An error happened.
+              console.log('error',error);
             });
+
+            this.presentToast("Avatar has been changed");
+            this.loading.dismiss(); 
           });
+
         }
     }, (err) => {
         console.log(err);

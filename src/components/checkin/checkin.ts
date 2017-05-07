@@ -1,10 +1,12 @@
 import { Component,Input, Output, ChangeDetectionStrategy  } from '@angular/core';
 import { NavController, NavParams} from 'ionic-angular';
+import firebase from 'firebase';
 
 import { SingletonService } from '../../providers/singleton-service';
 
 import { ProfilePage } from '../../pages/profile/profile';
 import { CheckinDetailPage } from '../../pages/checkin-detail/checkin-detail';
+
 
 
 @Component({
@@ -24,11 +26,14 @@ export class CheckinComponent {
   public checkinPageId:any;
   public beerRating:any;
   public checkinTime:string;
+  public fbRef:any;
+  public userName:string;
 
   constructor(public sing:SingletonService, 
               public navCtrl:NavController ) {
     //console.log('Hello Checkin Component');
     this.check = {};
+    this.fbRef = firebase.database();
   }
 
   ngOnInit() {
@@ -41,6 +46,12 @@ export class CheckinComponent {
       this.beerRating = 0;
     else
       this.beerRating = this.check.beerRating;
+
+    //console.log('check',this.check);
+
+    this.fbRef.ref('/users/'+this.check.uid).once('value').then(snapshot=>{
+      this.userName = snapshot.val().name;
+    });
 
      this.checkinTime = this.getTimestamp(this.check.dateCreated);
      //this.cdRef.detectChanges();
@@ -76,5 +87,6 @@ export class CheckinComponent {
   getProfile(uid) {
     this.navCtrl.push(ProfilePage,{uid:uid,lookup:true});
   }
+
 
 }

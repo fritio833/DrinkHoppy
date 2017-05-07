@@ -17,11 +17,18 @@
   <ion-grid class="background-home">
     <ion-row>
       <ion-col>
+        <!--
         <div id="find-drinks-button" class="center">
-          <button ion-button round (click)="startSearch()">Search Beers &amp; Places</button>
+          <button ion-button color="white" clear (click)="startSearch()">Search Beers &amp; Places</button>
         </div>
-        <div class="right">
-          <button right ion-button small color="dark">{{sing.geoCity}}. Change?</button>
+        -->
+        <div id="city-select" class="right">
+          <button *ngIf="sing.hasLocation()" right ion-button small color="dark" (click)="changeCity()">
+            {{sing.getSelectCity()}}. Change?
+          </button>
+          <button *ngIf="!sing.hasLocation()" right ion-button small color="dark" (click)="changeCity()">
+            Pick a City
+          </button>
         </div>
       </ion-col>
     </ion-row>

@@ -5,28 +5,12 @@
 </ion-header>
 <ion-content>
   <img id="user-pic" [src]="checkinImg">
-  <ion-card>
-    <ion-card-header>Check-in Info</ion-card-header>
+  <ion-card (click)="getBeerDetail()">
+    <ion-card-header>
+       <ion-item><span item-left>Beer</span><span item-right>{{getDateMonthDayYear(dateCreated)}}</span></ion-item>
+    </ion-card-header>
     <ion-card-content>
       <ion-item>
-          <ion-avatar item-left *ngIf="userIMG" (click)="getProfile(uid)">
-            <img [src]="userIMG">
-          </ion-avatar>
-          <ion-avatar item-left *ngIf="!userIMG" (click)="getProfile(uid)">
-            <img src="images/default-profile.png">
-          </ion-avatar>
-          <span item-left>
-            <p class="check-name" (click)="getProfile(uid)">
-                <span>
-                  {{userName}}
-                </span>						 
-            </p>	
-          </span>
-          <span item-right>
-            <p class="check-timestamp">{{getDateMonthDayYear(dateCreated)}}</p>
-          </span>
-      </ion-item>
-      <ion-item (click)="getBeerDetail()">
         <ion-thumbnail item-left>
           <img [src]="beerIMG">
         </ion-thumbnail>
@@ -37,7 +21,7 @@
           <p *ngIf="servingStyleName!=''">
             <ion-icon name="beer"></ion-icon>&nbsp;{{servingStyleName}}
           </p>        
-        </span>
+        </span>       
       </ion-item>
       <ion-item *ngIf="comments!=''" text-wrap class="botton-border-item">
         <ion-icon color="check" item-left name="quote"></ion-icon>
@@ -68,4 +52,41 @@
       </ion-item>
     </ion-card-content>
   </ion-card>
+  <ion-card>
+    <ion-card-content>
+      <ion-item  (click)="getProfile(uid)">
+          <ion-avatar item-left *ngIf="userIMG">
+            <img [src]="userIMG">
+          </ion-avatar>
+          <ion-avatar item-left *ngIf="!userIMG">
+            <img src="images/default-profile.png">
+          </ion-avatar>
+          <span item-left>
+            <p class="check-name" (click)="getProfile(uid)">
+              {{userName}}
+            </p>
+            <p>Reputation: {{userRep}}</p>
+            <p>Check-ins: {{numCheckins}}</p>	
+          </span>
+      </ion-item>
+      <ion-item>
+        <p item-left>Has {{userName}} been helpful? Give a thumbs up!</p>
+        <button ion-button icon-only clear item-right (click)="repUp()">
+          <ion-icon name="thumbs-up"></ion-icon>
+        </button>
+      </ion-item>
+      <ion-item>
+        <p item-left>False information? Give a thumbs down.</p>
+        <button ion-button icon-only clear item-right (click)="repDown()">
+          <ion-icon name="thumbs-down"></ion-icon>
+        </button>
+      </ion-item>
+      <ion-item>
+        <p item-left>Flag if inappropriate picture or comment.</p>
+        <button ion-button icon-only clear item-right (click)="flagCheckin()">
+          <ion-icon color="danger" name="flag"></ion-icon>
+        </button>
+      </ion-item>       
+    </ion-card-content>
+  </ion-card>  
 </ion-content>

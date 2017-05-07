@@ -32,6 +32,8 @@ export class SelectLocationPage {
   	  this.geo.cityAutoComplete(event.target.value).subscribe((success)=>{  	  	
   	  	this.citiesPredictions = success.predictions;
   	  	console.log(this.citiesPredictions);
+      },error=>{
+        console.log('error',error);
       }); 
   	}
   }
@@ -43,6 +45,7 @@ export class SelectLocationPage {
   		let cityState = this.geo.fixCityState(success);
   		this.sing.selectCity = cityState.city;
   		this.sing.selectState = cityState.state;
+      this.sing.selectCountry = cityState.country;
   		this.sing.selectLat = success.result.geometry.location.lat;
   		this.sing.selectLng = success.result.geometry.location.lng;
 
@@ -57,7 +60,7 @@ export class SelectLocationPage {
   }
 
   setCurrentLocation() {
-    this.sing.setCurrentLocation();
+    this.sing.setLocationToGeo();
     this.view.dismiss(true);
   }
 

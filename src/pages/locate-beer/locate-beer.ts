@@ -18,7 +18,6 @@ import firebase from 'firebase';
 export class LocateBeerPage {
 
   public beer:any;
-  public geoLocation:any;
   public fbRef:any;
   public locations:FirebaseListObservable<any>;
   public locationsLen:number;
@@ -50,55 +49,46 @@ export class LocateBeerPage {
       this.beerRating = rating;
     });
 
-    this.sing.getGeolocation().subscribe(geo=>{
-      console.log('geo',geo);
-      this.geoLocation = this.geo.getCityState
-      this.geo.reverseGeocodeLookup(geo.latitude,geo.longitude)
-        .subscribe((resp)=>{
-         this.geoLocation = resp;
-         
-         locKey = resp.city.toLowerCase()+'-'+resp.state.toLowerCase()+'-'+resp.country.toLowerCase();
-         console.log('/beer_by_city/'+locKey+'/'+this.beer.id+'/locations');
-         this.locations = this.angFire.database.list('/beer_by_city/'+locKey+'/'+this.beer.id+'/locations',{
-            query:{
-              orderByChild:'name',
-              limitToFirst: this.limit,
-              preserveSnapshot: true
-            }
-         });
 
-         this.locations.subscribe(resp=>{
-
-           this.locationsLen = resp.length;
-
-           if (this.locationsLen) {
-             this.beersFound = true;
-           }
-
-           for (var i=0;i<this.locationsLen;i++) {
-             let locPoint = {lat:geo.latitude,lng:geo.longitude};
-             let userPoint = {lat:resp[i].lat,lng:resp[i].lng};             
-             this.placeIMGS[resp[i].$key] = this.geo.getThumbnail(resp[i].photo,100);
-             let dist = this.geo.getDistance(locPoint,userPoint,true);
-             this.distance[resp[i].$key] = Math.round(dist * 10) / 10;
-           }
-
-           if (resp.length > 0) {
-             // If the last key in the list equals the last key in the database
-             if (resp[resp.length - 1].$key === this.lastKey) {
-               this.queryable = false;
-             } else {
-               this.queryable = true;
-             }
-           }             
-         });
-
-      },error=>{
-        console.log('error getBeerLocations',error);  
-      });       
-    },error=>{
-      console.log('error getBeerLocations',error);
+    var geo = this.sing.getLocation();
+    
+    locKey = this.sing.getLocationKey();
+    console.log('/beer_by_city/'+locKey+'/'+this.beer.id+'/locations');
+    this.locations = this.angFire.database.list('/beer_by_city/'+locKey+'/'+this.beer.id+'/locations',{
+      query:{
+        orderByChild:'name',
+        limitToFirst: this.limit,
+        preserveSnapshot: true
+      }
     });
+
+    this.locations.subscribe(resp=>{
+
+      this.locationsLen = resp.length;
+
+      if (this.locationsLen) {
+        this.beersFound = true;
+      }
+
+      for (var i=0;i<this.locationsLen;i++) {
+        let locPoint = {lat:geo.lat,lng:geo.lng};
+        let userPoint = {lat:resp[i].lat,lng:resp[i].lng};             
+        this.placeIMGS[resp[i].$key] = this.geo.getThumbnail(resp[i].photo,100);
+        let dist = this.geo.getDistance(locPoint,userPoint,true);
+        this.distance[resp[i].$key] = Math.round(dist * 10) / 10;
+      }
+
+      if (resp.length > 0) {
+        // If the last key in the list equals the last key in the database
+        if (resp[resp.length - 1].$key === this.lastKey) {
+          this.queryable = false;
+        } else {
+          this.queryable = true;
+        }
+      }             
+    });
+
+
   }
  
   getThumbnail(picURL) {

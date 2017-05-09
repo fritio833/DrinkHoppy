@@ -99,6 +99,12 @@
 		  No. Send Verify Email
 		</button>
 	</ion-item>
+	<ion-item (click)="getAchievements()">
+		<ion-label>
+			Unlocked Achievements
+		</ion-label>
+		<ion-icon name="arrow-forward" item-right></ion-icon>
+	</ion-item>	
 	<ion-item *ngIf="uniqueBreweries" (click)="viewVisitedBreweries()">
 		<ion-label>
 			Brewery Checked-Ins ({{uniqueBreweries}})

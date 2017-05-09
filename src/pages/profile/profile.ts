@@ -14,6 +14,7 @@ import firebase from 'firebase';
 import { FavoritesPage } from '../favorites/favorites';
 import { ProfileEditPage } from '../profile-edit/profile-edit';
 import { BreweryVisitsPage } from '../brewery-visits/brewery-visits';
+import { AchievementsPage } from '../achievements/achievements';
 
 @Component({
   selector: 'page-profile',
@@ -83,9 +84,12 @@ export class ProfilePage {
     this.navCtrl.push(BreweryVisitsPage,{lookup:this.isLookup,uid:this.uid,name:this.displayName});
   }
 
+  getAchievements() {
+    this.navCtrl.push(AchievementsPage,{uid:this.uid});
+  }
+
   getUserProfile(uid) {
 
-    this.showLoading();
     if (uid != null) {
       
       this.profileRef = firebase.database().ref('users/'+uid).on('value', snapshot => {
@@ -104,8 +108,7 @@ export class ProfilePage {
         if (!this.isLookup && this.user!=null) {
           //console.log('currUser',this.user);
           this.isEmailVerified = this.user.emailVerified;
-        }
-        this.loading.dismiss();            
+        }        
       });
 
       // Get points by month

@@ -75,5 +75,7 @@
       "ionic-plugin-keyboard": {},
       "com-sarriaroman-photoviewer": {}
     }
+  },"config": {
+    "ionic_source_map_type": "eval"
   }
 }

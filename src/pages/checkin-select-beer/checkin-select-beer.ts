@@ -83,6 +83,8 @@ export class CheckinSelectBeerPage {
         this.view.dismiss(resp.data);
       else
       	this.presentToast(beerName + ' no longer exists. Consider removing.');
+    },error=>{
+      console.log('error setBeer',error);
     });
   }
 

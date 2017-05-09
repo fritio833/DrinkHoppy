@@ -3,10 +3,13 @@ import { NavController, Events,LoadingController, ToastController, ModalControll
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 import { Storage } from '@ionic/storage';
 
+import firebase from 'firebase';
+
 import { SingletonService } from '../../providers/singleton-service';
 import { GoogleService } from '../../providers/google-service';
 import { BreweryService } from '../../providers/brewery-service';
 import { DemoService } from '../../providers/demo-service';
+import { AchievementsService } from '../../providers/achievements-service';
 
 import { ProfilePage } from '../profile/profile';
 import { SearchMenuPage } from '../search-menu/search-menu';
@@ -22,8 +25,9 @@ import { PopularLocationsPage } from '../popular-locations/popular-locations';
 import { RandomBeersPage } from '../random-beers/random-beers';
 import { EventInfoPage } from '../event-info/event-info';
 import { SelectLocationPage } from '../select-location/select-location';
+import { AchievementsPage } from '../achievements/achievements';
 
-import firebase from 'firebase';
+
 
 @Component({
   selector: 'page-home',
@@ -49,6 +53,7 @@ export class HomePage {
   public notifications:FirebaseListObservable<any>;
   public mostPopularBeer:any;
   public mostPopularLocation:any;
+  public achievement:any;
 
   constructor(public navCtrl: NavController, 
   	          public sing:SingletonService,
@@ -60,6 +65,7 @@ export class HomePage {
               public demo:DemoService,
               public geo:GoogleService,
               public angFire:AngularFire,
+              public achieve:AchievementsService,
   	          public storage:Storage) {
     this.fbRef = firebase.database();
   }
@@ -72,6 +78,8 @@ export class HomePage {
     this.storage.ready().then(()=>{
       this.storage.get('uid').then(uid=>{
         if (uid != null) {
+
+          this.uid = uid;
 
           // Get Notification Count
           this.notifications = this.angFire.database.list('/notifications_users/'+ uid,{
@@ -89,6 +97,10 @@ export class HomePage {
               this.notifyColor = 'yellow';
             else
               this.notifyColor = 'white';
+          });
+
+          this.achieve.getNextAchievement(uid).then(resp=>{
+            this.achievement = resp;
           });          
         }
       });
@@ -259,6 +271,10 @@ export class HomePage {
       content: 'Loading...'
     });
     this.loading.present();
+  }
+
+  seeAchievements() {
+    this.navCtrl.push(AchievementsPage,{uid:this.uid});
   }
 
   ionViewDidLoad() {

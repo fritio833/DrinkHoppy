@@ -17,6 +17,7 @@ import { GoogleService } from '../providers/google-service';
 import { ConnectivityService } from '../providers/connectivity-service';
 import { DemoService } from '../providers/demo-service';
 import { NotificationService } from '../providers/notification-service';
+import { AchievementsService } from '../providers/achievements-service';
 
 import { CheckinComponent } from '../components/checkin/checkin';
 
@@ -73,6 +74,8 @@ import { FeedsPage } from '../pages/feeds/feeds';
 import { BreweryVisitsPage } from '../pages/brewery-visits/brewery-visits';
 import { EventInfoPage } from '../pages/event-info/event-info';
 import { EventMapPage } from '../pages/event-map/event-map';
+import { AchievementsPage } from '../pages/achievements/achievements';
+import { AchievementsDetailPage } from '../pages/achievements-detail/achievements-detail';
 
 export const firebaseConfig = {
     apiKey: "AIzaSyCd-WZs4O8gNx9qVlwwyRdK6_qY60WuQl0",
@@ -157,7 +160,9 @@ const cloudSettings: CloudSettings = {
     FeedsPage,
     BreweryVisitsPage,
     EventInfoPage,
-    EventMapPage
+    EventMapPage,
+    AchievementsPage,
+    AchievementsDetailPage
   ],
   imports: [
     IonicModule.forRoot(MyApp),
@@ -220,7 +225,9 @@ const cloudSettings: CloudSettings = {
     FeedsPage,
     BreweryVisitsPage,
     EventInfoPage,
-    EventMapPage
+    EventMapPage,
+    AchievementsPage,
+    AchievementsDetailPage
   ],
   providers: [{provide: ErrorHandler, 
               useClass: IonicErrorHandler},
@@ -233,6 +240,7 @@ const cloudSettings: CloudSettings = {
               DbService,
               LocationService,
               NotificationService,
+              AchievementsService,
               DemoService,
               GoogleService,
               ConnectivityService]

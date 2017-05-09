@@ -122,7 +122,7 @@
         <p>Checked in {{mostPopularBeer.checkinCount * -1}} times</p>
       </ion-item>
     </ion-card-content>
-     <button item-right ion-button full (click)="getAllPopBeers()">View ALL Popular Beers</button>
+     <button item-right ion-button full (click)="getAllPopBeers()">ALL Popular Beers</button>
   </ion-card>
 
   <div class="card-head" *ngIf="mostPopularLocation">
@@ -143,27 +143,22 @@
         <p>Checked in {{mostPopularLocation.checkinCount * -1}} times</p>
       </ion-item>
     </ion-card-content>
-    <button item-right ion-button full (click)="getAllPopLocation()">View ALL POPULAR PLACES </button>
+    <button item-right ion-button full (click)="getAllPopLocation()">ALL POPULAR PLACES </button>
   </ion-card>
 
   <div class="card-head">
     <p><ion-icon name="trophy"></ion-icon>&nbsp;Challenges</p>
   </div>
-  <ion-card>
+  <ion-card id="achievement" *ngIf="achievement">
     <ion-card-content>
-      <ion-grid>
-        <ion-row>
-          <ion-col width-25>
-            <div class="center challenge-icon">
-              <ion-icon color="danger" name="pin"></ion-icon>
-            </div>
-          </ion-col>
-          <ion-col width-75>
-            <h3 id="challenge-label" class="center">My First Check-In</h3>
-            <p class="center">Find a location and check-in to unlock this badge.</p>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
+      <ion-item text-wrap>
+          <ion-thumbnail item-left>
+            <img [src]="achievement.img">
+          </ion-thumbnail>
+          <h3 id="challenge-label" class="center">{{achievement.name}}</h3>
+          <p class="center">{{achievement.description}}</p>
+      </ion-item>
     </ion-card-content>
+     <button ion-button full (click)="seeAchievements()">See ALL achievements</button>
   </ion-card>
 </ion-content>

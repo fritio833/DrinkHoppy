@@ -6,6 +6,7 @@ import { SingletonService } from '../../providers/singleton-service';
 
 import { ProfilePage } from '../../pages/profile/profile';
 import { CheckinDetailPage } from '../../pages/checkin-detail/checkin-detail';
+import { AchievementsDetailPage } from '../../pages/achievements-detail/achievements-detail';
 
 
 
@@ -28,6 +29,7 @@ export class CheckinComponent {
   public checkinTime:string;
   public fbRef:any;
   public userName:string;
+  public achievements = new Array();
 
   constructor(public sing:SingletonService, 
               public navCtrl:NavController ) {
@@ -46,8 +48,6 @@ export class CheckinComponent {
       this.beerRating = 0;
     else
       this.beerRating = this.check.beerRating;
-
-    //console.log('check',this.check);
 
     this.fbRef.ref('/users/'+this.check.uid).once('value').then(snapshot=>{
       this.userName = snapshot.val().name;
@@ -69,8 +69,6 @@ export class CheckinComponent {
   }
 
   getCheckinDetail(key) {
-    console.log('key',key);
-    console.log('page',this.checkPage);
 
     this.navCtrl.push(CheckinDetailPage,{checkinKey:key,page:this.checkPage,checkinPageId:this.checkinPageId});
   }
@@ -82,6 +80,10 @@ export class CheckinComponent {
   getLocation() {
 
     console.log('checkin clicked');
+  }
+
+  getAchievement(key) {
+    this.navCtrl.push(AchievementsDetailPage,{achieveId:key,uid:null})
   }
 
   getProfile(uid) {

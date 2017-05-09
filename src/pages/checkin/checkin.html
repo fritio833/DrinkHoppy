@@ -150,15 +150,38 @@
   <button *ngIf="beer" class="chk-btn" ion-button color="check" full (click)="doCheckin()">Check-in</button>
 </div>
 <div *ngIf="successfulCheckin">
-  <ion-card>
-    <ion-card-header>Check-in successful</ion-card-header>
+  <ion-list no-lines>
+    <ion-item>
+      <h2 item-left><ion-icon color="check" name="checkmark-circle"></ion-icon> Successful Check-In</h2>
+    </ion-item>
+    <ion-item>
+    <p id="points" *ngFor="let points of checkinPoints">
+      {{points}}        
+    </p>
+    </ion-item>
+    <ion-item>
+      <ion-label item-left>Total Points Earned</ion-label>
+      <ion-chip color="primary" item-right>
+        <ion-icon name="pint" color="dark"></ion-icon>
+        <ion-label>{{checkinScore}}</ion-label>
+      </ion-chip>
+    </ion-item>
+  </ion-list>
+  <ion-card *ngIf="achievements.length">
+    <ion-card-header>Congratulations!  You unlocked a badge</ion-card-header>
     <ion-card-content>
-      <p>
-        You earned {{checkinScore}} points.  Earn more points by entering a beer rating, comment, picture, and
-        if the beer is a bottle or can.
-      </p>
+      <ion-item *ngFor="let badge of achievements">
+        <ion-thumbnail item-left>
+          <img [src]="badge.img">
+        </ion-thumbnail>
+        <h2>{{badge.name}}</h2>
+      </ion-item>
     </ion-card-content>
   </ion-card>
-  <button *ngIf="beer" class="chk-btn" ion-button color="check" full (click)="cancel()">Close</button>
 </div>
 </ion-content>
+<ion-footer *ngIf="beer && successfulCheckin">
+  <button ion-button fullcolor="check" full (click)="cancel()">
+   Close
+  </button>
+</ion-footer>

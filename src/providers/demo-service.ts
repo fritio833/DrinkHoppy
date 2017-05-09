@@ -80,7 +80,8 @@ export class DemoService {
                 
                 if (error) {
                   console.log('error setBeerDemo',error);  //User found, don't increment unique counts
-                  observer.next(true);
+                  observer.next(false);
+                  observer.complete();
                 } else if (committed) {
                    this.fbRef.ref('/beers/'+data.beerId).transaction(value=>{
                        if (value) {
@@ -118,13 +119,16 @@ export class DemoService {
                      if (committed) { // Increment Unique Beers
                        console.log('unique checked in');
                        this.fbRef.ref('/users/'+data.uid+'/numOfUniqueBeers/').transaction(value=>{
+                         let uniqueCounts = (value||0)+1;
+                         observer.next(uniqueCounts);
+                         observer.complete();
                          return (value||0)+1;
                        },(error,committed,snapshot)=>{
                          if (error)
                            console.log('error setUniqueBeers',error);
+                           observer.error(error);
                        });
                      }
-                      observer.next(true);
                    });
                 }
               });
@@ -139,14 +143,17 @@ export class DemoService {
   setCheckinUserCount(uid) {
     return new Observable(observer => {
       this.fbRef.ref('/users/'+uid+'/checkins').transaction(value=>{
-          //value.cities[]       
-          return (value||0)+1;
+          //value.cities[]
+          let userCount = (value||0)+1
+          observer.next(userCount);
+          observer.complete();
+          return userCount;
       },(error,committed,snapshot)=>{
         if (error) {
           console.log('error setCheckinUserCount',error);
+          observer.error(error);
         }
       });
-      observer.next(true);
     });    
   }
 
@@ -177,23 +184,28 @@ export class DemoService {
           },(error,committed,snapshot)=>{
             if (error) {
               console.log('error setUserScore',error);
+            } else if (committed) {
+               observer.next(true);
+               observer.complete();
             }
           });
         }
       });
-      observer.next(true);
     });
   }
 
   setLocation(data) {
+    let foundNewLocation = false;
     return new Observable(observer => {
       this.fbRef.ref('/locations/'+data.placeId).transaction(value=>{
         if (value) {
+          foundNewLocation = false;
           value.photo = data.photo;
           value.rating = data.locationRating;
           value.checkinCount++;
           return value;
         } else {
+          foundNewLocation = true;
           let locData = {
             placeId:data.placeId,
             breweryId:data.breweryId,
@@ -216,15 +228,17 @@ export class DemoService {
         if (error)
           observer.error(error);
 
-        if(committed)
-          observer.next(true);
+        if(committed) {
+          observer.next(foundNewLocation);
+          observer.complete();
+        }
       });
     });    
   }
 
   setBeerByLocation(data) {
     return new Observable(observer => {
-
+      let checkedInNewBeerThisLocation = false;
       if (data.placeId!=null && data.placeId!='') {
         this.getUpdateTime().subscribe(priorityTime=>{
           this.fbRef.ref('/location_menu/'+ data.placeId +'/beers/'+data.beerId).transaction(value=>{
@@ -235,6 +249,7 @@ export class DemoService {
               //value.priority = this.getUpdateTime();
               return value;
             } else {
+              checkedInNewBeerThisLocation = true;
               let newBeer = {
                 uid:data.uid,
                 name:data.beerDisplayName,
@@ -278,10 +293,16 @@ export class DemoService {
                   },(error,committed,snapshot)=>{
                     if(error)
                       observer.error(error);
-                    if(committed)
-                      observer.next(true);
+                    if(committed) {
+                      observer.next(checkedInNewBeerThisLocation);
+                      observer.complete();
+                    }
                   });
+                } else {
+                  observer.next(checkedInNewBeerThisLocation);
+                  observer.complete();                  
                 }
+
              }
           });
         });
@@ -293,6 +314,12 @@ export class DemoService {
 
     return new Observable(observer => {
 
+      if (data.isBrewery === 'N') {
+        observer.next(false);
+        observer.complete();
+        return;      
+      }
+      let breweryObj = {newBrewery:false,uniqueBreweries:{},isUnique:false};
       let cityKey =  this.sing.getCityStateKey(data.city,data.state,data.country);              
       let beerCityRef = '';
       this.fbRef.ref('/brewery_by_city/'+cityKey+'/'+data.breweryId).transaction(value=>{
@@ -304,6 +331,7 @@ export class DemoService {
           value.rating = data.locationRating;
           return value;
         } else {
+            breweryObj.newBrewery = true;
             let location = {
               name:data.breweryName,
               placeId:data.placeId,
@@ -327,9 +355,11 @@ export class DemoService {
         }
       },(error,committed,snapshot)=>{
 
-        if (committed && data.isBrewery =='Y') {
+        if (committed && data.isBrewery === 'Y') {
            this.fbRef.ref('/users/'+data.uid+'/breweriesVisited/'+data.breweryId).transaction(value=>{
               if (value) {
+                observer.next(breweryObj);
+                observer.complete();
                 value.checkedIn++;
                 return value;
               } else {
@@ -343,16 +373,21 @@ export class DemoService {
                   checkedIn:1,
                   timestamp:firebase.database.ServerValue.TIMESTAMP
                 }
-                this.incrementUserBreweryVisited(data.uid);
+                this.incrementUserBreweryVisited(data.uid).subscribe(uniqueBreweryCount=>{
+                  breweryObj.isUnique = true;
+                  breweryObj.uniqueBreweries = uniqueBreweryCount;
+                  observer.next(uniqueBreweryCount);
+                  observer.complete();
+                });
                 return location;                
               }
            },(error,committed,snapshot)=>{
              if (error) {
                console.log('error setBreweryByCity',error);
+               observer.error(error);
              }
            });
         }
-          observer.next(true);
 
         if (error)
           observer.error(error);
@@ -362,13 +397,17 @@ export class DemoService {
   }
 
   incrementUserBreweryVisited(uid) {
-     this.fbRef.ref('/users/'+uid+'/uniqueBreweriesVisited/').transaction(value=>{
-       return (value||0)+1;
-     },(error,committed,snapshot)=>{
-       if (error) {
-         console.log('error incrementUserBreweryVisited',error);
-       }
-     });
+    return new Observable(observer => {
+      this.fbRef.ref('/users/'+uid+'/uniqueBreweriesVisited/').transaction(value=>{
+        let uniqueBreweries:number = (value||0)+1;
+        observer.next(uniqueBreweries);
+        return uniqueBreweries;
+      },(error,committed,snapshot)=>{
+        if (error) {
+          console.log('error incrementUserBreweryVisited',error);
+        }
+      });
+    });
   }
 
   setLocationbyCityDemo(data) {
@@ -406,9 +445,10 @@ export class DemoService {
         }
       },(error,committed,snapshot)=>{
 
-        if (committed)
+        if (committed) {
           observer.next(true);
-
+          observer.complete();
+        }
         if (error)
           observer.error(error);
       });
@@ -513,8 +553,10 @@ export class DemoService {
              if (error)
                observer.error(error);
             
-             if (committed)
+             if (committed) {
                observer.next(true);
+               observer.complete();
+             }
           });
         }
       });

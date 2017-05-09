@@ -1,7 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
 import { NavController, Platform, ModalController, ActionSheetController } from 'ionic-angular';
 import { Slides, NavParams, ViewController, LoadingController, AlertController, ToastController } from 'ionic-angular';
-
+import 'rxjs/add/observable/forkJoin';
+import { Observable } from 'rxjs/Observable';
 import { Geolocation, SocialSharing, Camera } from 'ionic-native';
 import { Ionic2RatingModule } from 'ionic2-rating';
 import { Storage } from '@ionic/storage';
@@ -15,6 +16,7 @@ import { SingletonService } from '../../providers/singleton-service';
 import { AuthService } from '../../providers/auth-service';
 import { DemoService } from '../../providers/demo-service';
 import { NotificationService } from '../../providers/notification-service';
+import { AchievementsService } from '../../providers/achievements-service';
 
 import { CheckinSelectBeerPage } from '../checkin-select-beer/checkin-select-beer';
 import { FriendsPage } from '../friends/friends';
@@ -69,6 +71,8 @@ export class CheckinPage {
   public checkinUsers = new Array();
   public notifyFriends:boolean;
   public successfulCheckin:boolean = false;
+  public achievements = new Array();
+  public checkinPoints = new Array();
 
   constructor(public navCtrl: NavController, 
   	          public params: NavParams,
@@ -86,6 +90,7 @@ export class CheckinPage {
               public angFire:AngularFire,
               public demo:DemoService,
               public storage:Storage,
+              public achieve:AchievementsService,
               public loadingCtrl:LoadingController) {
 
     this.beer = params.get('beer');
@@ -669,18 +674,37 @@ export class CheckinPage {
     this.geo.reverseGeocodeLookup(this.location.geometry.location.lat,this.location.geometry.location.lng)
     .subscribe((success)=> {
 
-      this.checkinScore += 25;  // base checkin point 
-      if (this.base64Image != null) // picture taken. Plus 10 points
-        this.checkinScore += 10;        
-
-      if (this.socialMessage.length > 10)
+      this.checkinScore += 25;  // base checkin point
+      this.checkinPoints.push('Checked in at a location - 25'); 
+      if (this.base64Image != null) { // picture taken. Plus 10 points
         this.checkinScore += 10;
+        this.checkinPoints.push('Picture taken - 10');
+      }   
 
-      if (this.beerRating!=0 && this.beerRating!=null)
-          this.checkinScore += 5; // gave rating +5
+      if (this.socialMessage.length < 20 && this.socialMessage.length > 1) {
+        this.checkinScore += 10;
+        this.checkinPoints.push('Left a short comment - 10');
+      }
+      
+      if (this.socialMessage.length > 20) {
+        this.checkinScore += 15;
+        this.checkinPoints.push('Left a descriptive comment - 15');        
+      }
 
-      if (this.servingStyleName != null)
+      if (this.beerRating!=0 && this.beerRating!=null) {
+        this.checkinScore += 5; // gave rating +5
+        this.checkinPoints.push('Gave a beer rating - 5'); 
+      }
+
+      if (this.servingStyleName != null) {
         this.checkinScore += 5; // set beer container. +5
+        this.checkinPoints.push('Selected serving style - 5'); 
+      }
+
+      if (this.checkinUsers.length) {
+        this.checkinScore += 5; // set beer container. +5
+        this.checkinPoints.push('Tagged a friend - 5'); 
+      }      
 
       if (this.location.hasOwnProperty('rating'))
         locationRating = this.location.rating;
@@ -705,6 +729,7 @@ export class CheckinPage {
         country:success.country,
         comments:this.socialMessage,
         friends:this.checkinUsers,
+        achievements:'',
         img:'',
         isBrewery:'N'
       }
@@ -725,30 +750,75 @@ export class CheckinPage {
 
         this.setBeerData(locationData);
 
+        //this.achieve.setCountAchievement(locationData);
         //console.log('locData',locationData);
         //set demographics for beer && set beer for locations
-        this.demo.setBeerDemo(locationData).subscribe(resp=>{});  
-        this.demo.setBeerByCityDemo(locationData).subscribe(resp=>{});
-        this.demo.setBeerByLocation(locationData).subscribe(resp=>{});
-        this.demo.setLocation(locationData).subscribe(resp=>{});
-        this.demo.setLocationbyCityDemo(locationData).subscribe(resp=>{});
-        this.demo.setBreweryByCity(locationData).subscribe(resp=>{});
+        Observable.forkJoin(
+          this.demo.setBeerDemo(locationData),  // 0  
+          this.demo.setBeerByCityDemo(locationData), // 1
+          this.demo.setBeerByLocation(locationData), // 2
+          this.demo.setLocation(locationData),  // 3
+          this.demo.setLocationbyCityDemo(locationData), // 4
+          this.demo.setCheckinUserCount(this.user.uid), // 5
+          this.demo.setUserScore(this.user.uid,this.checkinScore,locationData), // 6        
+          this.demo.setBreweryByCity(locationData)).subscribe(resp=>{ // 7
+            console.log('fork resp',resp);
+            
+            if (resp[2]) {
+              this.checkinScore += 25; // set beer container. +5
+              this.checkinPoints.push('Checked-in a new beer at this locaiton - 25');               
+            }
 
-        //set checkin count for user
-        this.demo.setCheckinUserCount(this.user.uid).subscribe(resp=>{});
-        this.demo.setUserScore(this.user.uid,this.checkinScore,locationData).subscribe(resp=>{});
-      }
-      // Upload Picture and save it to firebase storage
-      if (this.base64Image != null) {
-        this.setCheckinIMG().then(downloadURL=>{
-          locationData['img'] = downloadURL;
-          this.setCheckinData(locationData);
-        }).catch(error=>{
-          console.log('error uploadImg',error);
+            if (resp[3]) {
+              this.checkinScore += 25; // set beer container. +5
+              this.checkinPoints.push('First to check-in at this locaiton - 50');               
+            }
+
+            Observable.forkJoin(
+              this.achieve.getAchievement(this.user.uid,locationData.beerCategoryName,'beerCategory'),
+              this.achieve.setCountAchievement(this.user.uid,resp[5])).subscribe(achieve=>{
+              let achieveArray = new Array();
+              let achieveCount = 0;
+              for (var i = 0; i < achieve.length; i++) {
+                if (achieve[i]) {
+                  achieveCount++;
+                  this.achievements.push(achieve[i]);
+                  achieveArray.push({key:achieve[i]['key'],img:achieve[i]['img']});
+                }
+              }
+
+              if (achieveCount) {
+                locationData['achievements'] = achieveArray;
+              }
+
+              console.log('achieve',this.achievements);
+              /*
+              if (achieve) {
+                this.achievements.push(achieve[1]);
+                console.log('location achieve',achieve[1]);
+                locationData['achievements'] = achieve['key']; 
+              } 
+              */            
+
+              // Upload Picture and save it to firebase storage
+              if (this.base64Image != null) {
+                this.setCheckinIMG().then(downloadURL=>{
+                  locationData['img'] = downloadURL;
+                  this.setCheckinData(locationData);
+                }).catch(error=>{
+                  console.log('error uploadImg',error);
+                });
+              } else {
+                this.setCheckinData(locationData);
+              }
+
+            });
+        },error=>{
+          console.log('fork error',error);
+           this.loading.dismiss().catch(()=>{});
         });
-      } else {
-        this.setCheckinData(locationData);
       }
+
     },error=>{
       console.log('error reverseGeocodeLookup',error);
       this.loading.dismiss();
@@ -807,7 +877,6 @@ export class CheckinPage {
           beerData['breweryId'] = this.beer.breweries[0].id;
           beerData['breweryName'] = this.beer.breweries[0].name;
           beerData['breweryShortName'] = this.beer.breweries[0].nameShortDisplay;
-          console.log('brewery beer',this.brewery);
 
           if (this.brewery != null && this.brewery.hasOwnProperty('locationTypeDisplay'))
             beerData['breweryType'] = this.brewery.locationTypeDisplay;
@@ -869,6 +938,7 @@ export class CheckinPage {
               
       }).catch(error=>{
         console.log('error',error);
+        that.loading.dismiss().catch(()=>{});
       });
       
     }); 

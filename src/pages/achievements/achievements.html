@@ -1,0 +1,19 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>Achievement List</ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content class="white-background">
+  <ion-list no-lines>
+    <ion-item>
+    <div class="achievements" *ngFor="let achievement of achievements">
+      <ion-thumbnail *ngIf="achievement.earned" (click)="getDetail(achievement.key)">
+        <img [src]="achievement.img">
+      </ion-thumbnail>
+      <ion-thumbnail *ngIf="!achievement.earned" class="gray-badge" (click)="getDetail(achievement.key)">
+        <img [src]="achievement.img">
+      </ion-thumbnail>      
+    </div>
+    </ion-item>
+  </ion-list>
+</ion-content>

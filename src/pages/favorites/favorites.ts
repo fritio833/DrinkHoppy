@@ -142,6 +142,7 @@ export class FavoritesPage {
 
     },error=>{
       console.log('error',error);
+      this.loading.dismiss().catch(()=>{});
     });
      
   }

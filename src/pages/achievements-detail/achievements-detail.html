@@ -1,0 +1,26 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>Achievement Detail</ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content class="white-background">
+  <ion-list no-lines *ngIf="achievement">
+    <ion-item text-wrap>
+      <ion-thumbnail item-left>
+        <img [src]="achievement.img">
+      </ion-thumbnail>
+      <h2>{{achievement.name}}</h2>
+      <p>{{achievement.description}}</p>
+      <p *ngIf="achievement.recurring">
+        Repeatable
+      </p>
+      <p *ngIf="achievement.count && achievement.recurring">
+       Number times unlocked: {{achievement.count}}
+      </p>
+      <p *ngIf="achievement.progress">
+        {{achievement.progress}} out of {{achievement.completion}}
+      </p>
+      <p *ngIf="achievement.earnDate">Unlocked: {{sing.getDateMonthDayYear(achievement.earnDate)}}</p>
+    </ion-item>
+  </ion-list>
+</ion-content>

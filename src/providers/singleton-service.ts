@@ -19,7 +19,7 @@ export class SingletonService {
   public realName:string = '';
   public token:string = '';
   public description:string = '';
-  public environment = 'dev';
+  public environment = 'production';  // set to dev or production
   public geoCity = null;
   public geoState = null;
   public geoCountry = null;
@@ -359,7 +359,7 @@ export class SingletonService {
         found = true;
 
         if (timeDifference > 30)
-          indexToRemove = i; //this.checkBeerArray.slice()
+          indexToRemove = i;
         else
           this.checkBeerArray[i].checkinTime = dateTime;
 

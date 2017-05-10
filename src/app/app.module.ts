@@ -7,11 +7,9 @@ import { AngularFireModule, AuthProviders, AuthMethods } from 'angularfire2';
 import { CloudSettings, CloudModule } from '@ionic/cloud-angular';
 import { PhotoViewer } from '@ionic-native/photo-viewer';
 
-import { FbProvider } from '../providers/fb-provider';
 import { BreweryService } from '../providers/brewery-service';
 import { SingletonService } from '../providers/singleton-service';
 import { AuthService } from '../providers/auth-service';
-import { DbService } from '../providers/db-service';
 import { LocationService } from '../providers/location-service';
 import { GoogleService } from '../providers/google-service';
 import { ConnectivityService } from '../providers/connectivity-service';
@@ -21,10 +19,8 @@ import { AchievementsService } from '../providers/achievements-service';
 
 import { CheckinComponent } from '../components/checkin/checkin';
 
-import { HelloIonicPage } from '../pages/hello-ionic/hello-ionic';
 import { ItemDetailsPage } from '../pages/item-details/item-details';
 import { ListPage } from '../pages/list/list';
-import { CreateAccountPage } from '../pages/create-account/create-account';
 import { CreateAccountFinalPage } from '../pages/create-account-final/create-account-final';
 import { SuccessPage } from '../pages/success/success';
 import { ChooseCategoryPage } from '../pages/choose-category/choose-category';
@@ -33,7 +29,6 @@ import { BeerListPage } from '../pages/beer-list/beer-list';
 import { SwipePage } from '../pages/swipe/swipe';
 import { SearchPage } from '../pages/search/search';
 import { BeerDetailPage } from '../pages/beer-detail/beer-detail';
-import { MyPubPage } from '../pages/my-pub/my-pub';
 import { LoginPage } from '../pages/login/login';
 import { FavoritesPage } from '../pages/favorites/favorites';
 import { ProfilePage } from '../pages/profile/profile';
@@ -49,7 +44,6 @@ import { LocationDetailPage } from '../pages/location-detail/location-detail';
 import { CheckinPage }  from '../pages/checkin/checkin';
 import { CheckinDetailPage }  from '../pages/checkin-detail/checkin-detail';
 import { CheckinSelectBeerPage } from '../pages/checkin-select-beer/checkin-select-beer';
-import { TackMapPage } from '../pages/tack-map/tack-map';
 import { LocationMapPage } from '../pages/location-map/location-map';
 import { SearchStartPage } from '../pages/search-start/search-start';
 import { SearchBeerPage } from '../pages/search-beer/search-beer';
@@ -107,10 +101,8 @@ const cloudSettings: CloudSettings = {
 @NgModule({
   declarations: [
     MyApp,
-    HelloIonicPage,
     ItemDetailsPage,
     ListPage,
-    CreateAccountPage,
     CreateAccountFinalPage,
     SuccessPage,
     ChooseCategoryPage,
@@ -119,7 +111,6 @@ const cloudSettings: CloudSettings = {
     BeerDetailPage,
     SwipePage,
     SearchPage,
-    MyPubPage,
     LoginPage,
     FavoritesPage,
     ProfilePage,
@@ -136,7 +127,6 @@ const cloudSettings: CloudSettings = {
     CheckinPage,
     CheckinDetailPage,
     CheckinSelectBeerPage,
-    TackMapPage,
     LocationMapPage,
     SearchStartPage,
     SearchBeerPage,
@@ -173,10 +163,8 @@ const cloudSettings: CloudSettings = {
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    HelloIonicPage,
     ItemDetailsPage,
     ListPage,
-    CreateAccountPage,
     CreateAccountFinalPage,
     SuccessPage,
     ChooseCategoryPage,
@@ -185,7 +173,6 @@ const cloudSettings: CloudSettings = {
     BeerDetailPage,
     SwipePage,
     SearchPage,
-    MyPubPage,
     LoginPage,
     FavoritesPage,
     ProfilePage,
@@ -202,7 +189,6 @@ const cloudSettings: CloudSettings = {
     CheckinPage,
     CheckinDetailPage,
     CheckinSelectBeerPage,
-    TackMapPage,
     LocationMapPage,
     SearchStartPage,
     SearchBeerPage,
@@ -234,10 +220,8 @@ const cloudSettings: CloudSettings = {
               BreweryService,
               Storage,
               PhotoViewer,
-              FbProvider,
               SingletonService,
               AuthService,
-              DbService,
               LocationService,
               NotificationService,
               AchievementsService,

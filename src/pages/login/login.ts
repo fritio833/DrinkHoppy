@@ -4,7 +4,6 @@ import { Validators, FormBuilder } from '@angular/forms';
 import { Storage } from '@ionic/storage';
 import { AuthProviders, AuthMethods, AngularFire  } from 'angularfire2';
 
-import { FbProvider } from '../../providers/fb-provider';
 import { ValidationService } from '../../providers/validation-service';
 import { SingletonService } from '../../providers/singleton-service';
 import { AuthService } from '../../providers/auth-service';
@@ -34,8 +33,7 @@ export class LoginPage {
   constructor(public navCtrl: NavController, 
               public params: NavParams,
               public alertCtrl: AlertController,
-              public form: FormBuilder,
-              public fb:FbProvider, 
+              public form: FormBuilder, 
               public storage: Storage,
               public sing: SingletonService,
               public auth:AuthService,

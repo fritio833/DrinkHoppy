@@ -166,9 +166,9 @@ export class BeerDetailPage {
 
     // fix beers with no images
     if (!this.beer.hasOwnProperty('labels')) {
-      this.beer['labels'] = {icon:'images/no-image.jpg',
-                             medium:'images/no-image.jpg',
-                             large:'images/no-image.jpg'};
+      this.beer['labels'] = {icon:null,
+                             medium:null,
+                             large:null};
     }
 
     // fix breweries without pictures

@@ -97,6 +97,15 @@ export class BreweryService {
     }
   }
 
+  getFestivals() {
+    return this.http.get(this.breweryDbUrl 
+           + 'events/?key=' 
+           + this.breweryDbAPI 
+           + '&type=festival&year=2017')
+           .retryWhen(error => error.delay(500))
+           .timeout(5000)
+           .map(res => res.json());    
+  }
   findBeerByName(name) {
     return this.http.get(this.breweryDbUrl 
            + 'search/?key=' 

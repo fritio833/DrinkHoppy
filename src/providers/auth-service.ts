@@ -10,7 +10,6 @@ import 'rxjs/add/operator/map';
 import { Storage } from '@ionic/storage';
 
 import { SingletonService } from './singleton-service';
-import { DbService } from './db-service';
 
 import { HomePage } from '../pages/home/home';
 import { LoginPage } from '../pages/login/login';
@@ -39,8 +38,7 @@ export class AuthService {
               public storage:Storage,
               public platform:Platform,
               public events:Events,
-              public app:App,
-              public db:DbService) {
+              public app:App) {
     this.auth = firebase.auth();
     this.userRef = firebase.database();
     this.userExistsRef = firebase.database();
@@ -252,54 +250,7 @@ export class AuthService {
 
   }
  
-  public login(credentials) {
-    if (credentials.email === null || credentials.password === null) {
-      return Observable.throw("Please insert credentials");
-    } else {
-      return Observable.create(observer => {
-        // At this point make a request to your backend to make a real check!
-        // login could be user name.  Backend makes the check.
 
-        this.db.loginUser(credentials)
-           .subscribe(allowed => {
-            //console.log(allowed);
-            let access = false;
-
-            if (allowed.status) {
-
-              access = true;
-      
-              this.currentUser = new User(allowed.data.name, allowed.data.email);
-
-              this.sing.loggedIn = true;
-
-              this.storage.set('loggedIn',true);
-              this.storage.set('token',allowed.data.token)
-              this.storage.set('email',credentials.email);
-              this.storage.set('userName',allowed.data.username);
-              this.storage.set('name',allowed.data.name);
-              this.storage.set('isFB', allowed.data.is_facebook);
-              this.storage.set('fbID', allowed.data.fb_id);
-              this.storage.set('fbPic', allowed.data.fb_pic);
-              this.storage.set('description', allowed.data.description);
-
-              this.setSingletonData();
-
-            } else {
-               access = false;
-               console.log('login fail');
-            }
-
-            observer.next(access);
-            observer.complete();
-
-         },error => {
-            console.log(error);
-         });
-
-      });
-    }
-  }
  
   public register(credentials) {
     if (credentials.email === null || credentials.password === null) {
@@ -382,50 +333,4 @@ export class AuthService {
     });
   }
 
-  public logout() {
-    return Observable.create(observer => {
-      this.currentUser = null;
-
-      this.storage.ready().then(()=>{
-
-        // store favorites before we destroy it
-        this.storage.get('beers').then((beers)=>{
-
-          console.log('beers to delete',beers);
-          this.storage.get('token').then((token)=>{
-
-              // If we have no beers to save, don't bother saving nothing.
-              if(beers!=null){
-
-                this.db.saveFavoriteBeers(token,JSON.stringify(beers)).subscribe((success)=>{
-                   console.log(success);
-                   //this.storage.clear();
-
-                });
-              } 
-          });          
-        });
-
-
-  	    this.storage.remove('loggedIn');
-        this.storage.remove('user');
-        this.storage.remove('token');
-        this.storage.remove('userName');
-        this.storage.remove('name');
-        this.storage.remove('email');
-        this.storage.remove('isFB');
-        this.storage.remove('fbID');
-        this.storage.remove('fbPic');        
-        this.storage.remove('description');
-        this.sing.token = '';
-  	    this.sing.loggedIn = false;
-        
-        
-        observer.next(true);
-        observer.complete();          
-
-      });
-
-    });
-  }
 }

@@ -10,7 +10,7 @@
 		<ion-spinner></ion-spinner>
 	</div>
   <ion-thumbnail item-left *ngIf="beerLoaded">
-	    <img [src]="beer?.labels.medium" />
+	    <img *ngIf="beer.labels.medium" [src]="beer?.labels.medium" />
   </ion-thumbnail>
 	<span item-left *ngIf="beerLoaded">
 	    <b>{{beer?.name}}</b>

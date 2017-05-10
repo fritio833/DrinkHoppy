@@ -44,6 +44,7 @@ export class BreweryDetailPage {
   public queryable:boolean = true;
   public fbRef:any;
   public uid:any;
+  public locationHours:any;
 
   constructor(public navCtrl: NavController, 
               public params: NavParams,
@@ -60,10 +61,14 @@ export class BreweryDetailPage {
     this.breweryBeers = params.get('beers');
     this.location = params.get('place');
     //console.log('place',this.location);
-    //console.log('brewery',this.brewery);
+    console.log('brewery',this.brewery);
     this.fbRef = firebase.database();
     this.checkinsPerPage = sing.checkinsPerPage;
     this.limit = new BehaviorSubject(this.checkinsPerPage);
+
+    if (this.params.get('loading')!=null) {
+      this.params.get('loading').dismiss();
+    }    
 
     this.storage.ready().then(()=>{
       this.storage.get('uid').then(uid=>{
@@ -85,10 +90,10 @@ export class BreweryDetailPage {
 
     if (!this.brewery.brewery.hasOwnProperty('images')) {
       
-      this.brewery['brewery']['images'] = {icon:'images/no-image.jpg',
-                                           medium:'images/no-image.jpg',
-                                           squareMedium:'images/no-image.jpg', 
-                                           large:'images/no-image.jpg'};      
+      this.brewery['brewery']['images'] = {icon:null,
+                                           medium:null,
+                                           squareMedium:null, 
+                                           large:null};      
     }
     
 
@@ -120,9 +125,12 @@ export class BreweryDetailPage {
     
     this.fbRef.ref('/favorite_locations/'+this.uid+'/'+this.location.place_id).set({
       photo:locPhoto,
-      name:this.brewery.name,
-      placeType:this.brewery.name,
+      name:this.brewery.brewery.name,
+      placeType:this.brewery.locationTypeDisplay,
       vicinity:this.location.vicinity,
+      breweryId:this.brewery.breweryId,
+      breweryLocId:this.brewery.id,
+      breweryIMG:this.brewery.brewery.images.icon,
       isBrewery:'Y'
     }).then(resp=>{
       this.presentToast(this.location.name+' saved to favorites');
@@ -327,6 +335,23 @@ export class BreweryDetailPage {
     console.log('ionViewDidLoad BreweryDetailPage');
 
     this.getCheckIns();
+
+    if (this.location.hasOwnProperty('opening_hours')) {
+      console.log(this.location.opening_hours);
+      //this.locationHours = this.location.opening_hours.weekday_text;
+      let dayOfWeek;
+
+      dayOfWeek = this.location.opening_hours.weekday_text[new Date().getDay()];
+
+      this.locationHours = dayOfWeek;
+    
+      this.locationOpen = this.location.opening_hours.open_now;
+         
+    }
+    else {
+      this.locationHours = null;
+      this.locationOpen = null;
+    }
 
     // get rating from google places
     if (this.location != null && this.location.hasOwnProperty('rating'))

@@ -33,15 +33,13 @@
 			              <span *ngIf="brewery.openToPublic == 'N'">&#8226; Not Open to Public</span>
               </span>
 				    </p>
+						<p class="hours" *ngIf="!locationOpen && locationHours">
+							Closed. {{locationHours}}
+						</p>
+						<p class="hours" *ngIf="locationOpen && locationHours">
+							Open from {{locationHours}}
+						</p>												
 			    </div>
-			  </div>
-			  <div align="right">
-				<p [hidden]="locationOpen || locationOpen==null">
-					<ion-badge color="dark">Currently Closed</ion-badge>
-				</p>
-				<p [hidden]="!locationOpen || locationOpen==null">
-					<ion-badge color="dark">Currently Open</ion-badge>
-				</p>			  	
 			  </div>
 			</ion-col>
 		</ion-row>

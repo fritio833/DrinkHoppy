@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { NavController, NavParams, LoadingController, ToastController, ModalController, ActionSheetController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
+import { Observable } from 'rxjs/Observable';
 import firebase from 'firebase';
 
 import { SingletonService } from '../../providers/singleton-service';
@@ -130,22 +131,95 @@ export class FavoritesPage {
     toast.present();
   }   
 
-  getLocation(locKey) {
+  getLocation(loc) {
      
     this.showLoading();
 
-    console.log(locKey);
+    if (loc.isBrewery=='Y') {
+      this.getBrewery(loc);
+    } else {
+      this.geo.placeDetail(loc.$key).subscribe((resp)=>{
 
-    this.geo.placeDetail(locKey).subscribe((resp)=>{
+        this.navCtrl.push(LocationDetailPage,{location:resp.result,loading:this.loading});
 
-      this.navCtrl.push(LocationDetailPage,{location:resp.result,loading:this.loading});
-
-    },error=>{
-      console.log('error',error);
-      this.loading.dismiss().catch(()=>{});
-    });
-     
+      },error=>{
+        console.log('error',error);
+        this.loading.dismiss().catch(()=>{});
+      });
+    }     
   }
+
+  getBrewery(loc) {
+
+    let foundBrewpub:number = -1;
+
+    this.showLoading();
+
+    console.log('breweryId',loc.breweryId);
+      this.beerAPI.loadBreweryLocations(loc.breweryId).subscribe((success)=>{
+        console.log('brewery locations',success);
+        for (let i = 0; i < success.data.length; i++) {
+          if (success.data[i].id == loc.breweryLocId) {
+            foundBrewpub = i;
+            break;
+          }
+        }
+
+        if (foundBrewpub == -1) {
+          foundBrewpub = 0;
+        }
+        //console.log('brewery',brewery);
+        //console.log('breweryLoc',success.data[foundBrewpub]);
+        
+        this.getBreweryFromGoogle(loc.name,
+                                  success.data[foundBrewpub].latitude,
+                                  success.data[foundBrewpub].longitude).subscribe(resp=>{
+          //console.log('data',resp['result']);
+          
+          this.beerAPI.loadLocationById(success.data[foundBrewpub].id).subscribe((pub)=>{
+                  
+            this.beerAPI.loadBreweryBeers(pub.data.breweryId).subscribe((beers)=>{
+
+                this.loading.dismiss();
+                this.navCtrl.push(BreweryDetailPage,{brewery:pub.data,beers:beers,place:resp['result'],loading:this.loading});
+            },error=>{
+              console.log('error',error);
+              this.loading.dismiss().catch(() => {});
+              this.presentToast('Could not connect. Check connection.');
+            });
+            
+          },error=>{
+            console.log('error',error);
+            this.loading.dismiss().catch(() => {});
+            this.presentToast('Could not connect. Check connection.');
+          });
+        });
+        
+      },error=>{
+        console.log('error',error);
+        this.loading.dismiss().catch(() => {});
+        this.presentToast('Could not connect. Check connection.');
+      });   
+  }
+
+  getBreweryFromGoogle(breweryName,lat,lng) {
+    //console.log('brewery',brewery);
+    let _breweryName = encodeURIComponent(breweryName);
+
+    return new Observable(observer=>{
+      this.geo.getPlaceByOrigin(_breweryName,lat,lng).subscribe(pub=>{
+        if (pub.results.length) {
+          //Get place detail
+          this.geo.placeDetail(pub.results[0].place_id).subscribe(detail=>{
+            //console.log('detail',detail);
+            observer.next(detail);
+          });
+        } else {
+          observer.next(false);
+        }
+      });      
+    });
+  }  
 
   ignoreMe() {
     console.log('yolo');
@@ -169,6 +243,14 @@ export class FavoritesPage {
       }
     });
 
+  }
+
+  removeFavoriteLocation(loc) {
+    //console.log('loc',loc);
+    
+    this.fbRef.ref('/favorite_locations/'+this.uid+'/'+loc.$key).remove().then(resp=>{
+      this.presentToast(loc.name + ' removed from favorites');
+    });
   }
 
   removeFavoriteBeer(beer) {

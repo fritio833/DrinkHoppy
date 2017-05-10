@@ -89,6 +89,8 @@ export class SearchBreweriesPage {
         } else {
           observer.next(false);
         }
+      },error=>{
+        observer.error(error);
       });      
     });
   
@@ -101,6 +103,8 @@ export class SearchBreweriesPage {
   
     this.showLoading('Loading Brewery...');
         
+
+    // Autocomplete Search    
     if (!brewery.hasOwnProperty('breweryId') && brewery.hasOwnProperty('id')) {
 
       this.beerAPI.loadBreweryLocations(brewery.id).subscribe((success)=>{
@@ -148,7 +152,7 @@ export class SearchBreweriesPage {
         this.presentToast('Could not connect. Check connection.');
       });
       
-    } else {
+    } else {  // Geo Search
 
       // Use Google Places to associated with BreweryDB
       let breweryName = encodeURIComponent(brewery.brewery.name);
@@ -192,9 +196,9 @@ export class SearchBreweriesPage {
       // fix beers with no images
       if (!breweries[i]['brewery'].hasOwnProperty('images')) {
         breweries[i]['brewery']['images'] = {icon:null,
-                                             medium:'images/no-image.jpg',
-                                             squareMedium:'images/no-image.jpg', 
-                                             large:'images/no-image.jpg'};
+                                             medium:null,
+                                             squareMedium:null, 
+                                             large:null};
       }
       breweries[i].name = breweries[i].brewery.name; 
     }

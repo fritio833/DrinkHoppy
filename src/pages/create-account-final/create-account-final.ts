@@ -4,7 +4,6 @@ import { Validators, FormBuilder } from '@angular/forms';
 
 
 import { ValidationService } from '../../providers/validation-service';
-import { DbService } from '../../providers/db-service';
 import { AuthService } from '../../providers/auth-service';
 
 import { MyPubPage } from '../my-pub/my-pub';
@@ -37,8 +36,7 @@ export class CreateAccountFinalPage {
   constructor(public navCtrl: NavController, 
               public navParams: NavParams, 
               public view: ViewController,
-              public form: FormBuilder, 
-              public db: DbService,
+              public form: FormBuilder,
               public loadingCtrl: LoadingController, 
               public alertCtrl: AlertController, 
               public auth:AuthService) {
@@ -89,26 +87,7 @@ export class CreateAccountFinalPage {
       //TODO:  Prompt screen of errors
       this.presentAlert("Fix the following erros to continue.");
     }
-  }
-
-
-
-  loginEmail(email,password) {
-
-    let loginCredentials = {email:email,password:password,socialLogin:0};
-
-    this.auth.login(loginCredentials).subscribe(allowed => {
-      if (allowed) {
-        setTimeout(() => {
-        this.loading.dismiss();
-        this.navCtrl.setRoot(HomePage)
-        });
-      }
-    },
-    error => {
-      console.log(error);
-    });    
-  }  
+  } 
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad CreateAccountFinalPage');

@@ -29,7 +29,8 @@
       </ion-item-options>       
       <ion-item>
         <ion-thumbnail item-left>
-          <img [src]="beer.labels.icon" />
+          <img *ngIf="beer.labels" [src]="beer.labels.icon" />
+          <img *ngIf="!beer.labels && beer.breweries && beer.breweries.length && beer.breweries[0].images" [src]="beer.breweries[0].images.icon">
         </ion-thumbnail>
         <h2>{{ beer.name }}</h2>
         <p>{{ beer.breweries[0].name}}</p>
@@ -41,14 +42,15 @@
   <ion-list *ngSwitchCase="'locationlist'">
     <ion-item-sliding *ngFor="let location of favLocations | async">
       <ion-item-options side="left">
-        <button ion-button (click)="removeFavoriteBeer(beer)" color="dark">
+        <button ion-button (click)="removeFavoriteLocation(location)" color="dark">
            <ion-icon name="trash"></ion-icon>
           Remove
         </button>      
       </ion-item-options>       
-      <ion-item text-wrap (click)="getLocation(location.$key)">
+      <ion-item text-wrap (click)="getLocation(location)">        
         <ion-thumbnail item-left>
-          <img *ngIf="location.photo" [src]="location.photo" />
+          <img *ngIf="location.isBrewery=='N' && location.photo" [src]="location.photo" />
+          <img *ngIf="location.isBrewery=='Y' && location.breweryIMG" [src]="location.breweryIMG" />
         </ion-thumbnail>
         <h2>{{ location.name }}</h2>
         <p>{{ location.placeType }}</p>

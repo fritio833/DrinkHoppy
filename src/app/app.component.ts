@@ -7,7 +7,6 @@ import firebase from 'firebase';
 
 import { SingletonService } from '../providers/singleton-service';
 import { GoogleService } from '../providers/google-service';
-import { ConnectivityService } from '../providers/connectivity-service';
 import { AuthService } from '../providers/auth-service';
 
 import { LoginPage } from '../pages/login/login';
@@ -18,7 +17,6 @@ import { Storage } from '@ionic/storage';
 import { SearchMenuPage } from '../pages/search-menu/search-menu';
 import { FriendsPage } from '../pages/friends/friends';
 import { FeedsPage } from '../pages/feeds/feeds';
-
 
 
 @Component({
@@ -48,10 +46,9 @@ export class MyApp {
     public storage:Storage,
     public events:Events,
     public push:Push,
-    public alertCtrl: AlertController,
-    public conn:ConnectivityService
+    public alertCtrl: AlertController
   ) {
-    this.fbRef = firebase.database();
+   
     this.initializeApp();
 
     // set our app's pages
@@ -65,23 +62,26 @@ export class MyApp {
       { title: 'Profile', component: ProfilePage }
     ];
 
-    // Event Listener for logged in and out
-    this.events.subscribe('user:loggedIn',userId=>{
-      this.getProfileData(userId);
 
-      // Set User Push Notification Token
-      this.setPushNotification(userId);
-    });
-
-    this.events.subscribe('user:loggedOut',userId=>{
-      console.log('user Logged Out',userId);
-    });
   }
 
   initializeApp() {
     this.platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
+      this.fbRef = firebase.database();
+
+      // Event Listener for logged in and out
+      this.events.subscribe('user:loggedIn',userId=>{
+        this.getProfileData(userId);
+
+        // Set User Push Notification Token
+        this.setPushNotification(userId);
+      });
+
+      this.events.subscribe('user:loggedOut',userId=>{
+        console.log('user Logged Out',userId);
+      });      
 
       this.auth.isLoggedIn().then((status)=>{
         if (status) {

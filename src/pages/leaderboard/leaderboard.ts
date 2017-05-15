@@ -14,34 +14,62 @@ import { ProfilePage } from '../profile/profile';
 })
 export class LeaderboardPage {
 
-  public users:FirebaseListObservable<any>;
+  public users = new Array();
   public timePeriod:string = 'month';
+  public fbRef:any;
 
   constructor(public navCtrl: NavController, 
               public angFire:AngularFire,
               public sing:SingletonService, 
               public navParams: NavParams) {
+    this.fbRef = firebase.database();
   
   }
 
   getMonthLeaderBoard() {
+    this.users = new Array();
     let timestamp = new Date().getTime();
     let dateKey = this.sing.getMonthYearKey(timestamp);
-    this.users = this.angFire.database.list('/leaderboard/'+dateKey,{
-      query: {
-        orderByChild: 'points',
-        endAt: -1
-      }
-    });    
+    this.fbRef.ref('/leaderboard/'+dateKey).orderByChild('points').once('value').then(snapshot=>{
+      snapshot.forEach(item=>{
+        let leader = {};
+        leader['uid'] = item.key;
+        leader['points'] = item.val().points;
+
+        this.fbRef.ref('/users/'+item.key).once('value').then(userSnap=>{
+          
+          if (userSnap.exists()) {
+            leader['name'] = userSnap.val().name;
+            if (userSnap.val().photo != null )
+              leader['photo'] = userSnap.val().photo;
+            else
+              leader['photo'] = null;
+
+            this.users.push(leader);  
+          }        
+        });
+      });      
+    });
   }
 
   getOverallLeaderBoard() {
-      this.users = this.angFire.database.list('/users/',{
-        query: {
-          orderByChild: 'points',
-          endAt: -1
-        }
-      });    
+      this.users = new Array();
+      this.fbRef.ref('/users/').orderByChild('points').endAt(-1).once('value').then(userSnap=>{
+
+        userSnap.forEach(item=>{
+          let leader = {}
+          leader['uid'] = item.key;
+          leader['points'] = item.val().points;
+          leader['name'] = item.val().name;
+
+          if (item.val().photo != null )
+            leader['photo'] = item.val().photo;
+          else
+            leader['photo'] = null;
+
+          this.users.push(leader);  
+        });    
+      });      
   }
 
   getProfile(uid) {

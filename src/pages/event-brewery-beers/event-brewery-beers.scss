@@ -1,0 +1,15 @@
+page-event-brewery-beers {
+  .white-background {
+      background-color: #ffffff;
+  }
+
+  .sub-header {
+      ion-item {
+        background-color : inherit !important;
+      }
+
+      ion-list {
+          margin: 0px !important;
+      }
+  }
+}

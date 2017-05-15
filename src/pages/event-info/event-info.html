@@ -1,17 +1,13 @@
 <ion-header>
   <ion-navbar color="primary">
-    <ion-title>Emeral Coast Beer Festival</ion-title>
+    <ion-title>Emerald Coast Beer Festival</ion-title>
   </ion-navbar>
 </ion-header>
 <ion-content class="white-background">
 <ion-list no-lines>
   <ion-item>
     <img src="images/emerald.png">
-  </ion-item>
-  <button ion-button icon-left (click)="goToPlaceWebsite('https://emeraldcoastbeerfest.com/')">
-    <ion-icon name="globe"></ion-icon>
-      Visit Website
-  </button>  
+  </ion-item> 
   <ion-item text-wrap>
     <p>Once again, the Emerald Coast Beer Festival™ returns to the world famous "Rosie O' Grady's Good Time Emporium" 
       entertainment complex in Seville Quarter. There are seven different rooms and two courtyards, each dedicated to 
@@ -29,6 +25,16 @@
     <p>Tickets: $40</p>
     <p>Cost: $30 (VIP $55) / At Gate: $40 (VIP $60)</p>
   </ion-item>
+  <div align="center">
+    <button ion-button icon-left (click)="goToPlaceWebsite('https://emeraldcoastbeerfest.com/')">
+      <ion-icon name="globe"></ion-icon>
+        Visit Website
+    </button>
+    <button ion-button icon-left (click)="getEventMap()">
+      <ion-icon name="people"></ion-icon>
+        Event Beers
+    </button>
+  </div>
   <ion-item>
 	  <ion-card>
 	    <ion-item>
@@ -44,5 +50,4 @@
 	  </ion-card>	
   </ion-item>
 </ion-list>
-<button ion-button full (click)="getEventMap()">View Event Map</button>
 </ion-content>

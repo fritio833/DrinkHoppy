@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, ViewController } from 'ionic-angular';
+import { NavController, ViewController } from 'ionic-angular';
 import { SearchBeerPage } from '../search-beer/search-beer';
 import { SearchLocationPage } from '../search-location/search-location';
 

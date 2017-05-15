@@ -69,8 +69,7 @@ export class DemoService {
             if (error) {
               observer.error(error);
             } else if (committed) {
-              this.fbRef.ref('/users/'+data.uid+'/beersRated/'+data.beerId).transaction(value=>{
-
+              this.fbRef.ref('/beers_checkin/'+data.uid+'/'+data.beerId).transaction(value=>{
                 let beer = {
                   beerRating:data.beerRating,
                   timestamp:firebase.database.ServerValue.TIMESTAMP
@@ -319,10 +318,11 @@ export class DemoService {
         observer.complete();
         return;      
       }
+
       let breweryObj = {newBrewery:false,uniqueBreweries:{},isUnique:false};
       let cityKey =  this.sing.getCityStateKey(data.city,data.state,data.country);              
       let beerCityRef = '';
-      this.fbRef.ref('/brewery_by_city/'+cityKey+'/'+data.breweryId).transaction(value=>{
+      this.fbRef.ref('/brewery_by_city/'+cityKey+'/'+data.breweryLocId).transaction(value=>{
         if (value) {          
           value.checkinCount--;
           value.timestamp = firebase.database.ServerValue.TIMESTAMP;
@@ -335,7 +335,8 @@ export class DemoService {
             let location = {
               name:data.breweryName,
               placeId:data.placeId,
-              breweryId:data.breweryId,
+              breweryId:data.breweryDBId,
+              breweryLocId:data.breweryLocId,
               breweryType:data.breweryType,
               address:data.address,
               city:data.city,
@@ -356,7 +357,8 @@ export class DemoService {
       },(error,committed,snapshot)=>{
 
         if (committed && data.isBrewery === 'Y') {
-           this.fbRef.ref('/users/'+data.uid+'/breweriesVisited/'+data.breweryId).transaction(value=>{
+
+           this.fbRef.ref('/breweries_visited/'+data.uid+'/'+data.breweryLocId).transaction(value=>{
               if (value) {
                 observer.next(breweryObj);
                 observer.complete();
@@ -366,11 +368,14 @@ export class DemoService {
                 let location = {
                   name:data.breweryName,
                   placeId:data.placeId,
-                  breweryId:data.breweryId,
+                  breweryId:data.breweryDBId,
+                  breweryLocId:data.breweryLocId,
                   breweryType:data.breweryType,
                   breweryImages:data.breweryImages,
                   photo:data.photo,
                   checkedIn:1,
+                  lat:data.lat,
+                  lng:data.lng,
                   timestamp:firebase.database.ServerValue.TIMESTAMP
                 }
                 this.incrementUserBreweryVisited(data.uid).subscribe(uniqueBreweryCount=>{
@@ -416,7 +421,17 @@ export class DemoService {
 
       let cityKey = this.sing.getCityStateKey(data.city,data.state,data.country);
       let beerCityRef = '';
-      this.fbRef.ref('/location_by_city/'+cityKey+'/'+data.placeId).transaction(value=>{
+      let placeKey = '';
+      let locName = '';
+
+      if (data.isBrewery === 'Y') {
+        placeKey = data.breweryLocId;
+        locName = data.breweryName;
+      } else {
+        placeKey = data.placeId;
+        locName = data.name;
+      }
+      this.fbRef.ref('/location_by_city/'+cityKey+'/'+placeKey).transaction(value=>{
         if (value) {          
           value.checkinCount--;
           value.timestamp = firebase.database.ServerValue.TIMESTAMP;
@@ -425,13 +440,15 @@ export class DemoService {
           return value;
         } else {
             let location = {
-              name:data.name,
+              name:locName,
               placeId:data.placeId,
               address:data.address,
               city:data.city,
               state:data.state,
               zip:data.zip,
               photo:data.photo,
+              breweryId:data.breweryDBId,
+              breweryLocId:data.breweryLocId,
               rating:data.locationRating,
               timestamp:firebase.database.ServerValue.TIMESTAMP,
               uid:data.uid,

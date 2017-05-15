@@ -150,9 +150,6 @@ export class BeerDetailPage {
     this.beerAPI.loadBeerById(this.beerId).subscribe(beer => {
       this.beer = beer;
       this.loadBeer(this.beer);
-      //console.log(this.beer);
-      this.getBeerReviews();
-      //this.beerLoaded = true;
       setTimeout(()=>{this.beerLoaded = true;},500);
     },error=>{
       this.beerLoaded = true;
@@ -207,17 +204,9 @@ export class BeerDetailPage {
   checkIn(beer) {
     
     let modal = this.modalCtrl.create(CheckinPage,{checkinType:'beer',beer:beer});
-    modal.onDidDismiss(()=> {
-      this.getBeerReviews();
-    });
+    modal.onDidDismiss(()=> {});
     modal.present();
     
-  }
-
-  getBeerReviews() {
-
-     let beerRatingTotal:number = 0;
-     this.beerReviewCount = 0;
   }
 
   getBrewery() {
@@ -251,29 +240,26 @@ export class BeerDetailPage {
         }
 
         console.log('breweries returned',success);
-        
-        this.getBreweryFromGoogle(breweryName,
-                                  success.data[foundBrewpub].latitude,
-                                  success.data[foundBrewpub].longitude).subscribe(resp=>{
-          console.log('data',resp['result']);
-          
-          this.beerAPI.loadLocationById(success.data[foundBrewpub].id).subscribe((pub)=>{
-                  
-            this.beerAPI.loadBreweryBeers(pub.data.breweryId).subscribe((beers)=>{
 
-                this.loading.dismiss();
-                this.navCtrl.push(BreweryDetailPage,{brewery:pub.data,beers:beers,place:resp['result']});
-            },error=>{
-              console.log('error',error);
-              this.loading.dismiss().catch(() => {});
-              this.presentToast('Could not connect. Check connection.');
-            });
-            
+        this.geo.getPlaceFromGoogleByLatLng(breweryName, 
+                                            success.data[foundBrewpub].latitude,
+                                            success.data[foundBrewpub].longitude)
+                                            .subscribe(resp=>{
+        
+          this.beerAPI.getBreweryDetail(breweryId,success.data[foundBrewpub].id).subscribe(pub=>{
+            console.log('pub',pub);
+            this.loading.dismiss();
+            this.navCtrl.push(BreweryDetailPage,{brewery:pub['detail'],beers:pub['beers'],place:resp['result']});        
           },error=>{
-            console.log('error',error);
+            console.log('error getBrewery',error);
             this.loading.dismiss().catch(() => {});
-            this.presentToast('Could not connect. Check connection.');
+            this.presentToast('Could not connect. Check connection.');         
           });
+
+        },error=>{
+            console.log('error getBreweryFromGoogle',error);
+            this.loading.dismiss().catch(() => {});
+            this.presentToast('Could not connect. Check connection.');      
         });
         
       },error=>{
@@ -284,35 +270,11 @@ export class BeerDetailPage {
     }
   }
 
-  getBreweryFromGoogle(breweryName,lat,lng) {
-    //console.log('brewery',brewery);
-    let _breweryName = encodeURIComponent(breweryName);
-
-    return new Observable(observer=>{
-      this.geo.getPlaceByOrigin(_breweryName,lat,lng).subscribe(pub=>{
-        if (pub.results.length) {
-          //Get place detail
-          this.geo.placeDetail(pub.results[0].place_id).subscribe(detail=>{
-            //console.log('detail',detail);
-            observer.next(detail);
-          });
-        } else {
-          observer.next(false);
-        }
-      });      
-    });
-  }
-
   showLoading(msg) {
     this.loading = this.loadingCtrl.create({
       content: msg
     });
     this.loading.present();
-  }
-
-  doLogin() {
-
-    this.navCtrl.push(LoginPage);
   }
 
   presentToast(msg) {
@@ -322,20 +284,6 @@ export class BeerDetailPage {
       duration: 3000
     });
     toast.present();
-  }
-
-  reviewBeer(beer) {
-
-    let modal = this.modalCtrl.create(ReviewBeerPage,{
-                                         beerId:beer.id,
-                                         beerName:beer.name,
-                                         beerPic:beer.labels.icon
-                                       });
-    modal.onDidDismiss(()=> {
-      this.getBeerReviews();
-    });
-    modal.present();
-
   }
 
   ionViewWillEnter() { 

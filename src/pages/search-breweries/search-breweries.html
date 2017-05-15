@@ -39,13 +39,11 @@
       <p><ion-icon name="search"></ion-icon>&nbsp;Search Results.</p>
     </ion-item>
     <button ion-item *ngFor="let result of brewerySearch" (click)="getDetail(result)">
-      <ion-thumbnail item-left *ngIf="result.images">
-        <img [src]="result.images.icon">
+      <ion-thumbnail item-left>
+        <img *ngIf="result.img" [src]="result.img">
       </ion-thumbnail>
-      <span item-left>
-        <h2 class="loc-name">{{result.name}}</h2>
-        <p>{{result.type}}</p>
-      </span>
+      <h2 class="loc-name">{{result.name}}</h2>
+      <p>{{result.locationTypeDisplay}}</p>
       <ion-icon name="arrow-forward" item-right></ion-icon>
     </button>
   </ion-list>
@@ -57,9 +55,9 @@
       <button item-right ion-button round (click)="changeCity()">Change City</button>
     </ion-item>
     <button ion-item *ngFor="let brew of breweries; let i = index;" (click)="getDetail(brew)">
-      <ion-avatar item-left>
+      <ion-thumbnail item-left>
       	<img *ngIf="brew.brewery.images.icon!=null" [src]="brew.brewery.images.icon" />
-      </ion-avatar>
+      </ion-thumbnail>
       <h2 class="loc-name">
       {{brew.brewery.name}}
       </h2>

@@ -12,7 +12,7 @@
   <ion-thumbnail item-left *ngIf="beerLoaded">
 	    <img *ngIf="beer.labels.medium" [src]="beer?.labels.medium" />
   </ion-thumbnail>
-	<span item-left *ngIf="beerLoaded">
+	<span item-left *ngIf="beer && beerLoaded">
 	    <b>{{beer?.name}}</b>
 			<p *ngIf="beerRating"><rating [(ngModel)]="beerRating" readOnly="true" max="5"></rating></p>
 	    <p>{{beer?.breweries[0].name}}</p>

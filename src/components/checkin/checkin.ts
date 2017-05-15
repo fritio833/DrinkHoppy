@@ -1,5 +1,5 @@
-import { Component,Input, Output, ChangeDetectionStrategy  } from '@angular/core';
-import { NavController, NavParams} from 'ionic-angular';
+import { Component,Input } from '@angular/core';
+import { NavController } from 'ionic-angular';
 import firebase from 'firebase';
 
 import { SingletonService } from '../../providers/singleton-service';

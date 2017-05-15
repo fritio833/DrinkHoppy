@@ -60,11 +60,6 @@ export class FavoritesPage {
       this.uid = this.user.uid;
     }
 
-    this.favBeers = this.angFire.database.list('/favorite_beers/'+this.uid+'/',{
-      query:{
-        orderByChild:'name'
-      }
-    });    
   }
 
   getBeerDetail(beerDbId) {
@@ -152,83 +147,56 @@ export class FavoritesPage {
   getBrewery(loc) {
 
     let foundBrewpub:number = -1;
+    this.showLoading();
+    this.geo.getPlaceFromGoogleByLatLng(loc.name,loc.lat,loc.lng).subscribe(resp=>{
+    
+      this.beerAPI.getBreweryDetail(loc.breweryId,loc.breweryLocId).subscribe(pub=>{
+        console.log('pub',pub);
+        this.loading.dismiss();
+        this.navCtrl.push(BreweryDetailPage,{brewery:pub['detail'],beers:pub['beers'],place:resp['result'],loading:this.loading});        
+      },error=>{
+        console.log('error getBrewery',error);
+        this.loading.dismiss().catch(() => {});
+        this.presentToast('Could not connect. Check connection.');         
+      });
+
+    },error=>{
+        console.log('error getBreweryFromGoogle',error);
+        this.loading.dismiss().catch(() => {});
+        this.presentToast('Could not connect. Check connection.');      
+    });         
+  }
+
+  getFavBeers() {
+
+    if (this.favBeers) {
+      return;
+    }
 
     this.showLoading();
-
-    console.log('breweryId',loc.breweryId);
-      this.beerAPI.loadBreweryLocations(loc.breweryId).subscribe((success)=>{
-        console.log('brewery locations',success);
-        for (let i = 0; i < success.data.length; i++) {
-          if (success.data[i].id == loc.breweryLocId) {
-            foundBrewpub = i;
-            break;
-          }
-        }
-
-        if (foundBrewpub == -1) {
-          foundBrewpub = 0;
-        }
-        //console.log('brewery',brewery);
-        //console.log('breweryLoc',success.data[foundBrewpub]);
-        
-        this.getBreweryFromGoogle(loc.name,
-                                  success.data[foundBrewpub].latitude,
-                                  success.data[foundBrewpub].longitude).subscribe(resp=>{
-          //console.log('data',resp['result']);
-          
-          this.beerAPI.loadLocationById(success.data[foundBrewpub].id).subscribe((pub)=>{
-                  
-            this.beerAPI.loadBreweryBeers(pub.data.breweryId).subscribe((beers)=>{
-
-                this.loading.dismiss();
-                this.navCtrl.push(BreweryDetailPage,{brewery:pub.data,beers:beers,place:resp['result'],loading:this.loading});
-            },error=>{
-              console.log('error',error);
-              this.loading.dismiss().catch(() => {});
-              this.presentToast('Could not connect. Check connection.');
-            });
-            
-          },error=>{
-            console.log('error',error);
-            this.loading.dismiss().catch(() => {});
-            this.presentToast('Could not connect. Check connection.');
-          });
-        });
-        
-      },error=>{
-        console.log('error',error);
-        this.loading.dismiss().catch(() => {});
-        this.presentToast('Could not connect. Check connection.');
-      });   
-  }
-
-  getBreweryFromGoogle(breweryName,lat,lng) {
-    //console.log('brewery',brewery);
-    let _breweryName = encodeURIComponent(breweryName);
-
-    return new Observable(observer=>{
-      this.geo.getPlaceByOrigin(_breweryName,lat,lng).subscribe(pub=>{
-        if (pub.results.length) {
-          //Get place detail
-          this.geo.placeDetail(pub.results[0].place_id).subscribe(detail=>{
-            //console.log('detail',detail);
-            observer.next(detail);
-          });
-        } else {
-          observer.next(false);
-        }
-      });      
+    this.favBeers = this.angFire.database.list('/favorite_beers/'+this.uid+'/',{
+      query:{
+        orderByChild:'name'
+      }
     });
-  }  
 
-  ignoreMe() {
-    console.log('yolo');
+    this.favBeers.subscribe(resp=>{
+      this.loading.dismiss().catch(()=>{});
+    },error=>{
+      console.log('error getFavBeers',error);
+      this.loading.dismiss().catch(()=>{});
+    });
   }
 
-  ionViewDidLoad() {
+  ionViewWillEnter() {
     console.log('ionViewDidLoad FavoritesPage');
-    
-  }
+
+    if (this.choice === 'beerlist')
+      this.getFavBeers();
+
+    if (this.choice === 'locationlist')
+      this.getLocFavs();      
+  }  
 
   showLoading() {
     this.loading = this.loadingCtrl.create({
@@ -237,11 +205,24 @@ export class FavoritesPage {
   }
 
   getLocFavs() {
+
+    if (this.favLocations) {
+      return;
+    }
+
+    this.showLoading();
     this.favLocations = this.angFire.database.list('/favorite_locations/'+this.uid+'/',{
       query:{
         orderByChild:'name'
       }
     });
+
+    this.favLocations.subscribe(resp=>{
+      this.loading.dismiss().catch(()=>{});
+    },error=>{
+      console.log('error getFavBeers',error);
+      this.loading.dismiss().catch(()=>{});
+    });    
 
   }
 
@@ -258,4 +239,17 @@ export class FavoritesPage {
       this.presentToast(beer.name + ' removed from favorites');
     });
   }
+
+  ionViewWillLeave() {
+
+    if (this.favLocations) {
+      this.favLocations = null;
+    }
+
+    if (this.favBeers) {
+      this.favBeers = null;
+    }
+
+  }
+
 }

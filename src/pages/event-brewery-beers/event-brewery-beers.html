@@ -1,0 +1,34 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>Abita Brewing Co.</ion-title>
+    <ion-buttons right>
+        <button ion-button icon-only (click)="cancel()">
+          <ion-icon name="close"></ion-icon>
+        </button>
+    </ion-buttons>       
+  </ion-navbar>
+</ion-header>
+<ion-content class="white-background">
+  <ion-list>
+    <ion-item (click)="getMap()">
+      <ion-thumbnail item-left>
+        <img src="https://s3.amazonaws.com/brewerydbapi/brewery/BBE5WM/upload_6HsKvN-icon.png">
+      </ion-thumbnail>
+      <h2>Abita Brewing Co.</h2>
+      <p>Map# 17</p>
+      <p>Micro Brewery</p>
+      <p>Covington, Louisiana</p>
+      <ion-icon item-right name="map"></ion-icon>
+    </ion-item>
+    <ion-item *ngFor="let beer of beers" text-wrap (click)="getBeerActions(beer)">
+      <ion-thumbnail item-left>
+        <img *ngIf="beer.labels" [src]="beer.labels.icon" />
+      </ion-thumbnail>		      	
+      <h2>{{beer.nameDisplay}}</h2>
+      <p>{{beer?.style.shortName}} &#8226; {{beer?.abv}}%</p>
+      <ion-icon *ngIf="approve[beer.id]" name="thumbs-up" item-right></ion-icon>
+      <ion-icon *ngIf="approve[beer.id] == false" name="thumbs-down" item-right></ion-icon>
+      <ion-icon *ngIf="approve[beer.id] == null" name="more" item-right></ion-icon>
+    </ion-item>
+  </ion-list>
+</ion-content>

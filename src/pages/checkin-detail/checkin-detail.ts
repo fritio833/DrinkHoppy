@@ -110,6 +110,7 @@ export class CheckinDetailPage {
       this.lat = snapshot.val().lat;
       this.lng = snapshot.val().lng;
       this.beerId = snapshot.val().beerId;
+      this.checkin = snapshot.val();
 
       //console.log(snapshot.val());
       this.fbRef.ref('/users/'+this.uid).once('value').then(snapshot=>{
@@ -137,48 +138,30 @@ export class CheckinDetailPage {
     }
     //console.log('page',this.page);
   }
-  getBreweryFromGoogle(breweryName,lat,lng) {
-    //console.log('brewery',brewery);
-    let _breweryName = encodeURIComponent(breweryName);
 
-    return new Observable(observer=>{
-      this.geo.getPlaceByOrigin(_breweryName,lat,lng).subscribe(pub=>{
-        if (pub.results.length) {
-          //Get place detail
-          this.geo.placeDetail(pub.results[0].place_id).subscribe(detail=>{
-            //console.log('detail',detail);
-            observer.next(detail);
-          });
-        } else {
-          observer.next(false);
-        }
-      });      
-    });
-  
-  }
 
   getBreweryDetail() {
     this.showLoading('Loading. Please wait...');
-    this.getBreweryFromGoogle(this.breweryName,this.lat,this.lng).subscribe(brewery=>{
-      //console.log('breweryObj',brewery);
-          this.beerAPI.loadLocationById(this.breweryId).subscribe((pub)=>{
-                  
-            this.beerAPI.loadBreweryBeers(this.breweryId).subscribe((beers)=>{
 
-                this.loading.dismiss();
-                this.navCtrl.push(BreweryDetailPage,{brewery:pub.data,beers:beers,place:brewery['result']});
-            },error=>{
-              console.log('error',error);
-              this.loading.dismiss().catch(() => {});
-              this.presentToast('Could not connect. Check connection.');
-            });
-            
-          },error=>{
-            console.log('error',error);
-            this.loading.dismiss().catch(() => {});
-            this.presentToast('Could not connect. Check connection.');
-          });      
-    });
+
+    this.geo.getPlaceFromGoogleByLatLng(this.breweryName,this.lat,this.lng).subscribe(resp=>{
+    
+      this.beerAPI.getBreweryDetail(this.checkin.breweryId,this.checkin.breweryLocId).subscribe(pub=>{
+        console.log('pub',pub);
+        this.loading.dismiss();
+        this.navCtrl.push(BreweryDetailPage,{brewery:pub['detail'],beers:pub['beers'],place:resp['result']});        
+      },error=>{
+        console.log('error getBrewery',error);
+        this.loading.dismiss().catch(() => {});
+        this.presentToast('Could not connect. Check connection.');         
+      });
+
+    },error=>{
+        console.log('error getBreweryFromGoogle',error);
+        this.loading.dismiss().catch(() => {});
+        this.presentToast('Could not connect. Check connection.');      
+    });    
+
   }
 
   getBeerDetail() {

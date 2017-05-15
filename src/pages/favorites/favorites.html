@@ -8,7 +8,7 @@
   </ion-navbar>
   <ion-toolbar no-border-top color="primary"> 
     <ion-segment [(ngModel)]="choice" color="white" class="toolbar">
-      <ion-segment-button icon-left role="button" color="primary" value="beerlist">
+      <ion-segment-button icon-left role="button" color="primary" value="beerlist" (click)="getFavBeers()">
         <ion-icon name="beer"></ion-icon>Beer List
       </ion-segment-button>   
       <ion-segment-button icon-left role="button" color="primary" value="locationlist" (click)="getLocFavs()">

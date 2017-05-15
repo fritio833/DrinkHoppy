@@ -2,6 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { NavController, LoadingController, ToastController, PopoverController, AlertController, NavParams, ModalController } from 'ionic-angular';
 import { Geolocation } from 'ionic-native';
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/forkJoin';
 
 import { BreweryService } from '../../providers/brewery-service';
 import { SingletonService } from '../../providers/singleton-service';
@@ -74,119 +75,41 @@ export class SearchBreweriesPage {
     toast.present();
   }
 
-  getBreweryFromGoogle(breweryName,lat,lng) {
-    //console.log('brewery',brewery);
-    let _breweryName = encodeURIComponent(breweryName);
 
-    return new Observable(observer=>{
-      this.geo.getPlaceByOrigin(_breweryName,lat,lng).subscribe(pub=>{
-        if (pub.results.length) {
-          //Get place detail
-          this.geo.placeDetail(pub.results[0].place_id).subscribe(detail=>{
-            //console.log('detail',detail);
-            observer.next(detail);
-          });
-        } else {
-          observer.next(false);
-        }
-      },error=>{
-        observer.error(error);
-      });      
-    });
-  
+  autoSearchCancel(event){
+    this.brewerySearch = [];
+    this.brewerySearchLen = 0;
+    this.qBreweryAuto = '';
+    console.log('i got here');
   }
+
 
   getDetail(brewery) {
     console.log(brewery);
     let breweryId;
     let foundBrewpub:number = -1;
   
-    this.showLoading('Loading Brewery...');
-        
+  
+    this.showLoading();
 
-    // Autocomplete Search    
-    if (!brewery.hasOwnProperty('breweryId') && brewery.hasOwnProperty('id')) {
-
-      this.beerAPI.loadBreweryLocations(brewery.id).subscribe((success)=>{
-
-        for (let i = 0; i < success.data.length; i++) {
-          if (success.data[i].locationType == 'brewpub' || success.data[i].openToPublic == 'Y') {
-            foundBrewpub = i;
-            break;
-          }
-        }
-
-        if (foundBrewpub == -1) {
-          foundBrewpub = 0;
-        }
-        //console.log('brewery',brewery);
-        //console.log('breweryLoc',success.data[foundBrewpub]);
-        
-        this.getBreweryFromGoogle(brewery.name,
-                                  success.data[foundBrewpub].latitude,
-                                  success.data[foundBrewpub].longitude).subscribe(resp=>{
-          //console.log('data',resp['result']);
-          
-          this.beerAPI.loadLocationById(success.data[foundBrewpub].id).subscribe((pub)=>{
-                  
-            this.beerAPI.loadBreweryBeers(pub.data.breweryId).subscribe((beers)=>{
-
-                this.loading.dismiss();
-                this.navCtrl.push(BreweryDetailPage,{brewery:pub.data,beers:beers,place:resp['result']});
-            },error=>{
-              console.log('error',error);
-              this.loading.dismiss().catch(() => {});
-              this.presentToast('Could not connect. Check connection.');
-            });
-            
-          },error=>{
-            console.log('error',error);
-            this.loading.dismiss().catch(() => {});
-            this.presentToast('Could not connect. Check connection.');
-          });
-        });
-        
+    this.geo.getPlaceFromGoogleByLatLng(brewery.name,brewery.latitude,brewery.longitude).subscribe(resp=>{
+    
+      this.beerAPI.getBreweryDetail(brewery.breweryId,brewery.id).subscribe(pub=>{
+        console.log('pub',pub);
+        this.loading.dismiss();
+        this.navCtrl.push(BreweryDetailPage,{brewery:pub['detail'],beers:pub['beers'],place:resp['result']});        
       },error=>{
-        console.log('error',error);
+        console.log('error getBrewery',error);
         this.loading.dismiss().catch(() => {});
-        this.presentToast('Could not connect. Check connection.');
+        this.presentToast('Could not connect. Check connection.');         
       });
-      
-    } else {  // Geo Search
 
-      // Use Google Places to associated with BreweryDB
-      let breweryName = encodeURIComponent(brewery.brewery.name);
-      //console.log('breweryName',breweryName);
-      
-      this.geo.getPlaceByOrigin(breweryName,brewery.latitude,brewery.longitude).subscribe(pub=>{
-        if (pub.results.length) {
-          //Get place detail
-          this.geo.placeDetail(pub.results[0].place_id).subscribe(detail=>{
-
-            this.beerAPI.loadBreweryBeers(brewery.breweryId).subscribe((beers)=>{
-              this.loading.dismiss();
-              this.navCtrl.push(BreweryDetailPage,{brewery:brewery,beers:beers,place:detail.result});
-            },error=>{
-              console.log('error',error);
-              this.loading.dismiss().catch(() => {});
-              this.presentToast('Could not connect. Check connection.');
-            });
-          });
-        } else {
-          this.beerAPI.loadBreweryBeers(brewery.breweryId).subscribe((beers)=>{
-              this.loading.dismiss();
-              this.navCtrl.push(BreweryDetailPage,{brewery:brewery,beers:beers,place:null});
-          },error=>{
-            console.log('error',error);
-            this.loading.dismiss().catch(() => {});
-            this.presentToast('Could not connect. Check connection.');
-          });          
-        }
-      },error=>{
+    },error=>{
+        console.log('error getBreweryFromGoogle',error);
         this.loading.dismiss().catch(() => {});
-        this.presentToast('Could not connect. Check connection.');        
-      });
-    }
+        this.presentToast('Could not connect. Check connection.');      
+    });    
+        
   }
 
   fixBreweries(breweries) {
@@ -207,19 +130,54 @@ export class SearchBreweriesPage {
 
   autoBrewerySearch(event) {
 
-    this.qBreweryAuto = event.target.value;
-
+    
+    console.log('i got here 2');
   	if (event.type == "input" && event.target.value.length) {
+        this.qBreweryAuto = event.target.value;
+        console.log('i got here 3');
   	    this.beerAPI.findBreweriesByName(event.target.value).subscribe((success)=>{
-  	      // console.log(success);
+  	      console.log('brewery',success);
+          let observableBatch = [];
   	      if (success.hasOwnProperty('data')) {
-	  	      this.brewerySearch = success.data;
-	  	      console.log(this.brewerySearch);
-	  	      this.brewerySearchLen = success.data.length;  	      	
+	  	      let brewSearch = success.data;
+            this.brewerySearch = [];
+            for (let i=0; i < brewSearch.length; i++) {
+              observableBatch.push(this.beerAPI.loadBreweryLocations(brewSearch[i].id));
+            }
+
+            Observable.forkJoin(observableBatch).subscribe(pubs=>{
+              console.log('pubs',pubs);
+              for (let i = 0; i < pubs.length; i++) {
+                let pub = pubs[i]['data'];
+                console.log('bs',brewSearch[i]);
+                console.log('pub',pub);
+                for (let j = 0; j < pub.length; j++) {
+                  let pubObj = {};
+                  pubObj['img'] = '';
+                  pubObj['breweryId'] = brewSearch[i].id;
+                  pubObj['id'] = pub[j].id;
+                  pubObj['name'] = brewSearch[i].name;
+                  pubObj['locationTypeDisplay'] = pub[j].locationTypeDisplay;
+                  pubObj['latitude'] = pub[j].latitude;
+                  pubObj['longitude'] = pub[j].longitude;
+
+                  if (brewSearch[i].hasOwnProperty('images')) {
+                    pubObj['img'] = brewSearch[i].images.icon;
+                  }
+                  this.brewerySearch.push(pubObj);
+                }
+              }
+              this.brewerySearchLen = this.brewerySearch.length;
+            });            
+	  	        	      	
   	      } else {
 	  	      this.brewerySearch = new Array();
 	  	      this.brewerySearchLen = 0;  	      	
   	      }
+
+          //this.beerAPI.loadBreweryLocations()
+
+
         },error=>{
           this.presentToast('Could not connect. Check connection.');
         });
@@ -231,7 +189,7 @@ export class SearchBreweriesPage {
 
   getBreweries() {
 
-    this.showLoading('Loading Breweries...');
+    this.showLoading();
     // Get breweries at user's current location
     if (this.sing.getLocation().geo){
 
@@ -243,6 +201,7 @@ export class SearchBreweriesPage {
 	        //console.log(breweries);          
           if (breweries.hasOwnProperty('data')) {
             this.breweries = this.fixBreweries(breweries.data);
+            console.log('breweries',this.breweries);
             this.numPages = breweries.numberOfPages;            
           } else {
             this.breweries = new Array();
@@ -412,7 +371,7 @@ export class SearchBreweriesPage {
   }  
 
   loadGoogleMaps() {
-    this.showLoading('Loading map. Please wait...');
+    this.showLoading();
     this.addConnectivityListeners();
  
     if (typeof google == "undefined" || typeof google.maps == "undefined" ) {
@@ -493,10 +452,8 @@ export class SearchBreweriesPage {
     console.log("enable map");
   }
 
-  showLoading(msg) {
-    this.loading = this.loadingCtrl.create({
-      content: msg
-    });
+  showLoading() {
+    this.loading = this.loadingCtrl.create({});
     this.loading.present();
   }
 

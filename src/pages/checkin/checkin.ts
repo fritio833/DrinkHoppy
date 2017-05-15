@@ -601,6 +601,7 @@ export class CheckinPage {
         userName:this.user.displayName,
         breweryId:'',
         breweryDBId:'',
+        breweryLocId:'',
         placeId:'',
         name:'',
         photo:'',
@@ -715,6 +716,7 @@ export class CheckinPage {
         userName:this.user.displayName,
         breweryId:'',
         breweryDBId:'',
+        breweryLocId:'',
         placeId:this.location.place_id,
         name:this.location.name,
         photo:this.location.url,
@@ -740,16 +742,19 @@ export class CheckinPage {
       }
 
       if (this.checkinType == 'brewery') {
-        locationData['breweryDBId'] = this.brewery.id;
+        locationData['breweryDBId'] = this.brewery.breweryId;
+        locationData['breweryLocId'] = this.brewery.id;
         locationData['address'] = this.brewery.streetAddress;
         locationData['zip'] = this.brewery.postalCode;
+        locationData['name'] = this.brewery.brewery.name
         locationData['isBrewery'] = 'Y';
       }
 
       if (this.beer != null) {
 
         this.setBeerData(locationData);
-
+        console.log('brewery beer',this.beer);
+        console.log('location data',locationData);
         //this.achieve.setCountAchievement(locationData);
         //console.log('locData',locationData);
         //set demographics for beer && set beer for locations
@@ -763,6 +768,8 @@ export class CheckinPage {
           this.demo.setUserScore(this.user.uid,this.checkinScore,locationData), // 6        
           this.demo.setBreweryByCity(locationData)).subscribe(resp=>{ // 7
             console.log('fork resp',resp);
+
+           
             
             if (resp[2]) {
               this.checkinScore += 25; // set beer container. +5

@@ -276,18 +276,26 @@ export class HomePage {
   seeAchievements() {
     this.navCtrl.push(AchievementsPage,{uid:this.uid});
   }
-
+  /*
   ionViewDidLoad() {
     console.log('ionViewDidLoad HomePage');
     this.getProfileData();
     
   }
+  */
 
   
   ionViewWillEnter() {
     console.log('ionViewWillEnter HomePage');
     this.getPopular();
+    this.getProfileData();
     
   }
+
+  ionViewWillLeave() {
+    if (this.notifications) {
+      this.notifications = null;
+    }
+  }  
   
 }

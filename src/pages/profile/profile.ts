@@ -91,8 +91,8 @@ export class ProfilePage {
   getUserProfile(uid) {
 
     if (uid != null) {
-      
-      this.profileRef = firebase.database().ref('users/'+uid).on('value', snapshot => {
+      this.showLoading();
+      this.profileRef = this.fbRef.ref('users/'+uid).on('value', snapshot => {
         this.displayName = snapshot.val().name;
         if (snapshot.val().photo!=null && snapshot.val().photo !='')
           this.profileIMG = snapshot.val().photo;
@@ -103,12 +103,12 @@ export class ProfilePage {
         this.numOfUniqueBeers = snapshot.val().numOfUniqueBeers;
         this.uniqueBreweries = snapshot.val().uniqueBreweriesVisited;
         this.points = snapshot.val().points * -1;
-        console.log('rep',this.reputation);
         
         if (!this.isLookup && this.user!=null) {
           //console.log('currUser',this.user);
           this.isEmailVerified = this.user.emailVerified;
-        }        
+        }
+        this.loading.dismiss().catch(()=>{});        
       });
 
       // Get points by month
@@ -200,9 +200,7 @@ export class ProfilePage {
   }
 
   showLoading() {
-    this.loading = this.loadingCtrl.create({
-      content: 'Loading...'
-    });
+    this.loading = this.loadingCtrl.create({});
     this.loading.present();
   }
 

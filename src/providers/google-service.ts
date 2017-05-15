@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
 import { SingletonService } from './singleton-service';
 import { Platform } from 'ionic-angular';
+import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/delay';
 import 'rxjs/add/operator/retry';
@@ -336,6 +337,29 @@ export class GoogleService {
         .timeout(5000,new Error('Error connecting'))  
         .map(res => res.json());    
   }
+
+  getPlaceFromGoogleByLatLng(placeName,lat,lng) {
+    //console.log('brewery',brewery);
+    let _placeName = encodeURIComponent(placeName);
+
+    return new Observable(observer=>{
+      this.getPlaceByOrigin(_placeName,lat,lng).subscribe(pub=>{
+        if (pub.results.length) {
+          //Get place detail
+          this.placeDetail(pub.results[0].place_id).subscribe(detail=>{
+            //console.log('detail',detail);
+            observer.next(detail);
+          },error=>{
+            console.log('error placeDetail',error);    
+          });
+        } else {
+          observer.next(false);
+        }
+      },error=>{
+        console.log('error getPlaceByOrigin',error);
+      });      
+    });
+  }   
 
   getStaticMap(lat,lng,width?,height?) {
     let _width = 640;

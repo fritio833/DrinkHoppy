@@ -128,8 +128,16 @@ export class AchievementsService {
       }
 
       this.fbRef.ref('/achievements/'+key).once('value').then(snapshot=>{
-        //let checkinCount = snapshot.val();
-        console.log('achieve snapshot',snapshot.val());
+
+        console.log('achieve snapshot',snapshot.val() + ' key: ' + key);
+
+        // Achievement doesn't exist.  Exit the function.
+        if (!snapshot.exists()) {
+            observer.next(false);
+            observer.complete();
+            return;        
+        }
+
         _recurring = snapshot.val().recurring;
         completion = parseInt(snapshot.val().completion);
 

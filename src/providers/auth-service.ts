@@ -11,9 +11,6 @@ import { Storage } from '@ionic/storage';
 
 import { SingletonService } from './singleton-service';
 
-import { HomePage } from '../pages/home/home';
-import { LoginPage } from '../pages/login/login';
-
 export class User {
   name: string;
   email: string;
@@ -42,7 +39,6 @@ export class AuthService {
     this.auth = firebase.auth();
     this.userRef = firebase.database();
     this.userExistsRef = firebase.database();
-    let that = this;
     
     firebase.auth().onAuthStateChanged((_currentUser) => {
         if (_currentUser && !this.loggedIn) {
@@ -63,7 +59,6 @@ export class AuthService {
   }
 
   public loginEmail(credentials) {
-    var that = this;
     return new Observable(observer => {
       firebase.auth().signInWithEmailAndPassword(credentials.email,credentials.password).then(response=>{
         this.updateUserData(response);
@@ -319,7 +314,6 @@ export class AuthService {
   }  
  
   public logOut() {
-    let sing = this.sing;
     var that = this;
     return new Promise(resolve=>{
       firebase.auth().signOut().then(resp=>{

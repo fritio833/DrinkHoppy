@@ -3,7 +3,7 @@ import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import { MyApp } from './app.component';
 import { Ionic2RatingModule } from 'ionic2-rating';
-import { AngularFireModule, AuthProviders, AuthMethods } from 'angularfire2';
+import { AngularFireModule } from 'angularfire2';
 import { CloudSettings, CloudModule } from '@ionic/cloud-angular';
 import { PhotoViewer } from '@ionic-native/photo-viewer';
 
@@ -70,6 +70,7 @@ import { EventInfoPage } from '../pages/event-info/event-info';
 import { EventMapPage } from '../pages/event-map/event-map';
 import { AchievementsPage } from '../pages/achievements/achievements';
 import { AchievementsDetailPage } from '../pages/achievements-detail/achievements-detail';
+import { EventBreweryBeersPage } from '../pages/event-brewery-beers/event-brewery-beers';
 
 export const firebaseConfig = {
     apiKey: "AIzaSyCd-WZs4O8gNx9qVlwwyRdK6_qY60WuQl0",
@@ -151,6 +152,7 @@ const cloudSettings: CloudSettings = {
     BreweryVisitsPage,
     EventInfoPage,
     EventMapPage,
+    EventBreweryBeersPage,
     AchievementsPage,
     AchievementsDetailPage
   ],
@@ -212,6 +214,7 @@ const cloudSettings: CloudSettings = {
     BreweryVisitsPage,
     EventInfoPage,
     EventMapPage,
+    EventBreweryBeersPage,
     AchievementsPage,
     AchievementsDetailPage
   ],

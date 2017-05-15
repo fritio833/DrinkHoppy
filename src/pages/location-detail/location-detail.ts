@@ -268,6 +268,9 @@ export class LocationDetailPage {
    this.getPlacePhotos().then(success=>{
       this.showPhotos = true;
       this.loading.dismiss();
+   }).catch(error=>{
+     console.log('error ShowAllPhotos',error);
+     this.loading.dismiss().catch(()=>{});
    });
 
   }
@@ -277,14 +280,15 @@ export class LocationDetailPage {
     if (this.locationPhoto != null) {
       locPhoto = this.locationPhoto.replace(/s\d+\-w\d+/g, "s100-w100");
     }
-
     
     this.fbRef.ref('/favorite_locations/'+this.uid+'/'+this.location.place_id).set({
       photo:locPhoto,
       name:this.location.name,
       placeType:this.location.place_types,
       vicinity:this.location.vicinity,
-      isBrewery:'N'
+      isBrewery:'N',
+      lat:this.location.geometry.location.lat,
+      lng:this.location.geometry.location.lng
     }).then(resp=>{
       this.presentToast(this.location.name+' saved to favorites');
     });

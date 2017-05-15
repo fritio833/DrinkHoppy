@@ -62,6 +62,9 @@ export class MyApp {
       { title: 'Profile', component: ProfilePage }
     ];
 
+    this.events.subscribe('user:loggedIn',userId=>{
+      this.getProfileData(userId);
+    });
 
   }
 
@@ -73,7 +76,7 @@ export class MyApp {
 
       // Event Listener for logged in and out
       this.events.subscribe('user:loggedIn',userId=>{
-        this.getProfileData(userId);
+        //this.getProfileData(userId);
 
         // Set User Push Notification Token
         this.setPushNotification(userId);
@@ -85,6 +88,9 @@ export class MyApp {
 
       this.auth.isLoggedIn().then((status)=>{
         if (status) {
+          //let user = this.auth.getUser();
+          //console.log('userInfo',user);
+          //this.getProfileData(user.uid);
           this.rootPage = HomePage;
         } else {
           this.rootPage = LoginPage;

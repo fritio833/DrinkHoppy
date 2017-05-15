@@ -5,10 +5,10 @@
   </ion-navbar>
 </ion-header>
 <ion-content class="white-background">
-  <ion-item *ngFor="let brewery of breweries | async" (click)="getBreweryDetail(brewery.breweryId,brewery.name)">
-    <ion-avatar item-left>
+  <ion-item *ngFor="let brewery of breweries | async" (click)="getBreweryDetail(brewery)">
+    <ion-thumbnail item-left>
       <img *ngIf="brewery.breweryImages" [src]="brewery.breweryImages.icon">
-    </ion-avatar>
+    </ion-thumbnail>
     <h2>{{brewery.name}}</h2>
     <p>
       {{brewery.breweryType}}

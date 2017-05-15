@@ -3,6 +3,8 @@ import { NavController, NavParams, ModalController, LoadingController, PopoverCo
 import { Geolocation } from 'ionic-native';
 import { Ionic2RatingModule } from 'ionic2-rating';
 
+import firebase from 'firebase';
+
 import { GoogleService } from '../../providers/google-service';
 import { BreweryService } from '../../providers/brewery-service';
 import { SingletonService } from '../../providers/singleton-service';
@@ -39,6 +41,7 @@ export class SearchLocationPage {
   public infScroll:any;
   public placeType:any = null;
   public searchType:any;
+  public fbRef:any;
 
   constructor(public navCtrl: NavController, 
   	          public params: NavParams,
@@ -58,6 +61,7 @@ export class SearchLocationPage {
       this.placeType = "all";
 
     this.searchType = params.get('searchType');
+    this.fbRef = firebase.database();
 
   }
 
@@ -180,7 +184,7 @@ export class SearchLocationPage {
 
   getLocal() {
 
-    this.showLoading('Loading. Please wait...');
+    this.showLoading();
 
     if (this.searchType == 'nearbysearch' || !this.sing.isSelectedLocation()) {
       Geolocation.getCurrentPosition().then((resp) => {
@@ -283,13 +287,13 @@ export class SearchLocationPage {
 
   getLocationDetail(location) {
     let validLocation = false;
-    this.showLoading('Loading. Please wait...');
+    this.showLoading();
     this.geo.placeDetail(location.place_id).subscribe((resp)=>{
 
-      this.isBrewery(resp.result).then(status=>{
+      this.isBrewery(resp.result).then(foundBrewery=>{
         //console.log('is brewery',status);
         
-        if (!status) {
+        if (!foundBrewery) {
           for (var i=0;i<resp.result.types.length;i++) {
 
             if (resp.result.types[i].match('night_club|food|bar|grocery_or_supermarket|liquor_store|gas_station|convenience_store')) {                
@@ -305,6 +309,8 @@ export class SearchLocationPage {
             this.presentToast('Not a place that would sell alcoholic beverages');
             this.loading.dismiss().catch(() => {});
           }
+        } else {
+          this.getBreweryDetail(foundBrewery);
         }
 
       });   
@@ -317,38 +323,41 @@ export class SearchLocationPage {
 
   }
 
+  getBreweryDetail(brewery) {
+    console.log('brewery',brewery);
+    
+    this.geo.placeDetail(brewery.placeId).subscribe((resp)=>{        
+        this.beerAPI.getBreweryDetail(brewery.breweryId,brewery.breweryLocId).subscribe(pub=>{
+          console.log('pub',pub);
+          this.loading.dismiss();
+          this.navCtrl.push(BreweryDetailPage,{brewery:pub['detail'],beers:pub['beers'],place:resp.result});        
+        },error=>{
+          console.log('error getBrewery',error);
+          this.loading.dismiss().catch(() => {});
+          this.presentToast('Could not connect. Check connection.');         
+        });
+
+    },error=>{
+      console.log('error',error);
+      this.loading.dismiss().catch(() => {});
+      this.presentToast('Could not connect. Check connection.');
+    });          
+  
+  }
+
   isBrewery(location) {
     return new Promise(resolve =>{
-      /*
-      let locLat = location.geometry.location.lat;
-      let locLng = location.geometry.location.lng;
-      let isBreweryFlg:boolean = false;
 
-      this.beerAPI.findBreweriesByGeo(locLat,locLng,1).subscribe((brewery)=>{
-
-        if (brewery.hasOwnProperty('data')) {
-
-          for (let i=0;i<brewery.data.length;i++) {
-
-            let breweryAPIName = brewery.data[i].brewery.nameShortDisplay.toLowerCase();
-            let locationName = location.name.toLowerCase();
-            //console.log('test:'+breweryAPIName+'|'+locationName,locationName.indexOf(breweryAPIName));
-   
-            // brewery found.  Get beers.
-            if (locationName.indexOf(breweryAPIName) !== -1) {
-              //console.log('brewery',brewery.data[i]);
-              this.beerAPI.loadBreweryBeers(brewery.data[i].breweryId).subscribe((beers)=>{
-                  //console.log('beers',beers);
-                  this.navCtrl.push(BreweryDetailPage,{brewery:brewery.data[i],beers:beers});                  
-              });
-              resolve(true);
-            }
-          }
+      this.fbRef.ref('brewery_google/'+location.place_id).once('value').then(snapshot=>{
+        if (snapshot.exists()) {
+          console.log('brewery found');
+          resolve(snapshot.val());
+        } else {
+          resolve(false);
         }
-        resolve(false);
-      });
-      */
-      resolve(false);
+      }).catch(error=>{
+        console.log('error isBrewery',error);
+      });     
     });
   }  
 
@@ -371,7 +380,7 @@ export class SearchLocationPage {
       //console.log('filter',filter);
 
       if (filter!=null) {
-        this.showLoading('Loading. Please wait...');
+        this.showLoading();
 
         this.filter = filter;
         this.locations = [];
@@ -530,7 +539,7 @@ export class SearchLocationPage {
   }
 
   loadGoogleMaps() {
-    this.showLoading('Loading map. Please wait...');
+    this.showLoading();
     this.addConnectivityListeners();
  
     if (typeof google == "undefined" || typeof google.maps == "undefined" ) {
@@ -651,10 +660,8 @@ export class SearchLocationPage {
     console.log("enable map");
   }  
 
-  showLoading(msg) {
-    this.loading = this.loadingCtrl.create({
-      content: msg
-    });
+  showLoading() {
+    this.loading = this.loadingCtrl.create({});
     this.loading.present();
   }  
 

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { NavController, NavParams, LoadingController } from 'ionic-angular';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
@@ -20,10 +20,12 @@ export class FeedsPage {
   public feedLen:number;
   public queryable:boolean = true;
   public checkinsPerPage:number;
+  public loading:any;
 
   constructor(public navCtrl: NavController, 
               public navParams: NavParams,
-              public sing: SingletonService, 
+              public sing: SingletonService,
+              public loadingCtrl:LoadingController,
               public angFire:AngularFire) {
 
     this.limit = new BehaviorSubject(this.sing.checkinsPerPage);
@@ -32,6 +34,7 @@ export class FeedsPage {
   }
 
   getFeeds() {
+    this.showLoading();
     this.feeds =  this.angFire.database.list('/checkin/feeds/',{
       query:{
         orderByChild:'priority',
@@ -51,6 +54,9 @@ export class FeedsPage {
       } else {
         this.lastKey = '';
       }
+      this.loading.dismiss().catch(()=>{});
+    },error=>{
+      this.loading.dismiss().catch(()=>{});
     });
   
     this.feeds.subscribe(resp=>{
@@ -79,6 +85,11 @@ export class FeedsPage {
       if (!this.queryable)
         infiniteScroll.enable(false);
     }, 1000);
+  }
+
+  showLoading() {
+    this.loading = this.loadingCtrl.create({});
+    this.loading.present();
   }  
 
   ionViewDidLoad() {

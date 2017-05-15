@@ -268,4 +268,25 @@ export class BreweryService {
         .map(res => res.json());    
   }
 
+  getBreweryDetail(breweryId,breweryLocId) {
+    return new Observable(observer=>{
+      this.loadLocationById(breweryLocId).subscribe((pub)=>{
+              
+        this.loadBreweryBeers(breweryId).subscribe((beers)=>{
+          let brewery = {};
+          brewery['detail'] = pub.data;
+          brewery['beers'] = beers;
+          observer.next(brewery);
+          observer.complete();
+        },error=>{
+          console.log('error loadBreweryBeers',error);
+          observer.error(error);
+        });
+      },error=>{
+        console.log('error locationById',error);
+        observer.error(error);
+      });
+    });
+  }
+
 }

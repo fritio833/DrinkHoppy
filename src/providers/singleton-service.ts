@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/fromPromise';
 import { Geolocation } from 'ionic-native';
+import { ToastController } from 'ionic-angular';
 
 import firebase from 'firebase';
 
@@ -67,7 +68,7 @@ export class SingletonService {
   //public lng = -84.298067;
 
 
-  constructor() {}
+  constructor(public toastCtrl:ToastController) {}
 
   getLocation() {
     let loc:any;    
@@ -157,6 +158,15 @@ export class SingletonService {
                         +'-'+state.toLowerCase().replace(/\s|\#|\[|\]|\$|\./g, "")
                         +'-'+country.toLowerCase().replace(/\s|\#|\[|\]|\$|\./g, "");
   }
+
+  presentOffline() {
+    let toast = this.toastCtrl.create({
+      message: 'Could not connect. Check connection.',
+      position: 'top',
+      duration: 3000
+    });
+    toast.present();
+  }  
 
   timeDifference(current, previous, short?) {
 

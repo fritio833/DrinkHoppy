@@ -13,4 +13,3 @@
 */
 declare module '*';
 declare const facebookConnectPlugin: any;
-declare var google:any;

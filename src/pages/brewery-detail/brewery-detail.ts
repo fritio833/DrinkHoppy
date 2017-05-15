@@ -123,7 +123,7 @@ export class BreweryDetailPage {
     }
 
     
-    this.fbRef.ref('/favorite_locations/'+this.uid+'/'+this.location.place_id).set({
+    this.fbRef.ref('/favorite_locations/'+this.uid+'/'+this.brewery.id).set({
       photo:locPhoto,
       name:this.brewery.brewery.name,
       placeType:this.brewery.locationTypeDisplay,
@@ -131,7 +131,10 @@ export class BreweryDetailPage {
       breweryId:this.brewery.breweryId,
       breweryLocId:this.brewery.id,
       breweryIMG:this.brewery.brewery.images.icon,
-      isBrewery:'Y'
+      isBrewery:'Y',
+      placeId:this.location.place_id,
+      lat:this.brewery.latitude,
+      lng:this.brewery.longitude
     }).then(resp=>{
       this.presentToast(this.location.name+' saved to favorites');
     });
@@ -139,8 +142,8 @@ export class BreweryDetailPage {
 
   viewMap() {
     let modal = this.modalCtrl.create(LocationMapPage,
-                                      { lat:this.location.geometry.location.lat,
-                                        lng:this.location.geometry.location.lng,
+                                      { lat:this.brewery.latitude,
+                                        lng:this.brewery.longitude,
                                         locName:this.location.name
                                       });
     modal.present();
@@ -269,6 +272,9 @@ export class BreweryDetailPage {
    this.getPlacePhotos().then(success=>{
       this.showPhotos = true;
       this.loading.dismiss();
+   }).catch(error=>{
+     console.log('error ShowAllPhotos',error);
+     this.loading.dismiss().catch(()=>{});
    });
 
   }
@@ -331,6 +337,23 @@ export class BreweryDetailPage {
     this.navCtrl.push(BeerDetailPage,{beerId:beer.id});
   }
 
+  setBreweryToGooglePlace() {
+    this.fbRef.ref('brewery_google/'+this.location.place_id).once('value').then(snapshot=>{
+      if (!snapshot.exists()) {
+        this.fbRef.ref('brewery_google/'+this.location.place_id).set({
+          breweryId:this.brewery.breweryId,
+          breweryLocId:this.brewery.id,
+          placeId:this.location.place_id,
+          googleName:this.location.name,
+          breweryName:this.brewery.brewery.name,
+          lat:this.brewery.latitude,
+          lng:this.brewery.longitude,
+          timestamp:firebase.database.ServerValue.TIMESTAMP
+        });
+      }
+    });
+  }
+
   ionViewDidLoad() {
     console.log('ionViewDidLoad BreweryDetailPage');
 
@@ -353,6 +376,10 @@ export class BreweryDetailPage {
       this.locationOpen = null;
     }
 
+    if (this.location != null) {
+      this.setBreweryToGooglePlace();
+    }
+
     // get rating from google places
     if (this.location != null && this.location.hasOwnProperty('rating'))
       this.locationRating = this.location.rating;
@@ -365,6 +392,8 @@ export class BreweryDetailPage {
     if (this.location != null && this.location.hasOwnProperty('photos')) {
       this.geo.placePhotos(this.location.photos[0].photo_reference).subscribe((photo)=>{
         this.locationPhoto = photo.url;
+      },error=>{
+        console.log('error placePhotos',error);
       });
     } else {
       // this.locationPhoto = '../images/bar3.jpg';

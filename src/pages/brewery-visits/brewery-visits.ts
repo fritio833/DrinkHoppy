@@ -45,7 +45,7 @@ export class BreweryVisitsPage {
   }
 
   getBreweries() {
-    this.breweries = this.angFire.database.list('/users/'+this.uid+'/breweriesVisited',{
+    this.breweries = this.angFire.database.list('/breweries_visited/'+this.uid,{
       query:{
         orderByChild:'name'
       }
@@ -61,78 +61,31 @@ export class BreweryVisitsPage {
     toast.present();
   }  
 
- getBreweryDetail(breweryId,breweryName) {
+ getBreweryDetail(brewery) {
 
-
-    let foundBrewpub:number = -1;
 
     this.showLoading('Loading Brewery...');
+   //console.log('brewery',brewery);
 
-    this.beerAPI.loadBreweryLocations(breweryId).subscribe((success)=>{
-
-      for (let i = 0; i < success.data.length; i++) {
-        // Brewpubs get thes prioirty, or tasting rooms that's open to the public
-        if (success.data[i].locationType == 'brewpub' || success.data[i].openToPublic == 'Y') {
-          foundBrewpub = i;
-          break;
-        }
-      }
-
-      if (foundBrewpub == -1) {
-        foundBrewpub = 0;
-      }
-
-      console.log('breweries returned',success);
-      
-      this.getBreweryFromGoogle(breweryName,
-                                success.data[foundBrewpub].latitude,
-                                success.data[foundBrewpub].longitude).subscribe(resp=>{
-        console.log('data',resp['result']);
-        
-        this.beerAPI.loadLocationById(success.data[foundBrewpub].id).subscribe((pub)=>{
-                
-          this.beerAPI.loadBreweryBeers(pub.data.breweryId).subscribe((beers)=>{
-
-              this.loading.dismiss();
-              this.navCtrl.push(BreweryDetailPage,{brewery:pub.data,beers:beers,place:resp['result']});
-          },error=>{
-            console.log('error',error);
-            this.loading.dismiss().catch(() => {});
-            this.presentToast('Could not connect. Check connection.');
-          });
-          
-        },error=>{
-          console.log('error',error);
-          this.loading.dismiss().catch(() => {});
-          this.presentToast('Could not connect. Check connection.');
-        });
+    this.geo.getPlaceFromGoogleByLatLng(brewery.name,brewery.lat,brewery.lng).subscribe(resp=>{
+    
+      this.beerAPI.getBreweryDetail(brewery.breweryId,brewery.breweryLocId).subscribe(pub=>{
+        console.log('pub',pub);
+        this.loading.dismiss();
+        this.navCtrl.push(BreweryDetailPage,{brewery:pub['detail'],beers:pub['beers'],place:resp['result']});        
+      },error=>{
+        console.log('error getBrewery',error);
+        this.loading.dismiss().catch(() => {});
+        this.presentToast('Could not connect. Check connection.');         
       });
-      
+
     },error=>{
-      console.log('error',error);
-      this.loading.dismiss().catch(() => {});
-      this.presentToast('Could not connect. Check connection.');
-    }); 
- }
-
-  getBreweryFromGoogle(breweryName,lat,lng) {
-    //console.log('brewery',brewery);
-    let _breweryName = encodeURIComponent(breweryName);
-
-    return new Observable(observer=>{
-      this.geo.getPlaceByOrigin(_breweryName,lat,lng).subscribe(pub=>{
-        if (pub.results.length) {
-          //Get place detail
-          this.geo.placeDetail(pub.results[0].place_id).subscribe(detail=>{
-            //console.log('detail',detail);
-            observer.next(detail);
-          });
-        } else {
-          observer.next(false);
-        }
-      });      
+        console.log('error getBreweryFromGoogle',error);
+        this.loading.dismiss().catch(() => {});
+        this.presentToast('Could not connect. Check connection.');      
     });
-  }
+
+ }
 
   showLoading(msg) {
     this.loading = this.loadingCtrl.create({

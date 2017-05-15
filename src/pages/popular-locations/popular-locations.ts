@@ -6,8 +6,10 @@ import firebase from 'firebase';
 
 import { SingletonService } from '../../providers/singleton-service';
 import { GoogleService } from '../../providers/google-service';
+import { BreweryService } from '../../providers/brewery-service';
 
 import { LocationDetailPage } from '../location-detail/location-detail';
+import { BreweryDetailPage } from '../brewery-detail/brewery-detail';
 
 @Component({
   selector: 'page-popular-locations',
@@ -27,6 +29,7 @@ export class PopularLocationsPage {
               public navParams: NavParams,
               public angFire:AngularFire,
               public geo: GoogleService,
+              public beerAPI: BreweryService,
               public loadingCtrl:LoadingController,
               public sing:SingletonService) {}
 
@@ -70,11 +73,36 @@ export class PopularLocationsPage {
 
   getLocation(location) {
     this.showLoading('Loading. Please wait...');
-     this.geo.placeDetail(location.placeId).subscribe((resp)=>{
-       //console.log('resp',resp);
-       this.navCtrl.push(LocationDetailPage,{location:resp.result,loading:this.loading});
-     });
+
+     if (location.isBrewery === 'N') {     
+       this.geo.placeDetail(location.placeId).subscribe((resp)=>{
+         //console.log('resp',resp);
+         this.navCtrl.push(LocationDetailPage,{location:resp.result,loading:this.loading});
+       });
+     } else {
+       this.getBrewery(location);
+     }
     //this.navCtrl.push(LocationDetailPage);
+  }
+
+  getBrewery(location) {
+    this.geo.getPlaceFromGoogleByLatLng(location.name,location.lat,location.lng).subscribe(resp=>{
+    
+      this.beerAPI.getBreweryDetail(location.breweryId,location.breweryLocId).subscribe(pub=>{
+        console.log('pub',pub);
+        this.loading.dismiss();
+        this.navCtrl.push(BreweryDetailPage,{brewery:pub['detail'],beers:pub['beers'],place:resp['result']});        
+      },error=>{
+        console.log('error getBrewery',error);
+        this.loading.dismiss().catch(() => {});
+        //this.presentToast('Could not connect. Check connection.');         
+      });
+
+    },error=>{
+        console.log('error getBreweryFromGoogle',error);
+        this.loading.dismiss().catch(() => {});
+        //this.presentToast('Could not connect. Check connection.');      
+    });    
   }
 
   getThumbnail(picURL) {

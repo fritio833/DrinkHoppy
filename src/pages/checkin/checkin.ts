@@ -17,6 +17,7 @@ import { AuthService } from '../../providers/auth-service';
 import { DemoService } from '../../providers/demo-service';
 import { NotificationService } from '../../providers/notification-service';
 import { AchievementsService } from '../../providers/achievements-service';
+import { SocialService } from '../../providers/social-service';
 
 import { CheckinSelectBeerPage } from '../checkin-select-beer/checkin-select-beer';
 import { FriendsPage } from '../friends/friends';
@@ -73,6 +74,7 @@ export class CheckinPage {
   public successfulCheckin:boolean = false;
   public achievements = new Array();
   public checkinPoints = new Array();
+  public toggleFB:boolean = false;
 
   constructor(public navCtrl: NavController, 
   	          public params: NavParams,
@@ -85,6 +87,7 @@ export class CheckinPage {
               public sing:SingletonService,
               public notify:NotificationService,
               public beerAPI:BreweryService,
+              public social:SocialService,
               public auth:AuthService,
               public actionCtrl:ActionSheetController,
               public angFire:AngularFire,
@@ -484,13 +487,19 @@ export class CheckinPage {
   }
 
   shareOnFacebook() {
+    if (this.toggleFB)
+      this.toggleFB = false;
+    else
+      this.toggleFB = true;
 
+
+   /*
     SocialSharing.shareViaFacebook('message me',null,'http://benderapp.com').then((success)=>{
        //Enter bender points here
     }).catch((error) => {
        this.presentAlert("Make sure you have the Facebook app installed.");
     });
-
+    */
   }
 
   presentToast(msg) {
@@ -942,7 +951,27 @@ export class CheckinPage {
       that.fbRef.ref().update(updates).then(success=>{
         that.successfulCheckin = true;
         that.loading.dismiss().catch(()=>{});
-              
+        if (that.location != null && that.toggleFB) {
+          let fbIMG = that.sing.logo;
+          let fbComment = '';
+          if (locationData.img)
+            fbIMG = locationData.img;
+          else if (that.location.photo)
+            fbIMG = that.location.photo;
+
+          if (!locationData.comments.length)
+            fbComment = "Enjoying " + locationData.beerName + ' @ ' + locationData.name+'. Come join me!'; 
+          else
+            fbComment = locationData.comments;
+          
+          that.social.shareFacebook('Brew Search',
+                                       fbComment,
+                                       fbIMG).subscribe(success=>{
+                                         console.log('success fb post');
+                                       },error=>{
+                                         console.log('error fb post',error);
+                                       });
+        }
       }).catch(error=>{
         console.log('error',error);
         that.loading.dismiss().catch(()=>{});

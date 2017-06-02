@@ -2,8 +2,10 @@ import { Component } from '@angular/core';
 import { NavController, NavParams, Platform, ModalController } from 'ionic-angular';
 
 import { GoogleService } from '../../providers/google-service';
+import { SingletonService } from '../../providers/singleton-service';
 
 import { LocationMapPage } from '../location-map/location-map';
+import { CheckinPage } from '../checkin/checkin';
 
 declare var window: any;
 
@@ -21,15 +23,18 @@ export class BreweryDetailMorePage {
   public breweryDescription:string;
   public breweryHours:string;
   public locationHours:any;
+  public breweryBeers:any;
 
   constructor(public navCtrl: NavController, 
   	          public params: NavParams,
   	          public platform: Platform,
+              public sing: SingletonService,
               public modalCtrl:ModalController,
   	          public geo:GoogleService) {
   	this.brewery = params.get('brewery');
     this.location = params.get('location');
     this.locationPhoto = params.get('photo');
+    this.breweryBeers = params.get('beers');
     console.log('locBrew',this.location);
     console.log('brewInfo',this.brewery);
   }
@@ -63,6 +68,22 @@ export class BreweryDetailMorePage {
     return str;
   }
   
+  checkIn(brewery) {
+    if (this.sing.online) {
+      let modal = this.modalCtrl.create(CheckinPage,{
+                                                      checkinType:'brewery',
+                                                      brewery:this.brewery,
+                                                      location:this.location,
+                                                      beers:this.breweryBeers
+                                                    });
+      modal.onDidDismiss(()=> {
+        // this.getBeerReviews();
+      });
+      modal.present();
+    } else {
+      this.sing.showNetworkAlert();
+    }
+  }  
 
   viewMap() {
     let modal = this.modalCtrl.create(LocationMapPage,

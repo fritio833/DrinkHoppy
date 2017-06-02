@@ -63,26 +63,36 @@ export class FavoritesPage {
   }
 
   getBeerDetail(beerDbId) {
-    this.navCtrl.push(BeerDetailPage,{beerId:beerDbId,favorites:true});
+    if (this.sing.online)
+      this.navCtrl.push(BeerDetailPage,{beerId:beerDbId,favorites:true});
+    else
+      this.sing.showNetworkAlert();
   }
   
   checkinBeer(beer) {
-    this.showLoading();
-    this.beerAPI.loadBeerById(beer.id).subscribe(resp=>{
-      this.loading.dismiss();
-      console.log('beer',resp);
-      if (resp.hasOwnProperty('data')) {
-        let modal = this.modalCtrl.create(CheckinPage,{checkinType:'beer',beer:resp.data});
-        modal.onDidDismiss(()=> {
-          
-        });
-        modal.present();      
-      }
-    });
+    if (this.sing.online) {
+      this.showLoading();
+      this.beerAPI.loadBeerById(beer.id).subscribe(resp=>{
+        this.loading.dismiss();
+        console.log('beer',resp);
+        if (resp.hasOwnProperty('data')) {
+          let modal = this.modalCtrl.create(CheckinPage,{checkinType:'beer',beer:resp.data});
+          modal.onDidDismiss(()=> {
+            
+          });
+          modal.present();      
+        }
+      });
+    } else {
+      this.sing.showNetworkAlert();
+    }
   }
 
   locateBeer(beer) {
-    this.navCtrl.push(LocateBeerPage,{beer:beer});
+    if (this.sing.online)
+      this.navCtrl.push(LocateBeerPage,{beer:beer});
+    else
+      this.sing.showNetworkAlert();
   }  
 
   getBeerActions(beer) {
@@ -128,43 +138,51 @@ export class FavoritesPage {
 
   getLocation(loc) {
      
-    this.showLoading();
+    if (this.sing.online) {
+      this.showLoading();
 
-    if (loc.isBrewery=='Y') {
-      this.getBrewery(loc);
+      if (loc.isBrewery=='Y') {
+        this.getBrewery(loc);
+      } else {
+        this.geo.placeDetail(loc.$key).subscribe((resp)=>{
+
+          this.navCtrl.push(LocationDetailPage,{location:resp.result,loading:this.loading});
+
+        },error=>{
+          console.log('error',error);
+          this.loading.dismiss().catch(()=>{});
+        });
+      }
     } else {
-      this.geo.placeDetail(loc.$key).subscribe((resp)=>{
-
-        this.navCtrl.push(LocationDetailPage,{location:resp.result,loading:this.loading});
-
-      },error=>{
-        console.log('error',error);
-        this.loading.dismiss().catch(()=>{});
-      });
-    }     
+      this.sing.showNetworkAlert();
+    }
   }
 
   getBrewery(loc) {
 
-    let foundBrewpub:number = -1;
-    this.showLoading();
-    this.geo.getPlaceFromGoogleByLatLng(loc.name,loc.lat,loc.lng).subscribe(resp=>{
-    
-      this.beerAPI.getBreweryDetail(loc.breweryId,loc.breweryLocId).subscribe(pub=>{
-        console.log('pub',pub);
-        this.loading.dismiss();
-        this.navCtrl.push(BreweryDetailPage,{brewery:pub['detail'],beers:pub['beers'],place:resp['result'],loading:this.loading});        
-      },error=>{
-        console.log('error getBrewery',error);
-        this.loading.dismiss().catch(() => {});
-        this.presentToast('Could not connect. Check connection.');         
-      });
+    if (this.sing.online) {
+      let foundBrewpub:number = -1;
+      this.showLoading();
+      this.geo.getPlaceFromGoogleByLatLng(loc.name,loc.lat,loc.lng).subscribe(resp=>{
+      
+        this.beerAPI.getBreweryDetail(loc.breweryId,loc.breweryLocId).subscribe(pub=>{
+          console.log('pub',pub);
+          this.loading.dismiss();
+          this.navCtrl.push(BreweryDetailPage,{brewery:pub['detail'],beers:pub['beers'],place:resp['result'],loading:this.loading});        
+        },error=>{
+          console.log('error getBrewery',error);
+          this.loading.dismiss().catch(() => {});
+          this.presentToast('Could not connect. Check connection.');         
+        });
 
-    },error=>{
-        console.log('error getBreweryFromGoogle',error);
-        this.loading.dismiss().catch(() => {});
-        this.presentToast('Could not connect. Check connection.');      
-    });         
+      },error=>{
+          console.log('error getBreweryFromGoogle',error);
+          this.loading.dismiss().catch(() => {});
+          this.presentToast('Could not connect. Check connection.');      
+      });
+    } else {
+      this.sing.showNetworkAlert();
+    }
   }
 
   getFavBeers() {
@@ -209,20 +227,23 @@ export class FavoritesPage {
     if (this.favLocations) {
       return;
     }
+    if (this.sing.online) {
+      this.showLoading();
+      this.favLocations = this.angFire.database.list('/favorite_locations/'+this.uid+'/',{
+        query:{
+          orderByChild:'name'
+        }
+      });
 
-    this.showLoading();
-    this.favLocations = this.angFire.database.list('/favorite_locations/'+this.uid+'/',{
-      query:{
-        orderByChild:'name'
-      }
-    });
-
-    this.favLocations.subscribe(resp=>{
-      this.loading.dismiss().catch(()=>{});
-    },error=>{
-      console.log('error getFavBeers',error);
-      this.loading.dismiss().catch(()=>{});
-    });    
+      this.favLocations.subscribe(resp=>{
+        this.loading.dismiss().catch(()=>{});
+      },error=>{
+        console.log('error getFavBeers',error);
+        this.loading.dismiss().catch(()=>{});
+      });
+    } else {
+      this.sing.showNetworkAlert();
+    }   
 
   }
 

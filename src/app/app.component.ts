@@ -62,9 +62,11 @@ export class MyApp {
       { title: 'Profile', component: ProfilePage }
     ];
 
+    /*
     this.events.subscribe('user:loggedIn',userId=>{
       this.getProfileData(userId);
     });
+    */
 
   }
 
@@ -73,10 +75,12 @@ export class MyApp {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       this.fbRef = firebase.database();
-
+      this.sing.setOnlineListener();
+   
+   
       // Event Listener for logged in and out
       this.events.subscribe('user:loggedIn',userId=>{
-        //this.getProfileData(userId);
+        this.getProfileData(userId);
 
         // Set User Push Notification Token
         this.setPushNotification(userId);
@@ -87,18 +91,25 @@ export class MyApp {
       });      
 
       this.auth.isLoggedIn().then((status)=>{
-        if (status) {
+        if (!status) {
           //let user = this.auth.getUser();
           //console.log('userInfo',user);
-          //this.getProfileData(user.uid);
-          this.rootPage = HomePage;
-        } else {
+          //this.getProfileData(user.uid);          
           this.rootPage = LoginPage;
+        } else {
+          console.log('status UID',status);
+          this.getProfileData(status);
+          this.rootPage = HomePage;
         }
       });
 
-      this.setLocation();
-      
+      this.events.subscribe('online:status',status=>{
+        if (status)
+          this.setLocation();
+        else
+          console.log('offline');
+      });
+    
       StatusBar.styleDefault();
       Splashscreen.hide();
 
@@ -146,7 +157,10 @@ export class MyApp {
     // close the menu when clicking a link from the menu
     this.menu.close();
     // navigate to the new page if it is not the current page
-    this.nav.setRoot(page.component);
+    if (this.sing.online)
+      this.nav.setRoot(page.component);
+    else
+      this.sing.showNetworkAlert();
   }
 
   doLogout() {
@@ -171,7 +185,7 @@ export class MyApp {
           this.setCityState(lowResp);
         },error=>{
           console.log('error',error);
-          this.presentNoGPSAlert();
+          //this.presentNoGPSAlert();
         });
       }); 
   }
@@ -190,6 +204,7 @@ export class MyApp {
       
     },error=>{
       console.log('error',error);
+      //this.presentNoGPSAlert();
     });    
   }
 
@@ -202,13 +217,14 @@ export class MyApp {
     if (uid != null) {
       this.fbRef.ref('users/'+uid).on('value',snapshot => {
         //console.log('snap',snapshot.val());
-      
-        this.displayName = snapshot.val().name;
+        if (snapshot.exists()) {
+          this.displayName = snapshot.val().name;
 
-        if (snapshot.val().photo!=null && snapshot.val().photo !='')
-          this.profileIMG = snapshot.val().photo;
-        else
-          this.profileIMG = 'images/default-profile.png';
+          if (snapshot.val().photo!=null && snapshot.val().photo !='')
+            this.profileIMG = snapshot.val().photo;
+          else
+            this.profileIMG = 'images/default-profile.png';
+        }
       });
     }
   }

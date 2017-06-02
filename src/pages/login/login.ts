@@ -78,6 +78,26 @@ export class LoginPage {
     });
   }
 
+ /*
+  detailFacebook() {
+    this.auth.getFacebookDetail();
+  }
+  */
+  loginGoogle() {
+     this.auth.loginGoogle().subscribe(resp => {
+      //console.log('resp',resp);
+      if (!resp)
+        this.presentToast("Incorrect Login Credentials.");
+      else {
+        this.navCtrl.setRoot(HomePage);
+        console.log('google login');
+      }
+      //this.showError("Incorrect Login Credentials."); 
+    }, error => {
+      console.log('error',error);
+    });
+  }  
+
   showAlert(title,msg) {
 
       let alert = this.alertCtrl.create({

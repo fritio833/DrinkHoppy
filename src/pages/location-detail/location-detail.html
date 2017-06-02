@@ -1,15 +1,24 @@
 <ion-header>
   <ion-navbar color="primary">
     <ion-title>Place</ion-title>
+		<!--
     <ion-buttons right>
       <button ion-button icon-left (click)="save()">
         <ion-icon name="heart"></ion-icon>
 				save
       </button>   
-    </ion-buttons>		
+    </ion-buttons>
+		-->		
   </ion-navbar>
 </ion-header>
 <ion-content>
+  <ion-fab top right edge>
+    <button ion-fab mini color="secondary"><ion-icon name="add"></ion-icon></button>
+    <ion-fab-list>
+      <button ion-fab (click)="shareFacebook()"><ion-icon name="logo-facebook"></ion-icon></button>
+			<button ion-fab (click)="save()"><ion-icon name="heart"></ion-icon></button>
+    </ion-fab-list>
+  </ion-fab>	
 	<ion-grid class="background-home" [ngStyle]="getBackgroundImg(locationPhoto)">
 		<ion-row>
 			<ion-col>

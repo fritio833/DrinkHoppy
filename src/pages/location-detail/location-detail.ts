@@ -6,10 +6,12 @@ import { AngularFire, FirebaseListObservable } from 'angularfire2';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Storage } from '@ionic/storage';
 
+
 import { LocationService } from '../../providers/location-service';
 import { GoogleService } from '../../providers/google-service';
 import { BreweryService } from '../../providers/brewery-service';
 import { SingletonService } from '../../providers/singleton-service';
+import { SocialService } from '../../providers/social-service';
 
 import { LocationMapPage } from '../location-map/location-map';
 import { LocationDetailsMorePage } from '../location-details-more/location-details-more';
@@ -70,6 +72,7 @@ export class LocationDetailPage {
               public angFire:AngularFire,
               public cdr:ChangeDetectorRef,
               public storage:Storage,
+              public social:SocialService,
               public toastCtrl:ToastController,
   	          public geo:GoogleService) {
 
@@ -243,8 +246,11 @@ export class LocationDetailPage {
   }
 
   checkIn() {
-    let modal = this.modalCtrl.create(CheckinPage,{ location:this.location,checkinType:'place'});
-    modal.present();    
+    if (this.sing.online) {
+      let modal = this.modalCtrl.create(CheckinPage,{ location:this.location,checkinType:'place'});
+      modal.present();
+    } else
+      this.sing.showNetworkAlert();
   }
 
   getGoogleStaticMap() {
@@ -330,6 +336,16 @@ export class LocationDetailPage {
   getBeerDetail(beerId) {
   	this.navCtrl.push(BeerDetailPage,{beerId:beerId});
 
+  }
+
+  shareFacebook() {
+    this.social.shareFacebook(this.location.name,
+        this.location.vicinity,
+        this.locationPhoto).subscribe(success=>{
+          alert('shared success');
+        },error=>{
+          alert('failed');
+        });
   }  
 
   getBeerMenu() {
@@ -337,7 +353,7 @@ export class LocationDetailPage {
       this.localBeers = this.angFire.database.list('/location_menu/'+this.location.place_id+'/beers',{
         query: {
           orderByChild: 'priority',
-          limitToFirst: this.limit
+          limitToFirst: 10
         }
       });
 

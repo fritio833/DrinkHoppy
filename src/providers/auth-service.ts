@@ -3,13 +3,17 @@ import { Platform, App, Events } from 'ionic-angular';
 
 import { Observable } from 'rxjs/Observable';
 import { AuthProviders, AuthMethods, AngularFire  } from 'angularfire2';
-import { Facebook, Geolocation } from 'ionic-native';
+import { Geolocation } from 'ionic-native';
+import { Facebook } from 'ionic-native';
+import { GooglePlus } from '@ionic-native/google-plus';
+import { TwitterConnect } from '@ionic-native/twitter-connect';
 import firebase from 'firebase';
 
 import 'rxjs/add/operator/map';
 import { Storage } from '@ionic/storage';
 
 import { SingletonService } from './singleton-service';
+
 
 export class User {
   name: string;
@@ -34,6 +38,8 @@ export class AuthService {
               public angFire:AngularFire,
               public storage:Storage,
               public platform:Platform,
+              public googlePlus:GooglePlus,
+              public twitter:TwitterConnect,
               public events:Events,
               public app:App) {
     this.auth = firebase.auth();
@@ -71,14 +77,17 @@ export class AuthService {
     });
   }
 
-  public updateUserData(resp) {
+  public updateUserData(resp,provider?,providerTok?) {
     let timestamp = firebase.database.ServerValue.TIMESTAMP;
     let updateData = {dateLoggedIn:timestamp};
 
+    if (provider!=null && providerTok!=null) {
+      updateData[provider+'Token'] = providerTok;
+    }
     this.userRef.ref('users/' + resp.uid).update(updateData);    
   }
 
-  public writeUserData(resp,provider,fbTok?,credName?) {
+  public writeUserData(resp,provider,providerTok?,credName?) {
     let timestamp = firebase.database.ServerValue.TIMESTAMP;
     let displayName = null;
     let photoURL = null;
@@ -102,14 +111,13 @@ export class AuthService {
     else
       photoURL = '';
 
-    this.userRef.ref('users/' + resp.uid).set({
+    let newUserData = {
       uid:resp.uid,
       name:displayName,
       nameLower:displayName.toLowerCase(),
       email:resp.email,
       dateCreated:timestamp,
-      dateLoggedIn:timestamp,      
-      facebookToken:fbTok,
+      dateLoggedIn:timestamp,
       provider:provider,
       photo:photoURL,
       emailVerified: resp.emailVerified,
@@ -122,8 +130,13 @@ export class AuthService {
       country:userHomeTownCountry,
       locationKey:locationKey,
       banned:0,
-      role:'user'
-    });
+      role:'user'      
+    };
+
+    newUserData[provider+'Token'] = providerTok;
+
+
+    this.userRef.ref('users/' + resp.uid).set(newUserData);
   }
    
   public signupEmail(cred) {
@@ -153,99 +166,165 @@ export class AuthService {
     });
   }
 
+  // Can't get email.  Must apply to Twitter to be whitelisted or find access on Fabric to turn email flag on.
   
-  /*
-  public signupEmail(cred) {
-    return new Promise( resolve => {
+  public loginTwitter() {
+    return Observable.create(observer => { 
       
-      this.angFire.auth.createUser({email:cred.email.value,password:cred.pword.value}).then(newUser=>{
-        let timestamp = firebase.database.ServerValue.TIMESTAMP;
-        console.log('newUser created',newUser);
-        // TODO: send sendPasswordResetEmail
-        this.auth.currentUser.sendEmailVerification();
-        //this.writeUserData(newUser.uid,cred.name.value,cred.email.value,)
-
-        this.userRef.ref('users/' + newUser.uid).set({
-          uid: newUser.uid,
-          username: cred.userName.value,
-          displayName: cred.name.value,
-          DOB: cred.birthDay.value, 
-          email: newUser.auth.email,
-          profilePicture: newUser.auth.photoURL,
-          dateCreated: timestamp,
-          checkins: 0,
-          emailVerified: newUser.auth.emailVerified
+      if (this.platform.is('cordova')) {
+        this.twitter.login().then(resp=>{
+          console.log('twitter resp',resp);
+          let provider = firebase.auth.TwitterAuthProvider.credential(resp.token,resp.secret);
+          this.setUserData(provider,resp.token,'twitter').subscribe(success=>{
+            observer.next(success);
+          });        
+        },error=>{
+          console.log('error loginTwitterPlugin',error);
         });
+      } else {
+        let provider = new firebase.auth.TwitterAuthProvider();
+        firebase.auth().signInWithPopup(provider).then(resp=>{
+          console.log('twitter keys',resp);
+          let providerTwitter = firebase.auth.TwitterAuthProvider.credential(resp.credential.accessToken,resp.credential.secret);
+          this.setUserData(providerTwitter,resp.credential.accessToken,'twitter').subscribe(success=>{
+            observer.next(success);
+          });
+        }).catch(error=>{
+          console.log('error signInWithPopup',error);
+        });        
+      }
+    });    
+  }
 
-        resolve(newUser);
+  public loginGoogle() {
+    return Observable.create(observer => { 
+      
+      if (this.platform.is('cordova')) {
+        this.googlePlus.login({
+          'webClientId':'925035513978-tv6qkm62kb4irdpjso6lprot1br1m5ut.apps.googleusercontent.com'
+        }).then(success=>{
+          console.log('resp',success);
+
+          let provider = firebase.auth.GoogleAuthProvider.credential(success.idToken);
+          this.setUserData(provider,success.idToken,'google').subscribe(success=>{
+            observer.next(success);
+          });          
+        
+        }).catch(error=>{
+          console.log('error',error);
+          observer.error(error);
+        });
+      } else {
+          let provider = new firebase.auth.GoogleAuthProvider();
+          firebase.auth().signInWithPopup(provider).then(resp=>{
+            console.log('google keys',resp);
+            let providerGoogle = firebase.auth.GoogleAuthProvider.credential(resp.credential.idToken);
+            this.setUserData(providerGoogle,resp.credential.idToken,'google').subscribe(success=>{
+              observer.next(success);
+            });
+          }).catch(error=>{
+            console.log('error google login',error);
+            observer.error(error);
+          });        
+      }
+    });    
+  }
+
+  public isLoggedInFacebook() {
+    return Observable.create(observer => {
+      Facebook.getLoginStatus().then(resp=>{
+        console.log('getFacebookDetail',resp);
+        if (resp.status === 'connected') {
+          /*
+          Facebook.api('/'+resp.authResponse.userID + '?fields=id,name,gender',[]).then(success=>{
+            console.log('fbResp',success);
+          }).catch(error=>{
+            console.log('error facebookDetail',error);
+          });
+          */
+          console.log('logged off facebook');
+          this.logoutFacebook().subscribe(loggedOut=>{
+            observer.next(true);
+          });
+        } else {
+          alert('Not logged in');
+          observer.next(true);
+        }
       }).catch(error=>{
-        console.log('error',error);
-        resolve(error);
+        observer.error(error);
       });
-
     });
   }
-  */
+
+  public logoutFacebook() {
+    return Observable.create(observer => {
+      Facebook.logout().then(resp=>{
+        observer.next(true);
+      }).catch(error=>{
+        observer.error(error);
+      });
+    });
+  }
+
   public loginFacebook() {
 
     return Observable.create(observer => {
 
       if (this.platform.is('cordova')) {
-        Facebook.login(['public_profile','email']).then(facebookData => {
-          //console.log('facebookData',facebookData);
+        
+        Facebook.login(['email']).then(facebookData => {
+          console.log('facebookData',facebookData);
 
           let provider = firebase.auth.FacebookAuthProvider.credential(facebookData.authResponse.accessToken);
-          firebase.auth().signInWithCredential(provider).then(firebaseData => {
-            //console.log('firebaseData',firebaseData);
-            this.storage.set('uid',firebaseData.uid);
-
-            this.userExistsRef.ref('users/').once('value',snapshot=>{
-              if (snapshot.hasChild(firebaseData.uid)) {
-                this.updateUserData(firebaseData);
-                observer.next(firebaseData);
-              } else {
-                this.auth.currentUser.sendEmailVerification();
-                this.writeUserData(firebaseData,'facebook',facebookData.authResponse.accessToken);
-                observer.next(firebaseData);                            
-              }
-            });
-          });
-        }, error => {
+          this.setUserData(provider,facebookData.authResponse.accessToken,'facebook').subscribe(success=>{
+            observer.next(success);
+          },error=>{
+            console.log('error setUserData Facebook',error);
+            observer.error(error);
+          });          
+        }).catch( error => {
+          console.log('error facebookPlugin',error);
           observer.error(error);
         });
+
       } else {
-          let provider = new firebase.auth.FacebookAuthProvider();
-          provider.addScope('user_birthday');
-          firebase.auth().signInWithPopup(provider).then(resp=>{
-
+        let provider = new firebase.auth.FacebookAuthProvider();
+        provider.addScope('user_birthday');
+        firebase.auth().signInWithPopup(provider).then(resp=>{
+          console.log('facebook popup resp',resp);
           let providerFB = firebase.auth.FacebookAuthProvider.credential(resp.credential.accessToken);
-          firebase.auth().signInWithCredential(providerFB).then(firebaseData => {            
-            //console.log('fbresp',firebaseData);
-            this.storage.set('uid',firebaseData.uid);
-
-            this.userExistsRef.ref('users/').once('value',snapshot=>{
-              if (snapshot.hasChild(firebaseData.uid)) {
-                this.updateUserData(firebaseData);
-                observer.next(firebaseData);
-              } else {
-                this.auth.currentUser.sendEmailVerification();
-                this.writeUserData(firebaseData,'facebook',resp.credential.accessToken);
-                observer.next(firebaseData);                            
-              }
-            });
-            
+          this.setUserData(providerFB,resp.credential.accessToken,'facebook').subscribe(success=>{
+            observer.next(success);
           });
-          }).catch(error=>{
-            console.log('error facebook login',error);
-            observer.next(error);
-          });        
+        }).catch(error=>{
+            //console.log('error facebook login',error['code']);
+            observer.error(error);
+        });      
       }
-
     });
-
   }
- 
 
+  public setUserData(providerData,token,provider) {
+    return Observable.create(observer => {
+      firebase.auth().signInWithCredential(providerData).then(firebaseData => {            
+        console.log('fbresp',firebaseData);
+        this.storage.set('uid',firebaseData.uid);
+
+        this.userExistsRef.ref('users/').once('value',snapshot=>{
+          if (snapshot.hasChild(firebaseData.uid)) {
+            this.updateUserData(firebaseData,provider,token);
+            observer.next(firebaseData);
+          } else {
+            this.auth.currentUser.sendEmailVerification();
+            this.writeUserData(firebaseData,provider,token);
+            observer.next(firebaseData);                            
+          }
+        });
+      }).catch(error=>{
+        observer.error(error);
+      });
+    });
+  }
  
   public register(credentials) {
     if (credentials.email === null || credentials.password === null) {
@@ -266,7 +345,6 @@ export class AuthService {
   public isLoggedIn() {
     return new Promise((resolve) => {
 
-
       this.storage.ready().then(()=>{
 
         this.storage.get("uid").then((status) =>{
@@ -275,7 +353,7 @@ export class AuthService {
               resolve(false);
             } else {
               this.sing.loggedIn = true;
-              resolve(true);
+              resolve(status);
             }
         });
 
@@ -283,35 +361,6 @@ export class AuthService {
        //this.sing.loggedIn;
     });
   }
-
-  public setSingletonData() {
-
-    console.log("Setting Singleton Data");
-    this.storage.ready().then(()=>{
-
-      this.storage.get('fbPic').then((fbPic)=>{
-        this.sing.profileIMG = fbPic;
-      });
-
-      this.storage.get("userName").then((uName) =>{
-        if ( uName != null )
-          this.sing.userName = uName;
-      });
-      this.storage.get("name").then((name) =>{
-        if ( name != null)
-            this.sing.realName = name;
-      });
-
-      this.storage.get("description").then((description) =>{
-          this.sing.description = description;
-      });
-
-      this.storage.get("token").then((token) =>{
-          this.sing.token = token;
-      });                 
-
-    });    
-  }  
  
   public logOut() {
     var that = this;

@@ -138,13 +138,13 @@
   </ion-item>
   <ion-item class="botton-border-item" *ngIf="beer">
       <ion-label>Share</ion-label>
-      <button color="facebook" item-right ion-button icon-left (click)="shareOnFacebook()">
+      <button *ngIf="!toggleFB" color="light" item-right ion-button icon-left (click)="shareOnFacebook()">        
         <ion-icon class="social-button" ios="logo-facebook" md="logo-facebook"></ion-icon>
         Facebook
-      </button>
-      <button color="twitter" item-right ion-button icon-left (click)="shareOnFacebook()">
-        <ion-icon class="social-button" ios="logo-twitter" md="logo-twitter"></ion-icon>
-        Twitter
+      </button>      
+      <button *ngIf="toggleFB" color="facebook" item-right ion-button icon-left (click)="shareOnFacebook()">        
+        <ion-icon class="social-button" ios="logo-facebook" md="logo-facebook"></ion-icon>
+        Facebook
       </button>
   </ion-item>
   <button *ngIf="beer" class="chk-btn" ion-button color="check" full (click)="doCheckin()">Check-in</button>

@@ -2,9 +2,12 @@ import { Component } from '@angular/core';
 import { NavController, NavParams, Platform, ModalController } from 'ionic-angular';
 
 import { Ionic2RatingModule } from 'ionic2-rating';
+
 import { GoogleService } from '../../providers/google-service';
+import { SingletonService } from '../../providers/singleton-service';
 
 import { LocationMapPage } from '../location-map/location-map';
+import { CheckinPage } from '../checkin/checkin';
 
 declare var window: any;
 declare var cordova: any;
@@ -26,7 +29,8 @@ export class LocationDetailsMorePage {
   constructor(public navCtrl: NavController, 
               public params: NavParams,
               public platform:Platform,
-              public modalCtrl:ModalController, 
+              public modalCtrl:ModalController,
+              public sing:SingletonService,
               public goog:GoogleService) {
     this.location = params.get('location');
     this.locationPhoto = params.get('photo');
@@ -106,6 +110,13 @@ export class LocationDetailsMorePage {
       }    
   }
 
+  checkIn() {
+    if (this.sing.online) {
+      let modal = this.modalCtrl.create(CheckinPage,{ location:this.location,checkinType:'place'});
+      modal.present();
+    } else
+      this.sing.showNetworkAlert();
+  }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad LocationDetailsMorePage');

@@ -147,17 +147,23 @@ export class SearchLocationPage {
   }
 
   autoLocationSearch(event) {
-    
-    
+        
   	if (event.type == "input") {
-      setTimeout(()=>{
-        console.log(event.target.value);
-  	    this.geo.placesAutocomplete(event.target.value).subscribe((success)=>{
-  	      this.predictions = success.predictions;
-  	      this.predictionsLen = success.predictions.length;
-  	      //console.log(this.predictions);
-        });
-      },1000);
+
+      if (this.sing.online) {
+        setTimeout(()=>{
+          console.log(event.target.value);
+          this.geo.placesAutocomplete(event.target.value).subscribe((success)=>{
+            this.predictions = success.predictions;
+            this.predictionsLen = success.predictions.length;
+            //console.log(this.predictions);
+          },error=>{
+            console.log('error placesAutocomplete',error);
+          });
+        },1000);
+      } else {
+        this.sing.showNetworkAlert();
+      }
   	}
   }
 
@@ -184,25 +190,28 @@ export class SearchLocationPage {
 
   getLocal() {
 
-    this.showLoading();
+    if (this.sing.online) {
+      this.showLoading();
 
-    if (this.searchType == 'nearbysearch' || !this.sing.isSelectedLocation()) {
-      Geolocation.getCurrentPosition().then((resp) => {
+      if (this.searchType == 'nearbysearch' || !this.sing.isSelectedLocation()) {
+        Geolocation.getCurrentPosition().then((resp) => {
 
-        this.geoLat = resp.coords.latitude;
-        this.geoLng = resp.coords.longitude;
-        this.setLocal(this.geoLat,this.geoLng);
-        
-      }).catch((error) => {
-        this.presentToast('Could not connect. Check connection.');
-        this.loading.dismiss().catch(() => {});      
-        console.log('Error getting location', error);
-      });
+          this.geoLat = resp.coords.latitude;
+          this.geoLng = resp.coords.longitude;
+          this.setLocal(this.geoLat,this.geoLng);
+          
+        }).catch((error) => {
+          this.sing.showNetworkAlert();
+          this.loading.dismiss().catch(() => {});      
+          console.log('Error getting geo location', error);
+        });
+      } else {
+        // Selection based on city selected out of town
+        this.setLocal(this.sing.selectLat,this.sing.selectLng);
+      }
     } else {
-      // Selection based on city selected out of town
-      this.setLocal(this.sing.selectLat,this.sing.selectLng);
+      this.sing.showNetworkAlert();
     }
-
   }
 
   setLocal(lat,lng) {
@@ -229,7 +238,7 @@ export class SearchLocationPage {
                   //console.log('Geolocation with high accuracy.');
                 });
             },error=>{
-              console.log(error);
+              console.log('error geo.reverseGeocodeLookup',error);
               this.presentToast('Could not connect. Check connection.');
               this.loading.dismiss().catch(() => {});              
             });
@@ -243,7 +252,7 @@ export class SearchLocationPage {
              this.nextNearByToken = success.next_page_token;             
              this.loading.dismiss().catch(() => {});
           },(error)=>{
-            console.log(error);
+            console.log('error geo.placesNearByRadius',error);
             this.presentToast('Could not connect. Check connection.');
             this.loading.dismiss().catch(() => {});
           });
@@ -251,98 +260,106 @@ export class SearchLocationPage {
   }
 
   getMoreLocal(infiniteScroll) {
-
-    if (this.nextNearByToken == null) {
-      infiniteScroll.complete();
-      return;
-    }
-
-    setTimeout(() => {
-
-      this.geo.getNextToken(this.nextNearByToken,this.searchType).subscribe((success)=>{
-
-        let locationsNext:any;
-
-        locationsNext = this.fixLocations(success.results);
-
-        if (success.hasOwnProperty('next_page_token'))
-          this.nextNearByToken = success.next_page_token;
-
-        for (let i = 0; i < locationsNext.length; i++) {
-          this.locations.push(locationsNext[i]);
-        }
-
+    if (this.sing.online) {
+      if (this.nextNearByToken == null) {
         infiniteScroll.complete();
+        return;
+      }
 
-        
-        if (!success.hasOwnProperty('next_page_token')) {
-          //infiniteScroll.enable(false);
-          this.nextNearByToken = null;
-        }
-      },error=>{
-         this.presentToast('Could not connect. Check connection.');        
-      });
-    }, 1000);
+      setTimeout(() => {
+
+        this.geo.getNextToken(this.nextNearByToken,this.searchType).subscribe((success)=>{
+
+          let locationsNext:any;
+
+          locationsNext = this.fixLocations(success.results);
+
+          if (success.hasOwnProperty('next_page_token'))
+            this.nextNearByToken = success.next_page_token;
+
+          for (let i = 0; i < locationsNext.length; i++) {
+            this.locations.push(locationsNext[i]);
+          }
+
+          infiniteScroll.complete();
+
+          
+          if (!success.hasOwnProperty('next_page_token')) {
+            //infiniteScroll.enable(false);
+            this.nextNearByToken = null;
+          }
+        },error=>{
+          this.presentToast('Could not connect. Check connection.');        
+        });
+      }, 1000);
+    } else {
+       this.presentToast('Could not connect. Check connection.');
+      infiniteScroll.complete();
+    }
   }
 
   getLocationDetail(location) {
-    let validLocation = false;
-    this.showLoading();
-    this.geo.placeDetail(location.place_id).subscribe((resp)=>{
+    if (this.sing.online) {
+      let validLocation = false;
+      this.showLoading();
+      this.geo.placeDetail(location.place_id).subscribe((resp)=>{
 
-      this.isBrewery(resp.result).then(foundBrewery=>{
-        //console.log('is brewery',status);
-        
-        if (!foundBrewery) {
-          for (var i=0;i<resp.result.types.length;i++) {
+        this.isBrewery(resp.result).then(foundBrewery=>{
+          //console.log('is brewery',status);
+          
+          if (!foundBrewery) {
+            for (var i=0;i<resp.result.types.length;i++) {
 
-            if (resp.result.types[i].match('night_club|food|bar|grocery_or_supermarket|liquor_store|gas_station|convenience_store')) {                
-                this.navCtrl.push(LocationDetailPage,{location:resp.result,loading:this.loading});
-                //this.loading.dismiss().catch(() => {});               
-                validLocation = true;
-                break;
+              if (resp.result.types[i].match('night_club|food|bar|grocery_or_supermarket|liquor_store|gas_station|convenience_store')) {                
+                  this.navCtrl.push(LocationDetailPage,{location:resp.result,loading:this.loading});
+                  //this.loading.dismiss().catch(() => {});               
+                  validLocation = true;
+                  break;
+              }
             }
+
+            if (!validLocation) {
+              console.log(resp.result.types);
+              this.presentToast('Not a place that would sell alcoholic beverages');
+              this.loading.dismiss().catch(() => {});
+            }
+          } else {
+            this.getBreweryDetail(foundBrewery);
           }
 
-          if (!validLocation) {
-            console.log(resp.result.types);
-            this.presentToast('Not a place that would sell alcoholic beverages');
-            this.loading.dismiss().catch(() => {});
-          }
-        } else {
-          this.getBreweryDetail(foundBrewery);
-        }
-
-      });   
-    },error=>{
-      console.log('error',error);
-      this.loading.dismiss().catch(() => {});
-      this.presentToast('Could not connect. Check connection.');
-
-    });
-
+        });   
+      },error=>{
+        console.log('error',error);
+        this.loading.dismiss().catch(() => {});
+        this.presentToast('Could not connect. Check connection.');
+      });
+    } else {
+      this.sing.showNetworkAlert();
+    }
   }
 
   getBreweryDetail(brewery) {
-    console.log('brewery',brewery);
-    
-    this.geo.placeDetail(brewery.placeId).subscribe((resp)=>{        
-        this.beerAPI.getBreweryDetail(brewery.breweryId,brewery.breweryLocId).subscribe(pub=>{
-          console.log('pub',pub);
-          this.loading.dismiss();
-          this.navCtrl.push(BreweryDetailPage,{brewery:pub['detail'],beers:pub['beers'],place:resp.result});        
-        },error=>{
-          console.log('error getBrewery',error);
-          this.loading.dismiss().catch(() => {});
-          this.presentToast('Could not connect. Check connection.');         
-        });
+    //console.log('brewery',brewery);
+    if (this.sing.online) {
+      this.geo.placeDetail(brewery.placeId).subscribe((resp)=>{        
+          this.beerAPI.getBreweryDetail(brewery.breweryId,brewery.breweryLocId).subscribe(pub=>{
+            console.log('pub',pub);
+            this.loading.dismiss();
+            this.navCtrl.push(BreweryDetailPage,{brewery:pub['detail'],beers:pub['beers'],place:resp.result});        
+          },error=>{
+            console.log('error getBrewery',error);
+            this.loading.dismiss().catch(() => {});
+            this.presentToast('Could not connect. Check connection.');         
+          });
 
-    },error=>{
-      console.log('error',error);
-      this.loading.dismiss().catch(() => {});
-      this.presentToast('Could not connect. Check connection.');
-    });          
-  
+      },error=>{
+        console.log('error',error);
+        this.loading.dismiss().catch(() => {});
+        this.presentToast('Could not connect. Check connection.');
+      });          
+    } else {
+      this.sing.showNetworkAlert();
+    }
   }
 
   isBrewery(location) {
@@ -371,63 +388,67 @@ export class SearchLocationPage {
   }  
 
   showLocationFilter() {
-    let modal = this.modalCtrl.create(SearchLocationFilterPage,
-                                      { 
-                                        filter:this.filter,
-                                        placeType:this.placeType}
-                                      );
-    modal.onDidDismiss(filter => {
-      //console.log('filter',filter);
+    if (this.sing.online){
+      let modal = this.modalCtrl.create(SearchLocationFilterPage,
+                                        { 
+                                          filter:this.filter,
+                                          placeType:this.placeType}
+                                        );
+      modal.onDidDismiss(filter => {
+        //console.log('filter',filter);
 
-      if (filter!=null) {
-        this.showLoading();
+        if (filter!=null) {
+          this.showLoading();
 
-        this.filter = filter;
-        this.locations = [];
+          this.filter = filter;
+          this.locations = [];
 
-        if (this.searchType == 'textsearch' ) {
+          if (this.searchType == 'textsearch' ) {
 
-          this.placeType = this.filter.placeType;
+            this.placeType = this.filter.placeType;
 
-          this.geo.searchByPlaceType(this.sing.getSelectCity()+' '+this.sing.getSelectState(),
-                                      this.filter.placeType,
-                                      this.filter).subscribe((resp)=>{
-             this.locations = [];
-             this.locations = this.fixLocations(resp.results);
-             this.nextNearByToken = resp.next_page_token;
-             //console.log('nextToken',this.nextNearByToken);
-             if (this.showMap && this.markers.length) {
-                this.clearMarkers();
-                this.setLocationMarkers();
-             }
-             this.loading.dismiss().catch(() => {});
-          },error=>{
-            console.log('error',error);
-            this.loading.dismiss().catch(() => {});
-          });
-        } else {
-          this.geo.placesNearByRadius(this.geoLat,
-                                      this.geoLng,
-                                      this.filter.distance,
-                                      this.filter).subscribe((resp)=>{
-             this.locations = [];
-             this.locations = this.fixLocations(resp.results);
-             this.nextNearByToken = resp.next_page_token;
-             //console.log('nextToken',this.nextNearByToken);
-             if (this.showMap && this.markers.length) {
-                this.clearMarkers();
-                this.setLocationMarkers();
-             }
-             this.loading.dismiss().catch(() => {});
-          },error=>{
-            console.log('error',error);
-            this.loading.dismiss().catch(() => {});            
-          });
+            this.geo.searchByPlaceType(this.sing.getSelectCity()+' '+this.sing.getSelectState(),
+                                        this.filter.placeType,
+                                        this.filter).subscribe((resp)=>{
+              this.locations = [];
+              this.locations = this.fixLocations(resp.results);
+              this.nextNearByToken = resp.next_page_token;
+              //console.log('nextToken',this.nextNearByToken);
+              if (this.showMap && this.markers.length) {
+                  this.clearMarkers();
+                  this.setLocationMarkers();
+              }
+              this.loading.dismiss().catch(() => {});
+            },error=>{
+              console.log('error',error);
+              this.loading.dismiss().catch(() => {});
+            });
+          } else {
+            this.geo.placesNearByRadius(this.geoLat,
+                                        this.geoLng,
+                                        this.filter.distance,
+                                        this.filter).subscribe((resp)=>{
+              this.locations = [];
+              this.locations = this.fixLocations(resp.results);
+              this.nextNearByToken = resp.next_page_token;
+              //console.log('nextToken',this.nextNearByToken);
+              if (this.showMap && this.markers.length) {
+                  this.clearMarkers();
+                  this.setLocationMarkers();
+              }
+              this.loading.dismiss().catch(() => {});
+            },error=>{
+              console.log('error',error);
+              this.loading.dismiss().catch(() => {});            
+            });
+          }
         }
-      }
 
-    });
-    modal.present(); 
+      });
+      modal.present();
+    } else {
+      this.sing.showNetworkAlert();
+    }
   }
 
   setBounds() {

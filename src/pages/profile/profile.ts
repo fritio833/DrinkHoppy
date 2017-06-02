@@ -15,6 +15,7 @@ import { FavoritesPage } from '../favorites/favorites';
 import { ProfileEditPage } from '../profile-edit/profile-edit';
 import { BreweryVisitsPage } from '../brewery-visits/brewery-visits';
 import { AchievementsPage } from '../achievements/achievements';
+import { SettingsPage } from '../settings/settings';
 
 @Component({
   selector: 'page-profile',
@@ -202,6 +203,10 @@ export class ProfilePage {
   showLoading() {
     this.loading = this.loadingCtrl.create({});
     this.loading.present();
+  }
+
+  doSettings() {
+    this.navCtrl.push(SettingsPage);
   }
 
   repUp() {

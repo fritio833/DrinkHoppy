@@ -4,7 +4,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/fromPromise';
 import { Geolocation } from 'ionic-native';
-import { ToastController } from 'ionic-angular';
+import { Diagnostic } from '@ionic-native/diagnostic';
+import { ToastController, AlertController, Events } from 'ionic-angular';
 
 import firebase from 'firebase';
 
@@ -35,8 +36,11 @@ export class SingletonService {
   public selectLng = null;
   public checkinsPerPage:number = 10;
   public checkBeerArray = new Array();
+  public online:boolean = false;
   
   public popularLoaded:boolean = false;
+  public webURL:string = 'http://brewsearchapp.com';
+  public logo:string = 'https://firebasestorage.googleapis.com/v0/b/bender-1487426215149.appspot.com/o/img%2Fbeerfest.png?alt=media&token=971dfd29-50c8-46b2-978c-4c406891b947';
 
   // App configuration.  API keys, webservice url, etc. 
   public breweryDbAPIKey:string = '3c7ec73417afb44ae7a4450482f99d70';
@@ -68,7 +72,25 @@ export class SingletonService {
   //public lng = -84.298067;
 
 
-  constructor(public toastCtrl:ToastController) {}
+  constructor(public toastCtrl:ToastController,public event:Events,public alertCtrl:AlertController, public diagnostic: Diagnostic) {}
+
+  setOnlineListener() {
+    var that = this;
+    var fbRef = firebase.database().ref('.info/connected').on('value', function(connectedSnap) {
+      if (connectedSnap.val() === true) {
+        /* we're connected! */
+        console.log('firebase connected');
+        that.event.publish('online:status',true);
+        that.online = true;
+      } else {
+        /* we're disconnected! */
+        console.log('firebase disconnected');
+        that.event.publish('online:status',false);
+        that.online = false;
+      }
+    });
+  }
+
 
   getLocation() {
     let loc:any;    
@@ -415,6 +437,36 @@ export class SingletonService {
     
     this.checkBeerArray.slice(indexToRemove);
     return true;
+  }
 
-  } 
+  showSettings(){
+    if (this.diagnostic.switchToWifiSettings) {
+      this.diagnostic.switchToWifiSettings();
+    } else {
+      this.diagnostic.switchToSettings();
+    }    
+  }  
+
+ showNetworkAlert() {
+    let networkAlert = this.alertCtrl.create({
+      title: 'No Internet Connection',
+      message: 'Please check your internet connection.',
+      buttons: [
+        {
+          text: 'Cancel',
+          handler: () => {}
+        },
+        {
+          text: 'Open Settings',
+          handler: () => {
+            networkAlert.dismiss().then(() => {
+              this.showSettings();
+            })
+          }
+        }
+      ]
+    });
+    networkAlert.present();
+  }
+
 }

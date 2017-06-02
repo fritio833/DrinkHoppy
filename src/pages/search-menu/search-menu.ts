@@ -5,6 +5,8 @@ import { SearchLocationPage } from '../search-location/search-location';
 import { SearchBreweriesPage } from '../search-breweries/search-breweries';
 import { ProfilePage } from '../profile/profile';
 
+import { SingletonService } from '../../providers/singleton-service';
+
 
 @Component({
   selector: 'page-search-menu',
@@ -12,25 +14,28 @@ import { ProfilePage } from '../profile/profile';
 })
 export class SearchMenuPage {
 
-  constructor(public navCtrl: NavController, public navParams: NavParams) {}
+  constructor(public navCtrl: NavController, public navParams: NavParams, public sing:SingletonService) {}
 
   doSearch(page) {
+    if (this.sing.online) {
+      switch(page) {
 
-    switch(page) {
-
-      case 'beers':
-        this.navCtrl.push(SearchBeerPage); 
-        break;
-      case 'locations':
-        this.navCtrl.push(SearchLocationPage,{searchType:'nearbysearch'});
-        break;
-      case 'breweries':
-        this.navCtrl.push(SearchBreweriesPage);
-        break;
-      case 'bars':
-        this.navCtrl.push(SearchLocationPage,{placeType:'bar',searchType:'textsearch'});
-        break;                  
-      default: console.log('not valid search');
+        case 'beers':
+          this.navCtrl.push(SearchBeerPage); 
+          break;
+        case 'locations':
+          this.navCtrl.push(SearchLocationPage,{searchType:'nearbysearch'});
+          break;
+        case 'breweries':
+          this.navCtrl.push(SearchBreweriesPage);
+          break;
+        case 'bars':
+          this.navCtrl.push(SearchLocationPage,{placeType:'bar',searchType:'textsearch'});
+          break;                  
+        default: console.log('not valid search');
+      }
+    } else {
+      this.sing.showNetworkAlert();
     }
   }
 

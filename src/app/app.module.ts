@@ -6,6 +6,10 @@ import { Ionic2RatingModule } from 'ionic2-rating';
 import { AngularFireModule } from 'angularfire2';
 import { CloudSettings, CloudModule } from '@ionic/cloud-angular';
 import { PhotoViewer } from '@ionic-native/photo-viewer';
+import { Diagnostic } from '@ionic-native/diagnostic';
+import { GooglePlus } from '@ionic-native/google-plus';
+import { TwitterConnect } from '@ionic-native/twitter-connect';
+import { Facebook } from 'ionic-native';
 
 import { BreweryService } from '../providers/brewery-service';
 import { SingletonService } from '../providers/singleton-service';
@@ -16,6 +20,7 @@ import { ConnectivityService } from '../providers/connectivity-service';
 import { DemoService } from '../providers/demo-service';
 import { NotificationService } from '../providers/notification-service';
 import { AchievementsService } from '../providers/achievements-service';
+import { SocialService } from '../providers/social-service';
 
 import { CheckinComponent } from '../components/checkin/checkin';
 
@@ -71,6 +76,7 @@ import { EventMapPage } from '../pages/event-map/event-map';
 import { AchievementsPage } from '../pages/achievements/achievements';
 import { AchievementsDetailPage } from '../pages/achievements-detail/achievements-detail';
 import { EventBreweryBeersPage } from '../pages/event-brewery-beers/event-brewery-beers';
+import { SettingsPage } from '../pages/settings/settings';
 
 export const firebaseConfig = {
     apiKey: "AIzaSyCd-WZs4O8gNx9qVlwwyRdK6_qY60WuQl0",
@@ -154,7 +160,8 @@ const cloudSettings: CloudSettings = {
     EventMapPage,
     EventBreweryBeersPage,
     AchievementsPage,
-    AchievementsDetailPage
+    AchievementsDetailPage,
+    SettingsPage
   ],
   imports: [
     IonicModule.forRoot(MyApp),
@@ -216,7 +223,8 @@ const cloudSettings: CloudSettings = {
     EventMapPage,
     EventBreweryBeersPage,
     AchievementsPage,
-    AchievementsDetailPage
+    AchievementsDetailPage,
+    SettingsPage
   ],
   providers: [{provide: ErrorHandler, 
               useClass: IonicErrorHandler},
@@ -224,12 +232,17 @@ const cloudSettings: CloudSettings = {
               Storage,
               PhotoViewer,
               SingletonService,
+              GooglePlus,
+              TwitterConnect,
+              Facebook,
               AuthService,
               LocationService,
               NotificationService,
               AchievementsService,
+              Diagnostic,
               DemoService,
               GoogleService,
+              SocialService,
               ConnectivityService]
 })
 export class AppModule {}

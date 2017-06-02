@@ -7,6 +7,7 @@ import { AngularFire, FirebaseListObservable } from 'angularfire2';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import { SingletonService } from '../../providers/singleton-service';
+import { SocialService } from '../../providers/social-service';
 
 import { BeerDetailPage } from '../beer-detail/beer-detail';
 import { LocationMapPage } from '../location-map/location-map';
@@ -53,6 +54,7 @@ export class BreweryDetailPage {
               public platform: Platform,
               public angFire: AngularFire,
               public sing: SingletonService,
+              public social:SocialService,
               public storage: Storage,
               public toastCtrl:ToastController,
               public modalCtrl:ModalController) {
@@ -302,9 +304,20 @@ export class BreweryDetailPage {
     });
   }
 
+  shareFacebook() {
+    this.social.shareFacebook(this.brewery.brewery.name,
+        this.location.vicinity,
+        this.locationPhoto).subscribe(success=>{
+          alert('shared success');
+        },error=>{
+          alert('failed');
+        });
+  }  
+
   viewMore() {
      this.navCtrl.push(BreweryDetailMorePage,{location:this.location,
                                               brewery:this.brewery,
+                                              beers:this.breweryBeers,
                                               photo:this.locationPhoto}); 
   }
 

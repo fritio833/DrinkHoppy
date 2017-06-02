@@ -23,11 +23,11 @@
         </div>
         -->
         <div id="city-select" class="right">
-          <button *ngIf="sing.hasLocation()" right ion-button small color="dark" (click)="changeCity()">
+          <button *ngIf="sing.hasLocation() && isOnline" right ion-button small color="dark" (click)="changeCity()">
             {{sing.getSelectCity()}}. Change?
           </button>
-          <button *ngIf="!sing.hasLocation()" right ion-button small color="dark" (click)="changeCity()">
-            Pick a City
+          <button *ngIf="!isOnline" right ion-button small color="dark" (click)="sing.showSettings()">
+            Offline
           </button>
         </div>
       </ion-col>
@@ -146,7 +146,7 @@
     <button item-right ion-button full (click)="getAllPopLocation()">ALL POPULAR PLACES </button>
   </ion-card>
 
-  <div class="card-head">
+  <div class="card-head" *ngIf="achievement">
     <p><ion-icon name="trophy"></ion-icon>&nbsp;Challenges</p>
   </div>
   <ion-card id="achievement" *ngIf="achievement">

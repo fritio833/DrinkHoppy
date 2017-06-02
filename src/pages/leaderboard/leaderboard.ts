@@ -30,13 +30,16 @@ export class LeaderboardPage {
     this.users = new Array();
     let timestamp = new Date().getTime();
     let dateKey = this.sing.getMonthYearKey(timestamp);
-    this.fbRef.ref('/leaderboard/'+dateKey).orderByChild('points').once('value').then(snapshot=>{
+    
+
+    this.fbRef.ref('/leaderboard/'+dateKey).orderByChild('points').endAt(-1).once('value').then(snapshot=>{
       snapshot.forEach(item=>{
         let leader = {};
+        let userId = item.key;
         leader['uid'] = item.key;
         leader['points'] = item.val().points;
-
-        this.fbRef.ref('/users/'+item.key).once('value').then(userSnap=>{
+        
+        this.fbRef.ref('/users/'+userId).once('value').then(userSnap=>{
           
           if (userSnap.exists()) {
             leader['name'] = userSnap.val().name;
@@ -45,12 +48,23 @@ export class LeaderboardPage {
             else
               leader['photo'] = null;
 
-            this.users.push(leader);  
-          }        
+            this.users.push(leader);
+          }  
         });
-      });      
+      });
+      setTimeout(()=>{this.users.sort(this.sortedByPoints)},100);    
     });
   }
+
+  sortedByPoints(a,b) {
+
+    if (a.points < b.points)
+      return -1;
+    if (a.points > b.points)
+      return 1;
+    return 0;
+  }
+ 
 
   getOverallLeaderBoard() {
       this.users = new Array();

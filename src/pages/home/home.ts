@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { NavController, Events,LoadingController, ToastController, ModalController } from 'ionic-angular';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 import { Storage } from '@ionic/storage';
+import { Diagnostic } from '@ionic-native/diagnostic';
 
 import firebase from 'firebase';
 
@@ -54,6 +55,7 @@ export class HomePage {
   public mostPopularBeer:any;
   public mostPopularLocation:any;
   public achievement:any;
+  public isOnline:boolean = false;
 
   constructor(public navCtrl: NavController, 
   	          public sing:SingletonService,
@@ -65,9 +67,14 @@ export class HomePage {
               public demo:DemoService,
               public geo:GoogleService,
               public angFire:AngularFire,
+              public diagnostic: Diagnostic,
               public achieve:AchievementsService,
   	          public storage:Storage) {
     this.fbRef = firebase.database();
+    this.events.subscribe('online:status',status=>{
+      this.isOnline = status;
+    });
+    this.isOnline = this.sing.online;   
   }
 
   getProfileData() {
@@ -108,32 +115,40 @@ export class HomePage {
   }
 
   changeCity() {
-    let modal = this.modalCtrl.create(SelectLocationPage);
-    modal.onDidDismiss(citySet => {
-      if (citySet) {
-        console.log('getLocation',this.sing.getLocation());
-        this.getPopular();
-        /*
-        let geoObj:any;
-        geoObj = this.geo.fixCityState(citySet);
-        this.sing.setCurrentLocation(geoObj);
-        console.log('citySet',geoObj);
-        this.getPopular();
-        */
-      }
+    if (this.sing.online) {
+      let modal = this.modalCtrl.create(SelectLocationPage);
+      modal.onDidDismiss(citySet => {
+        if (citySet) {
+          console.log('getLocation',this.sing.getLocation());
+          this.getPopular();
+          /*
+          let geoObj:any;
+          geoObj = this.geo.fixCityState(citySet);
+          this.sing.setCurrentLocation(geoObj);
+          console.log('citySet',geoObj);
+          this.getPopular();
+          */
+        }
 
-    });
-    modal.present();    
+      });
+      modal.present();
+    } else {
+      this.sing.showNetworkAlert();
+    } 
   }
 
   randomBeers() {
-    this.showLoading();
-    this.beerAPI.getRandomBeers().subscribe(beers=>{
-      this.navCtrl.push(RandomBeersPage,{beers:beers,loading:this.loading});
-    },error=>{
-      console.log('error getRandomBeers',error);
-      this.loading.dismiss();
-    });
+    if (this.sing.online) {
+      this.showLoading();
+      this.beerAPI.getRandomBeers().subscribe(beers=>{
+        this.navCtrl.push(RandomBeersPage,{beers:beers,loading:this.loading});
+      },error=>{
+        console.log('error getRandomBeers',error);
+        this.loading.dismiss();
+      });
+    } else {
+      this.sing.showNetworkAlert();
+    }
   }
 
   getLeaderboard() {
@@ -142,21 +157,25 @@ export class HomePage {
 
   doSearch(page) {
 
-    switch(page) {
+    if (this.sing.online) {
+      switch(page) {
 
-      case 'beers':
-        this.navCtrl.push(SearchBeerPage); 
-        break;
-      case 'locations':
-        this.navCtrl.push(SearchLocationPage,{searchType:'nearbysearch'});
-        break;
-      case 'breweries':
-        this.navCtrl.push(SearchBreweriesPage);
-        break;
-      case 'bars':
-        this.navCtrl.push(SearchLocationPage,{placeType:'bar',searchType:'textsearch'});
-        break;                  
-      default: console.log('not valid search');
+        case 'beers':
+          this.navCtrl.push(SearchBeerPage); 
+          break;
+        case 'locations':
+          this.navCtrl.push(SearchLocationPage,{searchType:'nearbysearch'});
+          break;
+        case 'breweries':
+          this.navCtrl.push(SearchBreweriesPage);
+          break;
+        case 'bars':
+          this.navCtrl.push(SearchLocationPage,{placeType:'bar',searchType:'textsearch'});
+          break;                  
+        default: console.log('not valid search');
+      }
+    } else {
+      this.sing.showNetworkAlert();
     }
   }  
 
@@ -221,22 +240,34 @@ export class HomePage {
  }
 
   getPopBeer(beerId) {
-    this.navCtrl.push(BeerDetailPage,{beerId:beerId});
+    if (this.sing.online)
+      this.navCtrl.push(BeerDetailPage,{beerId:beerId});
+    else
+      this.sing.showNetworkAlert();
   }
 
   getPopLocation(placeId) {
-
-    this.geo.placeDetail(placeId).subscribe((resp)=>{
-      this.navCtrl.push(LocationDetailPage,{location:resp.result});
-    });    
+    if (this.sing.online) {
+      this.geo.placeDetail(placeId).subscribe((resp)=>{
+        this.navCtrl.push(LocationDetailPage,{location:resp.result});
+      });
+    } else {
+      this.sing.showNetworkAlert();
+    }    
   }
 
   getAllPopLocation() {
-    this.navCtrl.push(PopularLocationsPage);
+    if (this.sing.online)
+      this.navCtrl.push(PopularLocationsPage);
+    else
+      this.sing.showNetworkAlert()
   }
 
   getAllPopBeers() {
-    this.navCtrl.push(PopularBeersPage);
+    if (this.sing.online)
+      this.navCtrl.push(PopularBeersPage);
+    else
+      this.sing.showNetworkAlert();
   }
 
 
@@ -249,21 +280,20 @@ export class HomePage {
     toast.present();
   }
 
-  goToProfile() {
-    this.navCtrl.setRoot(ProfilePage);
-  }
-
   startSearch() {
     this.navCtrl.push(SearchMenuPage);
   }
 
   showNotifications() {
+    if (this.sing.online) {
+      let modal = this.modalCtrl.create(NotificationsPage,{});
+      modal.onDidDismiss(filter => {
 
-    let modal = this.modalCtrl.create(NotificationsPage,{});
-    modal.onDidDismiss(filter => {
-
-    });
-    modal.present();      
+      });
+      modal.present();
+    } else {
+      this.sing.showNetworkAlert();
+    }
   }
 
   showLoading() {
@@ -274,7 +304,10 @@ export class HomePage {
   }
 
   seeAchievements() {
-    this.navCtrl.push(AchievementsPage,{uid:this.uid});
+    if (this.sing.online)
+      this.navCtrl.push(AchievementsPage,{uid:this.uid});
+    else
+      this.sing.showNetworkAlert();
   }
   /*
   ionViewDidLoad() {
@@ -289,6 +322,8 @@ export class HomePage {
     console.log('ionViewWillEnter HomePage');
     this.getPopular();
     this.getProfileData();
+
+   
     
   }
 

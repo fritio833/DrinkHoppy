@@ -69,23 +69,28 @@
             <p>Check-ins: {{numCheckins}}</p>	
           </span>
       </ion-item>
-      <ion-item>
-        <p item-left>Has {{userName}} been helpful? Give a thumbs up!</p>
-        <button ion-button icon-only clear item-right (click)="repUp()">
+      <ion-item text-wrap>
+        <button ion-button icon-only clear item-left large (click)="repUp()">
           <ion-icon name="thumbs-up"></ion-icon>
-        </button>
+        </button>        
+        <p>
+          Did {{userName}} help you find a beer or a nice location? Give a thumbs up.
+          Reputation is used to inform the community that the information provided is accurate.
+        </p>
       </ion-item>
-      <ion-item>
-        <p item-left>False information? Give a thumbs down.</p>
-        <button ion-button icon-only clear item-right (click)="repDown()">
+      <!--
+      <ion-item text-wrap>
+        <button ion-button icon-only clear item-left large (click)="repDown()">
           <ion-icon name="thumbs-down"></ion-icon>
         </button>
+        <p>Was this info wrong. Give a thumbs down.</p>        
       </ion-item>
-      <ion-item>
-        <p item-left>Flag if inappropriate picture or comment.</p>
-        <button ion-button icon-only clear item-right (click)="flagCheckin()">
+      -->
+      <ion-item text-wrap (click)="flagCheckin()">
+        <button ion-button icon-only clear large item-left>
           <ion-icon color="danger" name="flag"></ion-icon>
         </button>
+         <p>Flag if picture or comment here is inappropriate. Also, if the user knowningly gives false information.</p>
       </ion-item>       
     </ion-card-content>
   </ion-card>  

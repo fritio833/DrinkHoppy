@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Network } from 'ionic-native';
-import { Platform } from 'ionic-angular';
+import { Platform, Events } from 'ionic-angular';
 
 declare var Connection;
 
@@ -9,7 +9,7 @@ export class ConnectivityService {
 
   public onDevice: boolean;
 
-  constructor(public platform: Platform) {
+  constructor(public platform: Platform,public event:Events) {
      this.onDevice = this.platform.is('cordova');
   }
 
@@ -27,6 +27,6 @@ export class ConnectivityService {
     } else {
       return !navigator.onLine;   
     }
-  }  
+  }
 
 }

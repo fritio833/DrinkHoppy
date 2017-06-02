@@ -325,6 +325,8 @@ export class GoogleService {
         + this.lat + ',' + this.lng 
         + '&types=establishment&radius=500&key=' 
         + this.googlePlacesAPIKey)
+        .retryWhen(error => error.delay(500))
+        .timeout(2000,new Error('Error connecting'))        
         .map(res => res.json());
   }
 
@@ -357,6 +359,7 @@ export class GoogleService {
         }
       },error=>{
         console.log('error getPlaceByOrigin',error);
+        observer.error(error);
       });      
     });
   }   

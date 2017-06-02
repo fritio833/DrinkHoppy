@@ -3,6 +3,7 @@ import { NavController, NavParams, LoadingController, ToastController, ModalCont
 import { Validators, FormBuilder } from '@angular/forms';
 
 import { BreweryService } from '../../providers/brewery-service';
+import { SingletonService } from '../../providers/singleton-service';
 import { Beer } from '../../models/beer';
 import { SearchPage } from '../search/search';
 import { BeerDetailPage } from '../beer-detail/beer-detail';
@@ -31,6 +32,7 @@ export class SearchBeerPage {
   	          public beerAPI: BreweryService,
   	          public toastCtrl: ToastController,
   	          public modalCtrl:ModalController,
+              public sing: SingletonService,
               public loadingCtrl:LoadingController,
   	          public _form: FormBuilder) {
 
@@ -85,110 +87,127 @@ export class SearchBeerPage {
     if (evt.type != "input")
       return;
 
-    this.showNoResults = false;
-    this.currentPage = 1;
+    if (this.sing.online) {
+      this.showNoResults = false;
+      this.currentPage = 1;
 
-    if (evt.target.value.length > 2) {
-      this.showLoading();
-	    this.beerAPI.findBeerByName(evt.target.value).subscribe(beer => {
-          console.log('searchReturn',beer);
-	        this.beers = beer;
-	        this.numberOfPages = beer.numberOfPages;
-          
-          if (this.beers.hasOwnProperty('totalResults'))
-            this.totalResults = beer.totalResults;
-          else {
-            this.totalResults = 0;
-            this.showNoResults = true;
-          }
-	        //console.log(this.beers);
-	        this.qSearchBeer = evt.target.value;
-          if (this.totalResults)
-	          this.beers = beer.data;
-           
-          console.log('beers1',this.beers);
-          this.loading.dismiss();          
-	    },error=>{
-        console.log('error',error);
-        this.loading.dismiss().catch(() => {});
-        this.showNoResults = false;
-        this.presentToast('Could not connect. Check connection.');
-      });
+      if (evt.target.value.length > 2) {
+        this.showLoading();
+        this.beerAPI.findBeerByName(evt.target.value).subscribe(beer => {
+            console.log('searchReturn',beer);
+            this.beers = beer;
+            this.numberOfPages = beer.numberOfPages;
+            
+            if (this.beers.hasOwnProperty('totalResults'))
+              this.totalResults = beer.totalResults;
+            else {
+              this.totalResults = 0;
+              this.showNoResults = true;
+            }
+            //console.log(this.beers);
+            this.qSearchBeer = evt.target.value;
+            if (this.totalResults)
+              this.beers = beer.data;
+            
+            console.log('beers1',this.beers);
+            this.loading.dismiss();          
+        },error=>{
+          console.log('error',error);
+          this.loading.dismiss().catch(() => {});
+          this.showNoResults = false;
+          this.presentToast('Could not connect. Check connection.');
+        });
+      } else {
+        this.totalResults = 0;
+        this.showLoader = false;
+      }
     } else {
-      this.totalResults = 0;
-      this.showLoader = false;
+      this.sing.showNetworkAlert();
     }
   }
 
   getMoreBeers(infiniteScroll) {
+    
+    if (this.sing.online) {
+      if (this.currentPage < this.numberOfPages) {
+        this.currentPage++;
+      }
 
-    if (this.currentPage < this.numberOfPages) {
-      this.currentPage++;
+      setTimeout(() => {
+        this.beerAPI.loadBeerByName(this.qSearchBeer,this.currentPage,this.filter).subscribe((beer)=>{
+          let beersNext:any;
+
+          beersNext = beer.data;
+
+          for (var i = 0; i < beersNext.length; i++) {
+            this.beers.push(beersNext[i]);
+          }
+          //console.log(beersNext);
+          infiniteScroll.complete();
+
+          if (this.currentPage == this.numberOfPages)
+            infiniteScroll.enable(false);
+
+        },error=>{
+          //this.presentToast('Could not connect. Check connection.');
+          this.sing.showNetworkAlert();
+        });
+      }, 1000);
+    } else {
+      infiniteScroll.complete();
+      this.presentToast('Could not connect. Check connection.');
+      //this.sing.showNetworkAlert();
     }
-
-    setTimeout(() => {
-      this.beerAPI.loadBeerByName(this.qSearchBeer,this.currentPage,this.filter).subscribe((beer)=>{
-        let beersNext:any;
-
-        beersNext = beer.data;
-
-        for (var i = 0; i < beersNext.length; i++) {
-          this.beers.push(beersNext[i]);
-        }
-        //console.log(beersNext);
-        infiniteScroll.complete();
-
-        if (this.currentPage == this.numberOfPages)
-          infiniteScroll.enable(false);
-
-      },error=>{
-         this.presentToast('Could not connect. Check connection.');
-      });
-    }, 1000);
   }
 
   showBeerFilter() {
-    this.showNoResults = false;
-    let modal = this.modalCtrl.create(SearchBeerFilterPage,{filter:this.filter});
-    modal.onDidDismiss(filter => {
+    if (this.sing.online) {
+      this.showNoResults = false;
+      let modal = this.modalCtrl.create(SearchBeerFilterPage,{filter:this.filter});
+      modal.onDidDismiss(filter => {
 
-      if (filter == null)
-        return;
-      //console.log('filter',filter);      
-      if (filter.styleId != null || 
-          filter.categoryId != null ||
-          filter.minABV != null ||
-          filter.minIBU != null ||
-          filter.showLabels != null ||
-          filter.isOrganic != null) {
-        this.filter = filter;
-        this.showLoading();
-        this.qSearchBeer = '';
-        this.clearSearch(null);
-        this.beerAPI.loadBeerByName(this.qSearchBeer,this.currentPage,this.filter).subscribe(beer => {
-            if (beer.hasOwnProperty('data')) { 
-              this.beers = beer.data;
-              this.numberOfPages = beer.numberOfPages;
-              this.totalResults = beer.totalResults;
-              //console.log(this.beers);
-              //this.loadBeers(this.beers);
-            } else {
-              this.beers = new Array();
-              this.presentToast("Sorry. No beers found.")
-            }
-            this.loading.dismiss();
-        },error=>{
-          this.loading.dismiss().catch(() => {});
-          this.presentToast('Could not connect. Check connection.');
-        });
-      }
-
-    });
-    modal.present();  	
+        if (filter == null)
+          return;
+        //console.log('filter',filter);      
+        if (filter.styleId != null || 
+            filter.categoryId != null ||
+            filter.minABV != null ||
+            filter.minIBU != null ||
+            filter.showLabels != null ||
+            filter.isOrganic != null) {
+          this.filter = filter;
+          this.showLoading();
+          this.qSearchBeer = '';
+          this.clearSearch(null);
+          this.beerAPI.loadBeerByName(this.qSearchBeer,this.currentPage,this.filter).subscribe(beer => {
+              if (beer.hasOwnProperty('data')) { 
+                this.beers = beer.data;
+                this.numberOfPages = beer.numberOfPages;
+                this.totalResults = beer.totalResults;
+                //console.log(this.beers);
+                //this.loadBeers(this.beers);
+              } else {
+                this.beers = new Array();
+                this.presentToast("Sorry. No beers found.")
+              }
+              this.loading.dismiss();
+          },error=>{
+            this.loading.dismiss().catch(() => {});
+            this.sing.showNetworkAlert();
+          });
+        }
+      });
+      modal.present();
+    } else {
+      this.sing.showNetworkAlert();
+    }
   }
 
   getBeerDetail(beerDbId) {
-    this.navCtrl.push(BeerDetailPage,{beerId:beerDbId});
+    if (this.sing.online)
+      this.navCtrl.push(BeerDetailPage,{beerId:beerDbId});
+    else
+      this.sing.showNetworkAlert();
   }
 
   showLoading() {

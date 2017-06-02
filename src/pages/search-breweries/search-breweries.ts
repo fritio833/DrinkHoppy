@@ -80,7 +80,7 @@ export class SearchBreweriesPage {
     this.brewerySearch = [];
     this.brewerySearchLen = 0;
     this.qBreweryAuto = '';
-    console.log('i got here');
+    //console.log('i got here');
   }
 
 
@@ -89,26 +89,32 @@ export class SearchBreweriesPage {
     let breweryId;
     let foundBrewpub:number = -1;
   
+    if (this.sing.online) {
   
-    this.showLoading();
+      this.showLoading();
 
-    this.geo.getPlaceFromGoogleByLatLng(brewery.name,brewery.latitude,brewery.longitude).subscribe(resp=>{
-    
-      this.beerAPI.getBreweryDetail(brewery.breweryId,brewery.id).subscribe(pub=>{
-        console.log('pub',pub);
-        this.loading.dismiss();
-        this.navCtrl.push(BreweryDetailPage,{brewery:pub['detail'],beers:pub['beers'],place:resp['result']});        
+      this.geo.getPlaceFromGoogleByLatLng(brewery.name,brewery.latitude,brewery.longitude).subscribe(resp=>{
+      
+        this.beerAPI.getBreweryDetail(brewery.breweryId,brewery.id).subscribe(pub=>{
+          //console.log('pub',pub);
+          this.loading.dismiss();
+          this.navCtrl.push(BreweryDetailPage,{brewery:pub['detail'],beers:pub['beers'],place:resp['result']});        
+        },error=>{
+          console.log('error getBrewery',error);
+          this.loading.dismiss().catch(() => {});
+          //this.presentToast('Could not connect. Check connection.');
+          this.sing.showNetworkAlert();         
+        });
+
       },error=>{
-        console.log('error getBrewery',error);
-        this.loading.dismiss().catch(() => {});
-        this.presentToast('Could not connect. Check connection.');         
+          console.log('error getBreweryFromGoogle',error);
+          this.loading.dismiss().catch(() => {});
+          //this.presentToast('Could not connect. Check connection.');
+          this.sing.showNetworkAlert();      
       });
-
-    },error=>{
-        console.log('error getBreweryFromGoogle',error);
-        this.loading.dismiss().catch(() => {});
-        this.presentToast('Could not connect. Check connection.');      
-    });    
+    } else {
+      this.sing.showNetworkAlert();
+    }
         
   }
 
@@ -131,7 +137,6 @@ export class SearchBreweriesPage {
   autoBrewerySearch(event) {
 
     
-    console.log('i got here 2');
   	if (event.type == "input" && event.target.value.length) {
         this.qBreweryAuto = event.target.value;
         console.log('i got here 3');
@@ -179,7 +184,9 @@ export class SearchBreweriesPage {
 
 
         },error=>{
-          this.presentToast('Could not connect. Check connection.');
+          console.log('error findBreweriesByName',error);
+          //this.presentToast('Could not connect. Check connection.');
+          this.sing.showNetworkAlert();
         });
   	} else {
   	    this.brewerySearch = new Array();
@@ -189,51 +196,55 @@ export class SearchBreweriesPage {
 
   getBreweries() {
 
-    this.showLoading();
-    // Get breweries at user's current location
-    if (this.sing.getLocation().geo){
+    if (this.sing.online) {
+      this.showLoading();
+      // Get breweries at user's current location
+      if (this.sing.getLocation().geo){
 
-	    let options = {timeout: 5000, enableHighAccuracy: true, maximumAge:3000};
-	    Geolocation.getCurrentPosition(options).then((resp) => {          
+        let options = {timeout: 5000, enableHighAccuracy: true, maximumAge:3000};
+        Geolocation.getCurrentPosition(options).then((resp) => {          
 
-	      this.beerAPI.findBreweriesByGeo(resp.coords.latitude,resp.coords.longitude)
-	      .subscribe((breweries)=>{
-	        //console.log(breweries);          
-          if (breweries.hasOwnProperty('data')) {
-            this.breweries = this.fixBreweries(breweries.data);
-            console.log('breweries',this.breweries);
-            this.numPages = breweries.numberOfPages;            
-          } else {
-            this.breweries = new Array();
-            this.numPages = 0;
-            this.showNoBreweries();
-          }
-          this.loading.dismiss();    
-	      },error=>{
-          this.loading.dismiss().catch(() => {});
-          this.presentToast('Could not connect. Check connection.');
+          this.beerAPI.findBreweriesByGeo(resp.coords.latitude,resp.coords.longitude)
+          .subscribe((breweries)=>{
+            //console.log(breweries);          
+            if (breweries.hasOwnProperty('data')) {
+              this.breweries = this.fixBreweries(breweries.data);
+              console.log('breweries',this.breweries);
+              this.numPages = breweries.numberOfPages;            
+            } else {
+              this.breweries = new Array();
+              this.numPages = 0;
+              this.showNoBreweries();
+            }
+            this.loading.dismiss();    
+          },error=>{
+            this.loading.dismiss().catch(() => {});
+            this.sing.showNetworkAlert();
+          });
+
+        }).catch((error) => {
+            console.log('Error getting location using high accuracy', error);
         });
-
-	    }).catch((error) => {
-	        console.log('Error getting location using high accuracy', error);
-	    });
-    } else { // breweries from user's selected city
-	      this.beerAPI.findBreweriesByGeo(this.sing.getLocation().lat,this.sing.getLocation().lng)
-	      .subscribe((breweries)=>{
-	        //console.log('cityBrew',breweries);
-          if (breweries.hasOwnProperty('data')) {
-            this.breweries = this.fixBreweries(breweries.data);
-            this.numPages = breweries.numberOfPages;            
-          } else {
-            this.breweries = new Array();
-            this.numPages = 0;
-            this.showNoBreweries();
-          }
-          this.loading.dismiss();       
-	      },error=>{
-          this.loading.dismiss().catch(() => {});
-          this.presentToast('Could not connect. Check connection.');        
-        });    	
+      } else { // breweries from user's selected city
+          this.beerAPI.findBreweriesByGeo(this.sing.getLocation().lat,this.sing.getLocation().lng)
+          .subscribe((breweries)=>{
+            //console.log('cityBrew',breweries);
+            if (breweries.hasOwnProperty('data')) {
+              this.breweries = this.fixBreweries(breweries.data);
+              this.numPages = breweries.numberOfPages;            
+            } else {
+              this.breweries = new Array();
+              this.numPages = 0;
+              this.showNoBreweries();
+            }
+            this.loading.dismiss();       
+          },error=>{
+            this.loading.dismiss().catch(() => {});
+            this.sing.showNetworkAlert();        
+          });    	
+      }
+    } else {
+      this.sing.showNetworkAlert();
     }
   }
 

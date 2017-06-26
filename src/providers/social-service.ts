@@ -22,11 +22,20 @@ export class SocialService {
 
 
 
-  shareFacebook(caption,description,picURL) {
+  shareFacebook(caption,description,picURL,shareType?,shareId?) {
     return new Observable(observer => {
+      let link = this.sing.webURL;
+
+      
+      if (shareType != null && shareId != null) {
+        link = link + '/' + shareType + '/' + shareId;
+        console.log('link',link);
+      }
+      
+      
       Facebook.showDialog({
         method: 'share',
-        href: this.sing.webURL,
+        href: link,
         caption: caption,
         description: description,
         picture: picURL      
@@ -37,7 +46,12 @@ export class SocialService {
         observer.error(error);
         observer.complete();
       });
+      
     });
   }
+
+  // TODO: function appInvite(options, options.url, options.picture)
+  // https://ionicframework.com/docs/native/facebook/
+
 
 }

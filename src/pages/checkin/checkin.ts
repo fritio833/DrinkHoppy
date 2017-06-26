@@ -311,7 +311,8 @@ export class CheckinPage {
 
     this.fixBeer();
 
-    Geolocation.getCurrentPosition().then((resp) => {
+    this.sing.getUserLocation().subscribe(resp=> {
+    //Geolocation.getCurrentPosition().then((resp) => {
 
       this.beerAPI.loadBeerGlassware().subscribe(glass=>{
         this.glassware = glass.data;
@@ -327,8 +328,10 @@ export class CheckinPage {
 
       } else {
 
-        this.lat = resp.coords.latitude;
-        this.lng = resp.coords.longitude;
+        this.lat = resp['latitude'];
+        this.lng = resp['longitude'];
+
+        console.log('lat long debug',this.lat + ' - ' + this.lng);
 
       }
       
@@ -366,7 +369,7 @@ export class CheckinPage {
           }
 
         });
-    }).catch((error) => {
+    },error => {
        console.log('error with geolocation',error);
     });    
   }
@@ -929,7 +932,8 @@ export class CheckinPage {
       var offset = snap.val();
       var updates = {};
       var newKey;
-      var newFeedRef;      
+      var newFeedRef;
+      var shareId;  
       var negativeTimestamp = (new Date().getTime() + offset) * -1; // for ordering new checkins first
       var timestamp = new Date().getTime() + offset;
       locationData['dateCreated'] = timestamp;
@@ -956,17 +960,25 @@ export class CheckinPage {
           let fbComment = '';
           if (locationData.img)
             fbIMG = locationData.img;
-          else if (that.location.photo)
-            fbIMG = that.location.photo;
+          else if ( that.location.url)
+            fbIMG = that.location.url;
 
           if (!locationData.comments.length)
             fbComment = "Enjoying " + locationData.beerName + ' @ ' + locationData.name+'. Come join me!'; 
           else
             fbComment = locationData.comments;
+
+          if (that.checkinType == 'brewery') {
+            shareId = that.brewery.id;
+          } else {
+            shareId = that.location.place_id;
+          }
           
           that.social.shareFacebook('Brew Search',
                                        fbComment,
-                                       fbIMG).subscribe(success=>{
+                                       fbIMG,
+                                       'checkin',
+                                       newKey).subscribe(success=>{
                                          console.log('success fb post');
                                        },error=>{
                                          console.log('error fb post',error);

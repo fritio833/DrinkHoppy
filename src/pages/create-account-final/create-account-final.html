@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-navbar color="check">
+  <ion-navbar color="primary">
     <ion-buttons start>
         <button ion-button icon-only (click)="cancel()">
           <ion-icon name="close"></ion-icon>
@@ -48,9 +48,20 @@
             You must be of legal drinking age to register.
           </ion-datetime>
 			</ion-item>
-      <ion-item *ngIf="!newUserForm.controls.birthDay.valid && (newUserForm.controls.birthDay.dirty || submitAttempt)">
-          <p class="warning">You must be 18 to register.</p>
-      </ion-item>           
+      <ion-item text-wrap *ngIf="!newUserForm.controls.birthDay.valid && (newUserForm.controls.birthDay.dirty || submitAttempt)">
+          <p class="warning">You must be 18 or older to register and of legal drinking age.</p>
+      </ion-item>
+      <ion-item>
+        <div align="center">
+            <a (click)="goToTerms('https://brewsearchapp.com/terms')">
+                Terms of Service
+            </a>
+            &amp;
+            <a (click)="goToTerms('https://brewsearchapp.com/privacy')">
+                Privacy Policy
+            </a>            
+        </div>
+      </ion-item>          
 			<ion-item text-wrap>
 				<ion-label id="agree">
 					By signing up you indicate that you have read and agree to the Terms 
@@ -61,10 +72,10 @@
       <ion-item *ngIf="!newUserForm.controls.agree.valid && (newUserForm.controls.agree.dirty || submitAttempt)">
           <p class="warning">Must agree to terms of service and privacy policy to proceed.</p>
       </ion-item>
-  	</ion-list>
+  	</ion-list>     
     <div align="center">
       <button type="submit" ion-button icon-left>
-        <ion-icon name="log-in"></ion-icon>Join Drink Hoppy
+        <ion-icon name="log-in"></ion-icon>Join Brew Search
       </button>
     </div>    
   </form>

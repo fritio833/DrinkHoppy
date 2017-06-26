@@ -160,7 +160,7 @@ export class GoogleService {
         + lat 
         + ',' 
         + lng 
-        + '&types=night_club|bar|food|grocery_or_supermarket|restaurant|liquor_store|gas_station|convenience_store&radius=200&&key=' 
+        + '&types=night_club|bar|food|grocery_or_supermarket|restaurant|liquor_store|gas_station|convenience_store&radius='+this.sing.checkinProximityMeters+'&key=' 
         + this.googlePlacesAPIKey)
         .map(res => res.json());    
   }
@@ -389,6 +389,23 @@ export class GoogleService {
     return x * Math.PI / 180;
   };
 
+  convertMetersToMiles(meters) {
+    let dist = meters * 0.00062137; 
+    return dist.toFixed(2);
+  }
+
+  getDistanceMeters(p1,p2) {
+    var R = 6378137; // Earth’s mean radius in meter
+    var dLat = this.rad(p2.lat - p1.lat);
+    var dLong = this.rad(p2.lng - p1.lng);
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(this.rad(p1.lat)) * Math.cos(this.rad(p2.lat)) *
+            Math.sin(dLong / 2) * Math.sin(dLong / 2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    var d = R * c;
+    return d;    
+  }
+
   getDistance(p1, p2,isMiles?) {
     var R = 6378137; // Earth’s mean radius in meter
     var dLat = this.rad(p2.lat - p1.lat);
@@ -404,7 +421,7 @@ export class GoogleService {
     } else {
       d = d * 0.001; // convert meters to kilometers
     }
-    return d; // returns the distance in meter
+    return d;
  }  
 
 }

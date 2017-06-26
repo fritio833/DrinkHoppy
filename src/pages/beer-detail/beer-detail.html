@@ -4,13 +4,20 @@
   </ion-navbar>
 </ion-header>
 <ion-content>
-
+  <ion-fab top right edge>
+    <button ion-fab mini color="secondary"><ion-icon name="add"></ion-icon></button>
+    <ion-fab-list>
+      <button ion-fab (click)="shareFacebook()"><ion-icon name="logo-facebook"></ion-icon></button>
+			<button ion-fab (click)="saveBeerToFavorites(beer?.id)"><ion-icon name="heart"></ion-icon></button>
+    </ion-fab-list>
+  </ion-fab>
 <ion-item class="beer-info" text-wrap>
 	<div *ngIf="!beerLoaded" align="center">
 		<ion-spinner></ion-spinner>
 	</div>
   <ion-thumbnail item-left *ngIf="beerLoaded">
 	    <img *ngIf="beer.labels.medium" [src]="beer?.labels.medium" />
+			<img *ngIf="beer.labels.medium === null" src="images/no-image.jpg" />
   </ion-thumbnail>
 	<span item-left *ngIf="beer && beerLoaded">
 	    <b>{{beer?.name}}</b>
@@ -25,20 +32,22 @@
 	    <p>{{beer?.available.description}}</p>
 	</span>
 </ion-item>
-<ion-grid>
+<ion-grid *ngIf="numLocations">
   <ion-row>
     <ion-col>
 			<button class="btn" item-left block ion-button icon-left (click)="locateBeer()">
 				<ion-icon name="pin"></ion-icon>
-				LOCATE
+				LOCATE IN {{sing.getSelectCity()}}
 			</button>
     </ion-col>
+		<!--
 		<ion-col>
 			<button class="btn" item-right block ion-button icon-left (click)='saveBeerToFavorites(beer?.id)'>
 				<ion-icon name="heart"></ion-icon>
 				SAVE
 			</button>
 		</ion-col>
+		-->
   </ion-row>
 </ion-grid>	
 <button id="checkin-button" color="check" ion-button block full (click)='checkIn(beer)'>

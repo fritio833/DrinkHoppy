@@ -72,7 +72,7 @@ export class BreweryService {
       if (filter.sortBy!=null)
         _filter += '&sort=' + filter.sortBy;
 
-      if (beerName!=null)
+      if (beerName!=null && beerName.length)
         _filter += '&name=*' + beerName + '*';
 
       return this.http.get(this.breweryDbUrl 

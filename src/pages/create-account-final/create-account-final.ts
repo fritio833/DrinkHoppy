@@ -97,6 +97,10 @@ export class CreateAccountFinalPage {
     this.view.dismiss();
   }
 
+  goToTerms(url) {
+    window.open(encodeURI(url),'_system');
+  }  
+
   presentLoading() {
 	  this.loading = this.loadingCtrl.create({
 	    content: 'Creating account. Please wait...'

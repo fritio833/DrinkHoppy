@@ -33,6 +33,7 @@ export class AuthService {
   public userExistsRef:any;
   public loggedIn:boolean = false;
   public user:any;
+  public userRole:string;
 
   constructor(public sing:SingletonService,
               public angFire:AngularFire,

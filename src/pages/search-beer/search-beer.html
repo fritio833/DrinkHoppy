@@ -40,6 +40,7 @@
       <ion-thumbnail item-left>
         <img *ngIf="beer.labels" [src]="beer.labels.icon">
         <img *ngIf="!beer.labels && beer.breweries && beer.breweries.length && beer.breweries[0].images" [src]="beer.breweries[0].images.icon">
+        <img *ngIf="!beer.labels && beer.breweries &&  beer.breweries.length && beer.breweries[0].images == null" src="images/no-image.jpg">
       </ion-thumbnail>
       <h2>{{ beer.name }}</h2>
       <p *ngIf="beer.breweries">{{ beer.breweries[0].name}}</p>

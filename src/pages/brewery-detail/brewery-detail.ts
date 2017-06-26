@@ -8,6 +8,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import { SingletonService } from '../../providers/singleton-service';
 import { SocialService } from '../../providers/social-service';
+import { AuthService } from '../../providers/auth-service';
 
 import { BeerDetailPage } from '../beer-detail/beer-detail';
 import { LocationMapPage } from '../location-map/location-map';
@@ -57,6 +58,7 @@ export class BreweryDetailPage {
               public social:SocialService,
               public storage: Storage,
               public toastCtrl:ToastController,
+              public auth:AuthService,
               public modalCtrl:ModalController) {
 
   	this.brewery = params.get('brewery');
@@ -242,19 +244,32 @@ export class BreweryDetailPage {
     window.location = "tel:"+phoneNo;
   }
 
+
+
+
   checkIn(brewery) {
     
-    let modal = this.modalCtrl.create(CheckinPage,{
-                                                    checkinType:'brewery',
-                                                    brewery:this.brewery,
-                                                    location:this.location,
-                                                    beers:this.breweryBeers
-                                                  });
-    modal.onDidDismiss(()=> {
-      // this.getBeerReviews();
-    });
-    modal.present();
-    
+    if (this.sing.online) {
+
+      this.sing.canUserCheckin(this.auth.userRole,this.brewery.latitude,this.brewery.longitude).subscribe(canCheckIn=>{
+        if (canCheckIn['checkin']) {
+          let modal = this.modalCtrl.create(CheckinPage,{
+                                                          checkinType:'brewery',
+                                                          brewery:this.brewery,
+                                                          location:this.location,
+                                                          beers:this.breweryBeers
+                                                        });
+          modal.present();
+        } else {
+          this.presentToast(canCheckIn['msg']);
+        }
+      },error=>{
+        console.log('error canUserCheckin',error);
+        this.presentToast(error);
+      });
+    } else
+      this.sing.showNetworkAlert();
+
   }
   
   goToNavApp() {
@@ -305,13 +320,19 @@ export class BreweryDetailPage {
   }
 
   shareFacebook() {
-    this.social.shareFacebook(this.brewery.brewery.name,
+
+    this.social.shareFacebook(this.location.name,
         this.location.vicinity,
-        this.locationPhoto).subscribe(success=>{
-          alert('shared success');
+        this.locationPhoto,
+        'brewery',
+        this.brewery.id
+        ).subscribe(success=>{
+          //alert('shared success');
+          console.log('success',success);
         },error=>{
-          alert('failed');
-        });
+          //alert('failed');
+          console.log('error shareFacebook',error);
+        });        
   }  
 
   viewMore() {

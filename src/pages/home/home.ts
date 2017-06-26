@@ -56,6 +56,7 @@ export class HomePage {
   public mostPopularLocation:any;
   public achievement:any;
   public isOnline:boolean = false;
+  public geoFailed:boolean = false;
 
   constructor(public navCtrl: NavController, 
   	          public sing:SingletonService,
@@ -74,6 +75,11 @@ export class HomePage {
     this.events.subscribe('online:status',status=>{
       this.isOnline = status;
     });
+
+    this.events.subscribe('gotGeo:false',geo=>{
+      this.geoFailed = true;
+    });
+    
     this.isOnline = this.sing.online;   
   }
 
@@ -317,6 +323,42 @@ export class HomePage {
   }
   */
 
+  setLocation() {
+      // Get geolocation.  Sets our app.
+      this.sing.getGeolocation().subscribe(resp=>{
+        this.setCityState(resp);
+        this.geoFailed = false;
+      },error=>{
+        console.log('error',error);
+        // Attempt to get geo with low accuracy
+        this.sing.getGeolocationLow().subscribe(lowResp=>{
+          this.setCityState(lowResp);
+          this.geoFailed = false;
+        },error=>{
+          console.log('error',error);
+           this.events.publish('gotGeo:false',null);
+          //this.presentNoGPSAlert();
+        });
+      }); 
+  }
+
+  setCityState(coords) {
+    this.geo.reverseGeocodeLookup(coords.latitude,coords.longitude)
+      .subscribe((success)=>{
+      this.sing.geoCity = success.city;
+      this.sing.geoState = success.state;
+      this.sing.geoCountry = success.country;
+      this.sing.geoLat = coords.latitude;
+      this.sing.geoLng = coords.longitude;
+      setTimeout(()=>{
+        this.events.publish('gotGeo:true',{city:this.sing.geoCity,state:this.sing.geoState,country:this.sing.geoCountry});
+      },1000);
+      
+    },error=>{
+      console.log('error',error);
+      //this.presentNoGPSAlert();
+    });    
+  }
   
   ionViewWillEnter() {
     console.log('ionViewWillEnter HomePage');
@@ -326,6 +368,8 @@ export class HomePage {
    
     
   }
+
+
 
   ionViewWillLeave() {
     if (this.notifications) {

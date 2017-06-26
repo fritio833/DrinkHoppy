@@ -37,10 +37,12 @@ export class SingletonService {
   public checkinsPerPage:number = 10;
   public checkBeerArray = new Array();
   public online:boolean = false;
+  public checkinProximityMeters = 200;
   
   public popularLoaded:boolean = false;
   public webURL:string = 'http://brewsearchapp.com';
   public logo:string = 'https://firebasestorage.googleapis.com/v0/b/bender-1487426215149.appspot.com/o/img%2Fbeerfest.png?alt=media&token=971dfd29-50c8-46b2-978c-4c406891b947';
+  public noImageBeer:string = 'https://firebasestorage.googleapis.com/v0/b/bender-1487426215149.appspot.com/o/img%2Fno-image.jpg?alt=media&token=5a8ee978-0ab9-4e8c-af54-dfedbd4be527';
 
   // App configuration.  API keys, webservice url, etc. 
   public breweryDbAPIKey:string = '3c7ec73417afb44ae7a4450482f99d70';
@@ -68,11 +70,22 @@ export class SingletonService {
   //public lng = -87.202452;
 
   //Pug Mahone's
-  //public lat = 30.464105;
-  //public lng = -84.298067;
+  //public lat = 30.464098;
+  //public lng = -84.298513;
+
+  // Prime Time lounge
+  //public lat = 30.448629;
+  //public lng = -84.315217;
+
+  // Test Leon Pub
+  //public lat = 30.456357299999997;
+  //public lng = -84.2797257;
 
 
-  constructor(public toastCtrl:ToastController,public event:Events,public alertCtrl:AlertController, public diagnostic: Diagnostic) {}
+  constructor(public toastCtrl:ToastController,
+              public event:Events,
+              public alertCtrl:AlertController,
+              public diagnostic: Diagnostic) {}
 
   setOnlineListener() {
     var that = this;
@@ -101,19 +114,25 @@ export class SingletonService {
              lat:this.selectLat,
              lng:this.selectLng,
              geo:false};
-    } else {
+    } else if (this.geoCity != null && this.geoState != null) {
       loc = {city:this.geoCity,
              state:this.geoState,
              country:this.geoCountry,
              lat:this.geoLat,
              lng:this.geoLng,
              geo:true};
+    } else {
+      loc = null;
     }
     return loc;
   }
 
   getLocationKey() {
     let locObj = this.getLocation();
+    
+    if (locObj == null)
+      return null;
+
     let key = locObj.city.toLowerCase().replace(/\s|\#|\[|\]|\$|\./g, "")
               +'-'+locObj.state.toLowerCase().replace(/\s|\#|\[|\]|\$|\./g, "")
               +'-'+locObj.country.toLowerCase().replace(/\s|\#|\[|\]|\$|\./g, "");
@@ -377,6 +396,25 @@ export class SingletonService {
       .timeout(10000);
   }
 
+  getUserLocation() {
+    return new Observable(observer=>{
+      // Get geolocation.  Sets our app.
+      this.getGeolocation().subscribe(resp=>{
+        observer.next(resp);
+      },error=>{
+        console.log('error',error);
+        // Attempt to get geo with low accuracy
+        this.getGeolocationLow().subscribe(lowResp=>{
+          observer.next(lowResp);
+        },error=>{
+          //console.log('error',error);
+          observer.error(error);
+        });
+      }); 
+
+    });
+  }  
+
   setCheckinTime(time,beerId) {
     let found:boolean = false;
     let dateTime:number = new Date().getTime();
@@ -468,5 +506,68 @@ export class SingletonService {
     });
     networkAlert.present();
   }
+
+  canUserCheckin(userRole,locationLat,locationLng) {
+    return new Observable(observer=>{
+
+      // Admins are not restricted by distance and can checkin at any location
+      if (userRole === 'admin') {
+        observer.next({checkin:true,msg:null});
+        observer.complete();
+      } else {
+
+        let locGeo =  {lat:locationLat,lng:locationLng};
+
+        this.getUserLocation().subscribe(resp=>{
+          //console.log('geoHigh',resp['latitude']);
+          let userGeo = {};
+          
+          if (this.test)
+            userGeo = {lat:this.lat,lng:this.lng};
+          else
+            userGeo = {lat:resp['latitude'],lng:resp['longitude']};
+
+          let distanceFromLocation = this.getDistanceMeters(locGeo,userGeo);
+
+          if (distanceFromLocation > this.checkinProximityMeters) {
+            let distToCheckin = this.convertMetersToMiles(distanceFromLocation - this.checkinProximityMeters);
+            //this.presentToast('You are too far away to checkin by ' + distToCheckin + ' miles');
+            observer.next({checkin:false,msg:'You are too far away to checkin by ' + distToCheckin + ' miles'});
+            observer.complete();
+          } else {
+            observer.next({checkin:true,msg:null});
+            observer.complete();
+          }
+          
+          },error=>{
+            console.log('error',error);
+            // Attempt to get geo with low accuracy
+            //this.presentToast('Unable to get your location. Try checking in again.');
+            observer.error('Unable to get your location. Try checking in again.');
+        }); 
+      }
+    });
+  }
+
+  rad(x) {
+    return x * Math.PI / 180;
+  };
+
+  convertMetersToMiles(meters) {
+    let dist = meters * 0.00062137; 
+    return dist.toFixed(2);
+  }
+
+  getDistanceMeters(p1,p2) {
+    var R = 6378137; // Earth’s mean radius in meter
+    var dLat = this.rad(p2.lat - p1.lat);
+    var dLong = this.rad(p2.lng - p1.lng);
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(this.rad(p1.lat)) * Math.cos(this.rad(p2.lat)) *
+            Math.sin(dLong / 2) * Math.sin(dLong / 2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    var d = R * c;
+    return d;    
+  }   
 
 }

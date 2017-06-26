@@ -5,13 +5,14 @@ import { Ionic2RatingModule } from 'ionic2-rating';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Storage } from '@ionic/storage';
-
+import { Observable } from 'rxjs/Observable';
 
 import { LocationService } from '../../providers/location-service';
 import { GoogleService } from '../../providers/google-service';
 import { BreweryService } from '../../providers/brewery-service';
 import { SingletonService } from '../../providers/singleton-service';
 import { SocialService } from '../../providers/social-service';
+import { AuthService } from '../../providers/auth-service';
 
 import { LocationMapPage } from '../location-map/location-map';
 import { LocationDetailsMorePage } from '../location-details-more/location-details-more';
@@ -74,6 +75,7 @@ export class LocationDetailPage {
               public storage:Storage,
               public social:SocialService,
               public toastCtrl:ToastController,
+              public auth:AuthService,
   	          public geo:GoogleService) {
 
     
@@ -246,12 +248,71 @@ export class LocationDetailPage {
   }
 
   checkIn() {
+    
     if (this.sing.online) {
-      let modal = this.modalCtrl.create(CheckinPage,{ location:this.location,checkinType:'place'});
-      modal.present();
+
+      this.sing.canUserCheckin(this.auth.userRole,this.locationLat,this.locationLng).subscribe(canCheckIn=>{
+
+        console.log('here',canCheckIn);
+        
+        if (canCheckIn['checkin']) {
+          let modal = this.modalCtrl.create(CheckinPage,{ location:this.location,checkinType:'place'});
+          modal.present();
+        } else {
+          this.presentToast(canCheckIn['msg']);
+        }
+      },error=>{
+        console.log('error canUserCheckin',error);
+        this.presentToast(error);
+      });
     } else
       this.sing.showNetworkAlert();
+
   }
+
+  /*
+  canUserCheckin(userRole) {
+    return new Observable(observer=>{
+
+      // Admins are not restricted by distance and can checkin at any location
+      if (userRole === 'admin') {
+        observer.next(true);
+        observer.complete();
+      } else {
+
+        let locGeo =  {lat:this.locationLat,lng:this.locationLng};
+
+        this.sing.getUserLocation().subscribe(resp=>{
+          //console.log('geoHigh',resp['latitude']);
+          let userGeo = {};
+          
+          if (this.sing.test)
+            userGeo = {lat:this.sing.lat,lng:this.sing.lng};
+          else
+            userGeo = {lat:resp['latitude'],lng:resp['longitude']};
+
+          let distanceFromLocation = this.geo.getDistanceMeters(locGeo,userGeo);
+
+          if (distanceFromLocation > this.sing.checkinProximityMeters) {
+            let distToCheckin = this.geo.convertMetersToMiles(distanceFromLocation - this.sing.checkinProximityMeters);
+            this.presentToast('You are too far away to checkin by ' + distToCheckin + ' miles');
+            observer.next(false);
+            observer.complete();
+          } else {
+            observer.next(true);
+            observer.complete();
+          }
+          
+          },error=>{
+            console.log('error',error);
+            // Attempt to get geo with low accuracy
+            this.presentToast('Unable to get your location. Try checking in again.');
+            observer.error(error);
+        }); 
+      }
+    });
+  }
+  */
 
   getGoogleStaticMap() {
     return this.geo.getStaticMap(this.locationLat,this.locationLng);
@@ -341,10 +402,15 @@ export class LocationDetailPage {
   shareFacebook() {
     this.social.shareFacebook(this.location.name,
         this.location.vicinity,
-        this.locationPhoto).subscribe(success=>{
-          alert('shared success');
+        this.locationPhoto,
+        'place',
+        this.location.place_id
+        ).subscribe(success=>{
+          //alert('shared success');
+          console.log('success',success);
         },error=>{
-          alert('failed');
+          //alert('failed');
+          console.log('error shareFacebook',error);
         });
   }  
 

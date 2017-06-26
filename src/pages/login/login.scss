@@ -16,12 +16,15 @@ page-login {
 	}
 
 	#home-content {
-	  //background-image: url('../images/login-splash-black.png');
-	  //background-repeat: no-repeat;
-	  //background-size: cover;
-	  background-color: #01796f;
+	  background-image: url('../images/loginbeers.jpg');
+	  background-repeat: no-repeat;
+	  background-size: cover;
+	  background-color: #C81B02;
 	}
 
+  #login-logo {
+		padding-top: 5rem;
+	}
 
 	h1 {
 	  font-size: 50px;

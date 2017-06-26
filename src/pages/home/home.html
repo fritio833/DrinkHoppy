@@ -29,6 +29,9 @@
           <button *ngIf="!isOnline" right ion-button small color="dark" (click)="sing.showSettings()">
             Offline
           </button>
+          <button *ngIf="isOnline && geoFailed" right ion-button small color="dark" (click)="setLocation()">
+            No Location. Try Again?
+          </button>          
         </div>
       </ion-col>
     </ion-row>

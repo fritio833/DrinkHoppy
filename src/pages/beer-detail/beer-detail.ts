@@ -10,6 +10,7 @@ import { BreweryService } from '../../providers/brewery-service';
 import { SingletonService } from '../../providers/singleton-service';
 import { GoogleService } from '../../providers/google-service';
 import { DemoService } from '../../providers/demo-service';
+import { SocialService } from '../../providers/social-service';
 
 import { Beer } from '../../models/beer';
 
@@ -48,6 +49,7 @@ export class BeerDetailPage {
   public lastKey:string;
   public queryable:boolean = true;
   public beerRating:any;
+  public numLocations:number = 0;
 
   constructor( public navCtrl: NavController, 
                public navParams: NavParams, 
@@ -59,6 +61,7 @@ export class BeerDetailPage {
                public geo:GoogleService,
                public demo:DemoService,
                public loadingCtrl:LoadingController,
+               public social:SocialService,
                public modalCtrl:ModalController) {
 
     this.beerId = navParams.get('beerId');
@@ -143,6 +146,7 @@ export class BeerDetailPage {
     console.log('ionViewDidLoad BeerDetailPage');
 
     this.getCheckIns();
+    this.hasLocations();
     this.demo.getBeerRating(this.beerId).subscribe(beerRating => {
       this.beerRating = beerRating;
     });
@@ -284,6 +288,63 @@ export class BeerDetailPage {
       duration: 3000
     });
     toast.present();
+  }
+
+  hasLocations() {
+
+    let locKey;
+    let locations;
+    locKey = this.sing.getLocationKey();
+    console.log('locKey',locKey);
+
+    if (locKey != null) {
+      var geo = this.sing.getLocation();
+      console.log('/beer_by_city/'+locKey+'/'+this.beerId+'/locations');
+      locations = this.angFire.database.list('/beer_by_city/'+locKey+'/'+this.beerId+'/locations');
+
+      locations.subscribe(resp=>{
+        this.numLocations = resp.length;
+        console.log('num beers',resp.length);
+        console.log('geo',geo);
+
+      },error=>{
+        console.log('error hasLocations',error);
+      });
+    }
+        
+  }
+
+  shareFacebook() {
+
+    let beerIMG = this.beer['labels'].medium;
+    let msg = '';
+    let title = this.beer.name;
+
+    if ( this.beer.hasOwnProperty('abv')) {
+      title += ' - ' + this.beer.abv + '% ABV';
+    }
+
+    if ( beerIMG == null)
+      beerIMG = this.sing.noImageBeer;
+
+    if (this.beer.hasOwnProperty('description')) {
+      msg = this.beer.description;
+    } else if (this.beer.hasOwnProperty('style')) {
+      msg = this.beer['style'].shortName;
+    }
+
+    this.social.shareFacebook(title,
+        msg,
+        beerIMG,
+        'beer',
+        this.beerId
+        ).subscribe(success=>{
+          //alert('shared success');
+          console.log('success',success);
+        },error=>{
+          //alert('failed');
+          console.log('error shareFacebook',error);
+        });    
   }
 
   ionViewWillEnter() { 

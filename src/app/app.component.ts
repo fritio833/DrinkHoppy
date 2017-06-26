@@ -176,6 +176,7 @@ export class MyApp {
 
   setLocation() {
       // Get geolocation.  Sets our app.
+      /*
       this.sing.getGeolocation().subscribe(resp=>{
         this.setCityState(resp);
       },error=>{
@@ -185,9 +186,17 @@ export class MyApp {
           this.setCityState(lowResp);
         },error=>{
           console.log('error',error);
+           this.events.publish('gotGeo:false',null);
           //this.presentNoGPSAlert();
         });
       }); 
+      */
+    this.sing.getUserLocation().subscribe(resp=>{
+      this.setCityState(resp);
+    },error=>{
+      console.log('error',error);
+      this.events.publish('gotGeo:false',null);
+    });
   }
 
   setCityState(coords) {
@@ -224,6 +233,8 @@ export class MyApp {
             this.profileIMG = snapshot.val().photo;
           else
             this.profileIMG = 'images/default-profile.png';
+
+          this.auth.userRole = snapshot.val().role;
         }
       });
     }

@@ -1,0 +1,60 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-buttons start>
+        <button ion-button icon-only (click)="cancel()">
+          <ion-icon name="close"></ion-icon>
+        </button>
+    </ion-buttons>    
+    <ion-title>Add Brewery</ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content class="white-background" padding>
+
+  <div *ngIf="!formSubmittedSuccess">
+      <form [formGroup]="breweryForm" (submit)="addrewery()">
+        <ion-list>
+          <ion-item>
+            <ion-label fixed>Name</ion-label>
+            <ion-input type="text" formControlName="name" placeholder="Brewery Name"></ion-input>
+            <span class="required"item-right>*</span>
+          </ion-item>
+          <ion-item>
+            <ion-label>Description</ion-label>
+            <span item-right>1500 Limit</span> 
+          </ion-item>
+          <ion-item>
+            <ion-textarea maxlength="1500" rows="5" type="text" formControlName="description">
+            </ion-textarea>
+          </ion-item>
+          <ion-item>
+            <ion-label fixed>Website</ion-label>
+            <ion-input type="text" formControlName="website" placeholder="http://"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label fixed>Established</ion-label>
+            <ion-input type="number" formControlName="established" placeholder="YYYY"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label fixed>Organic?</ion-label>
+            <ion-select formControlName="isOrganic">
+              <ion-option value="N">No</ion-option>
+              <ion-option value="Y">Yes</ion-option>
+            </ion-select>
+          </ion-item>                               
+        </ion-list>
+      </form>
+  </div>
+  <div id="success-submit" *ngIf="formSubmittedSuccess" align="center">
+    <h3>Brewery Successfully Submitted!</h3>
+    <p>
+      The brewery has been successfully added and is waiting to be approved by our administrators.
+      Please allow 24 hours to process.
+    </p>
+    <button ion-button (click)="addAnother()">Add Another Brewery?</button>   
+  </div>
+</ion-content>
+<ion-footer>
+  <button ion-button full (click)="addBrewery()">
+    ADD BREWERY
+  </button>
+</ion-footer>

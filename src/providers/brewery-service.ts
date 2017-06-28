@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Http } from '@angular/http';
+import { Http, Headers, RequestOptions } from '@angular/http';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/delay';
 import 'rxjs/add/operator/retry';
@@ -40,7 +40,6 @@ export class BreweryService {
 
   	console.log('Hello BreweryService Provider');
   }
-
   
   loadBeerByName(beerName,page?,filter?)  {
 
@@ -106,6 +105,7 @@ export class BreweryService {
            .timeout(5000)
            .map(res => res.json());    
   }
+
   findBeerByName(name) {
     return this.http.get(this.breweryDbUrl 
            + 'search/?key=' 
@@ -249,8 +249,6 @@ export class BreweryService {
 
   loadBeerStyles() {
 
-    let categoryId = '';
-
     return this.http.get(this.breweryDbUrl 
          + 'styles/'
          + '?key=' + this.breweryDbAPI)
@@ -258,6 +256,73 @@ export class BreweryService {
          .timeout(5000,new Error('Error connecting'))          
          .map(res => res.json());    
   }
+
+  loadMenuStyles() {
+
+    return this.http.get(this.breweryDbUrl 
+         + 'menu/styles/'
+         + '?key=' + this.breweryDbAPI)
+         .retryWhen(error => error.delay(500))
+         .timeout(5000,new Error('Error connecting'))          
+         .map(res => res.json());    
+  }
+
+  loadMenuAvailability() {
+    return this.http.get(this.breweryDbUrl 
+         + 'menu/beer-availability/'
+         + '?key=' + this.breweryDbAPI)
+         .retryWhen(error => error.delay(500))
+         .timeout(5000,new Error('Error connecting'))          
+         .map(res => res.json());    
+  }
+
+  postNewBeer(beerData) {
+
+    var headers = new Headers();
+    headers.append('Content-Type','application/json');
+    let options = new RequestOptions({ headers: headers });
+
+    //console.log('json string',this.single.jsonToQueryString(beerData));
+    return this.http.post(this.breweryDbUrl 
+         + 'beers'
+         + '?key=' + this.breweryDbAPI + this.single.jsonToQueryString(beerData),null,options)
+         .retryWhen(error => error.delay(500))
+         .timeout(5000,new Error('Error connecting'))          
+         .map(res => res.json());  
+  }
+
+  postNewBrewery(breweryData) {
+    var headers = new Headers();
+    headers.append('Content-Type','application/json');
+    let options = new RequestOptions({ headers: headers });
+
+    console.log('json string',this.single.jsonToQueryString(breweryData));
+    
+    return this.http.post(this.breweryDbUrl 
+         + 'breweries'
+         + '?key=' + this.breweryDbAPI + this.single.jsonToQueryString(breweryData),null,options)
+         .retryWhen(error => error.delay(500))
+         .timeout(5000,new Error('Error connecting'))          
+         .map(res => res.json());    
+  }
+
+  loadMenuSRM() {
+    return this.http.get(this.breweryDbUrl 
+         + 'menu/srm/'
+         + '?key=' + this.breweryDbAPI)
+         .retryWhen(error => error.delay(500))
+         .timeout(5000,new Error('Error connecting'))          
+         .map(res => res.json());    
+  }
+
+  loadMenuTemp() {
+    return this.http.get(this.breweryDbUrl 
+         + 'menu/beer-temperature/'
+         + '?key=' + this.breweryDbAPI)
+         .retryWhen(error => error.delay(500))
+         .timeout(5000,new Error('Error connecting'))          
+         .map(res => res.json());    
+  }  
 
   loadBeerGlassware() {
     return this.http.get(this.breweryDbUrl 

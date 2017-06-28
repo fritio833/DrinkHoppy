@@ -48,7 +48,8 @@
   </ion-item>
   <ion-item class="botton-border-item" (click)="getCheckinDetail(check.$key)">
     <ion-thumbnail item-left>
-      <img [src]="check.beerIMG">
+      <img *ngIf="check.beerIMG" [src]="check.beerIMG">
+      <img *ngIf="check.beerIMG == null" src="images/no-image.jpg">
     </ion-thumbnail>
     <span item-left>
       <h3>{{check.beerName}}</h3>

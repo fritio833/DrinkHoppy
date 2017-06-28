@@ -1,14 +1,6 @@
 <ion-header>
   <ion-navbar color="primary">
-    <ion-title>Brewery</ion-title>
-		<!--
-    <ion-buttons right>
-      <button ion-button icon-left (click)="save()">
-        <ion-icon name="heart"></ion-icon>
-				save
-      </button>   
-    </ion-buttons>
-		-->		
+    <ion-title>Brewery</ion-title>	
   </ion-navbar>
 </ion-header>
 <ion-content>
@@ -17,6 +9,7 @@
     <ion-fab-list>
       <button ion-fab (click)="shareFacebook()"><ion-icon name="logo-facebook"></ion-icon></button>
 			<button ion-fab (click)="save()"><ion-icon name="heart"></ion-icon></button>
+			<button ion-fab (click)="addBeer()"><ion-icon name="beer"></ion-icon></button>
     </ion-fab-list>
   </ion-fab>	
 	<ion-grid class="background-home" [ngStyle]="getBackgroundImg(locationPhoto)">
@@ -87,32 +80,36 @@
 		  </ion-col>
 		</ion-row>
   </ion-grid>
-  <div *ngIf="breweryBeers.length">
+  <div id="menu-list" *ngIf="breweryBeers.length">
     <ion-card>
       <ion-item>
         <p>Beer List</p>
       </ion-item>
-        <div *ngFor="let beer of breweryBeers; let i=index" (click)="getBeerDetail(beer)">
-	      	<ion-item *ngIf="i < 5">
-		      	<ion-thumbnail item-left>
-		      		<img *ngIf="beer.labels.icon!='zzz'" [src]="beer.labels.medium" />
-		      	</ion-thumbnail>		      	
-			    <h2>{{beer.nameDisplay}}</h2>
-			     <p>{{beer?.style.shortName}}</p>
-			     <ion-icon name="arrow-forward" item-right></ion-icon>
-		     </ion-item>
-      	</div>
-      	<div *ngIf="breweryBeers.length > 5" align="center">
-	      <ion-item item-content>
-	        <div align="center">
-	            <button ion-button (click)="showDrinkMenu()">
-	              Show More
-	            </button>
-            </div>
-	      </ion-item>
-		</div>      	
+			<div *ngFor="let beer of breweryBeers; let i=index" (click)="getBeerDetail(beer)">
+				<ion-item *ngIf="i < 5">
+					<ion-thumbnail item-left>
+						<img *ngIf="beer.labels.icon!='zzz'" [src]="beer.labels.medium" />
+						<img *ngIf="beer.labels.icon==='zzz'" src="images/no-image.jpg" />
+					</ion-thumbnail>		      	
+				  <h2>{{beer.nameDisplay}}</h2>
+					<p>{{beer?.style.shortName}}</p>
+					<ion-icon name="arrow-forward" item-right></ion-icon>
+				</ion-item>
+			</div>
+			<button *ngIf="breweryBeers.length > 5" ion-button full (click)="showDrinkMenu()">Show More</button>			   	
     </ion-card>
   </div>
+	<div id="no-beer" *ngIf="!breweryBeers.length">
+    <ion-card>
+      <div align="center">
+        <h3>Uh Oh!</h3>
+				<p>No beers have been submitted. Help us grow by adding one.</p>
+				<div>
+          <button ion-button (click)="addBeer()">Add Beer</button>
+				</div>
+      </div>
+    </ion-card>
+	</div>
   <div>    
 	  <ion-card>
 	    <ion-item>

@@ -11,7 +11,7 @@
   </ion-navbar>
 </ion-header>
 <ion-content class="white-background">
-  <ion-item>
+  <ion-item *ngIf="checkinType != 'brewery'">
 		<ion-searchbar (ionInput)="doSearchBeer($event)"
 										debounce="1000"
 										(ionClear)="clearSearch($event)"
@@ -37,7 +37,7 @@
 			<ion-infinite-scroll-content></ion-infinite-scroll-content>
 		</ion-infinite-scroll>
   </ion-list>
-  <ion-list>
+  <ion-list *ngIf="checkinType != 'brewery'">
 	<button ion-item (click)="getFavoriteBeers()">
 	  <ion-label>
 	    <ion-icon name="heart" color="danger"></ion-icon>
@@ -71,7 +71,8 @@
   <ion-list *ngIf="toggleLocationBeers">
     <button ion-item *ngFor="let beer of breweryBeers" (click) = "setBeer(beer.id,beer.name)">
 	      <ion-thumbnail item-left>
-	          <img *ngIf="beer.labels.icon!='zzz'" [src]="beer.labels.icon" />
+	        <img *ngIf="beer.labels.icon!='zzz'" [src]="beer.labels.icon" />
+          <img *ngIf="beer.labels.icon=='zzz'" src="images/no-image.jpg" />
 	      </ion-thumbnail>
 	      <h2>{{ beer.name }}</h2>
 				<p>{{locationName}}</p>

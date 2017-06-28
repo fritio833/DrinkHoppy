@@ -122,7 +122,12 @@ export class SingletonService {
              lng:this.geoLng,
              geo:true};
     } else {
-      loc = null;
+      loc = {city:null,
+             state:null,
+             country:null,
+             lat:null,
+             lng:null,
+             geo:null};
     }
     return loc;
   }
@@ -532,7 +537,7 @@ export class SingletonService {
           if (distanceFromLocation > this.checkinProximityMeters) {
             let distToCheckin = this.convertMetersToMiles(distanceFromLocation - this.checkinProximityMeters);
             //this.presentToast('You are too far away to checkin by ' + distToCheckin + ' miles');
-            observer.next({checkin:false,msg:'You are too far away to checkin by ' + distToCheckin + ' miles'});
+            observer.next({checkin:false,msg:'You are too far away to check-in by ' + distToCheckin + ' miles.'});
             observer.complete();
           } else {
             observer.next({checkin:true,msg:null});
@@ -568,6 +573,14 @@ export class SingletonService {
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     var d = R * c;
     return d;    
-  }   
+  }
+
+  jsonToQueryString(json) {
+      return '&' + 
+          Object.keys(json).map(function(key) {
+            if ( json[key] != null && json[key] != '' )
+              return encodeURIComponent(key) + '=' + encodeURIComponent(json[key]);
+          }).join('&');
+  }  
 
 }

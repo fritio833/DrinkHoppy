@@ -2,7 +2,7 @@
   <ion-navbar color="primary">
     <ion-toolbar>
     	<ion-searchbar (ionInput)="doSearchBeer($event)"
-                     debounce="1000"
+                     debounce="500"
                      spellcheck="true"
                      (ionClear)="clearSearch($event)"
                      placeholder="Enter Beer Name">
@@ -19,22 +19,22 @@
 	<div *ngIf="showLoader" align="center">
 		<ion-spinner></ion-spinner>
 	</div>
-  <div *ngIf="showNoResults && !showLoader">
-    <ion-item class="no-border-item" text-wrap>
-      <ion-icon item-left name="alert"></ion-icon>
+  <div id="sorry-area" *ngIf="showNoResults && !showLoader" align="center">
       <p>
-        Sorry! We couldn't find your beer: <b>{{qSearchBeer}}</b>.<br />  
-        Our data is crowdsourced by people like you. Please help us stay current by
-        clicking the button below and tell us the name of the beer, brewery (optional), 
-        and brewery location (optional).
+         We didn't find any beers matching 
       </p>
-    </ion-item>
-    <ion-item>
-      <div align="center">
-        <button ion-button>Submit New Beer</button>
+      <h2>"{{qSearchBeer}}"</h2>
+      <p>
+        Please check your spelling or add a beer.
+      </p>
+      <div>
+        <button ion-button (click)="addBeer()">Add New Beer</button>
       </div>
-    </ion-item>
   </div>
+  <ion-item *ngIf="totalResults > 0">
+      <p>Didn't find your beer?</p>  
+      <button ion-button item-right round (click)="addBeer()">Add New Beer</button>
+  </ion-item>
   <ion-list *ngIf="totalResults > 0">
     <button ion-item *ngFor="let beer of beers" (click) = "getBeerDetail(beer.id)">
       <ion-thumbnail item-left>

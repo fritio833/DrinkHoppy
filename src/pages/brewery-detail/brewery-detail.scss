@@ -105,4 +105,21 @@ page-brewery-detail {
      font-size: 13px;
   }
 
+  #no-beer {
+    h3 {
+      padding:2rem;
+      font-size:2rem;
+      font-weight:bold;
+    }
+
+    button {
+      margin:2rem;
+    }
+  }
+
+  #menu-list .button {
+    margin: 0px !important;
+    height: 4.5rem;
+  }
+
 }

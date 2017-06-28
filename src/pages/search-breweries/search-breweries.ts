@@ -12,6 +12,7 @@ import { ConnectivityService } from '../../providers/connectivity-service';
 import { BreweryDetailPage } from '../brewery-detail/brewery-detail';
 import { SelectLocationPage } from '../select-location/select-location';
 import { SearchLocationKeyPage } from '../search-location-key/search-location-key';
+import { AddBreweryPage } from '../add-brewery/add-brewery';
 
 declare var google;
 declare var GoogleMap;
@@ -25,7 +26,7 @@ export class SearchBreweriesPage {
   @ViewChild('map') mapElement;
   public breweries = new Array();
   public brewerySearch:any;
-  public brewerySearchLen:number=0;
+  public brewerySearchLen:number = -1;
   public numPages:number;
   public showMap:boolean = false;
   public map:any;
@@ -35,6 +36,7 @@ export class SearchBreweriesPage {
   public city:string;
   public markers:any;
   public qBreweryAuto:string = "";
+  public breweriesFound:number = -1;
 
   constructor(public navCtrl: NavController, 
   	          public navParams: NavParams,
@@ -173,11 +175,13 @@ export class SearchBreweriesPage {
                 }
               }
               this.brewerySearchLen = this.brewerySearch.length;
+               this.breweriesFound = 1;
             });            
 	  	        	      	
   	      } else {
 	  	      this.brewerySearch = new Array();
-	  	      this.brewerySearchLen = 0;  	      	
+	  	      this.brewerySearchLen = 0;
+            this.breweriesFound = 0;	      	
   	      }
 
           //this.beerAPI.loadBreweryLocations()
@@ -199,7 +203,7 @@ export class SearchBreweriesPage {
     if (this.sing.online) {
       this.showLoading();
       // Get breweries at user's current location
-      if (this.sing.getLocation().geo){
+      if (this.sing.getLocation().geo != null && this.sing.getLocation().geo){
 
         let options = {timeout: 5000, enableHighAccuracy: true, maximumAge:3000};
         Geolocation.getCurrentPosition(options).then((resp) => {          
@@ -224,24 +228,31 @@ export class SearchBreweriesPage {
 
         }).catch((error) => {
             console.log('Error getting location using high accuracy', error);
+            this.loading.dismiss().catch(() => {});
         });
-      } else { // breweries from user's selected city
+      } else if (this.sing.getLocation().geo != null && !this.sing.getLocation().geo) { // breweries from user's selected city
           this.beerAPI.findBreweriesByGeo(this.sing.getLocation().lat,this.sing.getLocation().lng)
           .subscribe((breweries)=>{
             //console.log('cityBrew',breweries);
             if (breweries.hasOwnProperty('data')) {
               this.breweries = this.fixBreweries(breweries.data);
-              this.numPages = breweries.numberOfPages;            
+              this.numPages = breweries.numberOfPages;
+               this.breweriesFound = 1;            
             } else {
               this.breweries = new Array();
               this.numPages = 0;
-              this.showNoBreweries();
+               this.breweriesFound = 0;
+               console.log('i got here');
+              //this.showNoBreweries();
             }
             this.loading.dismiss();       
           },error=>{
             this.loading.dismiss().catch(() => {});
             this.sing.showNetworkAlert();        
           });    	
+      } else {
+        this.presentToast('Failed to get location.');
+        this.loading.dismiss().catch(() => {});
       }
     } else {
       this.sing.showNetworkAlert();
@@ -517,6 +528,11 @@ export class SearchBreweriesPage {
       ]
     });
     alert.present();    
+  }
+
+  addBrewery() {
+    let modal = this.modalCtrl.create(AddBreweryPage,{breweryName:this.qBreweryAuto});
+    modal.present();      
   }
 
   ionViewDidLoad() {

@@ -96,7 +96,7 @@
 	    </ion-list>
 	  </ion-card>
 	</div>
-  <div *ngIf="localBeerLen">
+  <div id="menu-list" *ngIf="localBeerLen">
     <ion-card>
       <ion-item>
         <p item-left>Beer List</p>
@@ -105,7 +105,8 @@
         <div *ngFor="let beer of localBeers  | async" (click)="getBeerDetail(beer.$key)">
 	      	<ion-item>
 		      	<ion-thumbnail item-left>
-		      		<img *ngIf="beer.img !=''" [src]="beer.img" />
+		      		<img *ngIf="beer.img !='' && beer.img !=null" [src]="beer.img" />
+							<img *ngIf="beer.img==null || beer.img ==''" src="images/no-image.jpg" />
 		      	</ion-thumbnail>		      	
 			      <h2>{{beer.name}}</h2>
 						<p>{{beer.brewery}}</p>
@@ -114,15 +115,7 @@
 			      <ion-icon name="arrow-forward" item-right></ion-icon>
 		     </ion-item>
       	</div>
-      	<div *ngIf="localBeers.length > 5" align="center">
-	      <ion-item item-content>
-	        <div align="center">
-	            <button ion-button (click)="showDrinkMenu()">
-	              Show More
-	            </button>
-            </div>
-	      </ion-item>
-		</div>      	
+	      <button *ngIf="localBeerLen > 5" ion-button full (click)="showDrinkMenu()">Show More</button>  	
     </ion-card>
   </div>	
 	<div>

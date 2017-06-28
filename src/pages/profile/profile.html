@@ -8,11 +8,13 @@
 				EDIT
 			</button>
 		</ion-buttons>
+	<!--
     <ion-buttons right [hidden]="isLookup">
        <button ion-button icon-only (click)="doSettings()">
            <ion-icon name="settings"></ion-icon>
        </button>            
-    </ion-buttons>    
+    </ion-buttons>
+	-->    
   </ion-navbar>
 </ion-header>
 <ion-content>
@@ -20,9 +22,9 @@
 		<ion-grid>
 			<ion-row>
 				<ion-col>
-					<div class="repme" align="center" *ngIf="isLookup">
-                      <button ion-button icon-only large clear (click)="repDown()">
-                        <ion-icon color="white" name="thumbs-down"></ion-icon>
+					<div class="repme" align="center" *ngIf="isLookup" (click)="repUp()">
+                      <button ion-button icon-only large clear>
+                        <ion-icon color="white" name="thumbs-up"></ion-icon>
                       </button>
 					</div>
 				</ion-col>
@@ -35,11 +37,11 @@
 					</div>
 				</ion-col>
 				<ion-col>
-					<div class="repme" align="center" *ngIf="isLookup" (click)="repUp()">
-                      <button ion-button icon-only large clear>
-                        <ion-icon color="white" name="thumbs-up"></ion-icon>
+					<div class="repme" align="center" *ngIf="isLookup">
+                      <button ion-button icon-only large clear (click)="repDown()">
+                        <ion-icon color="white" name="thumbs-down"></ion-icon>
                       </button>
-					</div>
+					</div>					
 				</ion-col>
 			</ion-row>
 		</ion-grid>

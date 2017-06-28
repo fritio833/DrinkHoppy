@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { NavController, NavParams, ModalController } from 'ionic-angular';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 import firebase from 'firebase';
 
 import { SingletonService } from '../../providers/singleton-service';
 
 import { BeerDetailPage } from '../beer-detail/beer-detail';
+import { AddBeerPage } from '../add-beer/add-beer';
 
 @Component({
   selector: 'page-drink-menu',
@@ -25,7 +26,8 @@ export class DrinkMenuPage {
 
   constructor(public navCtrl: NavController, 
               public params: NavParams,
-              public sing: SingletonService, 
+              public sing: SingletonService,
+              public modalCtrl:ModalController, 
               public angFire:AngularFire) {
     this.breweryBeers = params.get('beers');
     this.brewery = params.get('brewery');
@@ -68,5 +70,13 @@ export class DrinkMenuPage {
   timeDiff(previous) {
     return this.sing.timeDifference( new Date().getTime(),previous,true);
   }
+
+  addBeer() {
+    let modal = this.modalCtrl.create(AddBeerPage,
+                                      { breweryId:this.brewery.breweryId,
+                                        locName:this.brewery.brewery.name
+                                      });
+    modal.present();
+  }  
 
 }

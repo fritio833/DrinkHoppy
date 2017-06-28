@@ -1,11 +1,13 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, Platform, ModalController } from 'ionic-angular';
+import { NavController, NavParams, Platform, AlertController, ToastController, ModalController } from 'ionic-angular';
 
 import { GoogleService } from '../../providers/google-service';
 import { SingletonService } from '../../providers/singleton-service';
+import { AuthService } from '../../providers/auth-service';
 
 import { LocationMapPage } from '../location-map/location-map';
 import { CheckinPage } from '../checkin/checkin';
+import { AddBeerPage } from '../add-beer/add-beer';
 
 declare var window: any;
 
@@ -30,13 +32,16 @@ export class BreweryDetailMorePage {
   	          public platform: Platform,
               public sing: SingletonService,
               public modalCtrl:ModalController,
+              public auth:AuthService,
+              public alertCtrl:AlertController,
+              public toastCtrl:ToastController,
   	          public geo:GoogleService) {
   	this.brewery = params.get('brewery');
     this.location = params.get('location');
     this.locationPhoto = params.get('photo');
     this.breweryBeers = params.get('beers');
-    console.log('locBrew',this.location);
-    console.log('brewInfo',this.brewery);
+    //console.log('locBrew',this.location);
+    //console.log('brewInfo',this.brewery);
   }
 
   getBackgroundImg(pic) {
@@ -67,28 +72,41 @@ export class BreweryDetailMorePage {
     }
     return str;
   }
-  
-  checkIn(brewery) {
+
+  checkIn() {
+    
     if (this.sing.online) {
-      let modal = this.modalCtrl.create(CheckinPage,{
-                                                      checkinType:'brewery',
-                                                      brewery:this.brewery,
-                                                      location:this.location,
-                                                      beers:this.breweryBeers
-                                                    });
-      modal.onDidDismiss(()=> {
-        // this.getBeerReviews();
+
+      if (!this.breweryBeers.length) {
+        this.presentAlert();
+        return;
+      }      
+
+      this.sing.canUserCheckin(this.auth.userRole,this.brewery.latitude,this.brewery.longitude).subscribe(canCheckIn=>{
+        if (canCheckIn['checkin']) {
+          let modal = this.modalCtrl.create(CheckinPage,{
+                                                          checkinType:'brewery',
+                                                          brewery:this.brewery,
+                                                          location:this.location,
+                                                          beers:this.breweryBeers
+                                                        });
+          modal.present();
+        } else {
+          this.presentToast(canCheckIn['msg']);
+        }
+      },error=>{
+        console.log('error canUserCheckin',error);
+        this.presentToast(error);
       });
-      modal.present();
-    } else {
+    } else
       this.sing.showNetworkAlert();
-    }
+
   }  
 
   viewMap() {
     let modal = this.modalCtrl.create(LocationMapPage,
-                                      { lat:this.location.geometry.location.lat,
-                                        lng:this.location.geometry.location.lng,
+                                      { lat:this.brewery.latitude,
+                                        lng:this.brewery.longitude,
                                         locName:this.location.name
                                       });
     modal.present();
@@ -118,7 +136,7 @@ export class BreweryDetailMorePage {
 
     // get rating from google places
     if (this.location != null && this.location.hasOwnProperty('rating'))
-      this.locationRating = this.location.rating;    
+      this.locationRating = this.location.rating;   
 
     // check if open
     if (this.location != null && this.location.hasOwnProperty('opening_hours'))
@@ -144,5 +162,42 @@ export class BreweryDetailMorePage {
     }    
 
   }
+
+  presentToast(msg) {
+    let toast = this.toastCtrl.create({
+      message: msg,
+      position: 'top',
+      duration: 3000
+    });
+    toast.present();
+  }
+
+  presentAlert() {
+    let networkAlert = this.alertCtrl.create({
+      title: 'Sorry!',
+      message: 'This brewery as no beers to view or check-in. Help us grow by adding one.',
+      buttons: [
+        {
+          text: 'Cancel',
+          handler: () => {}
+        },
+        {
+          text: 'Add New Beer',
+          handler: () => {
+            this.addBeer();
+          }
+        }
+      ]
+    });
+    networkAlert.present();
+  }
+
+  addBeer() {
+    let modal = this.modalCtrl.create(AddBeerPage,
+                                      { breweryId:this.brewery.breweryId,
+                                        locName:this.brewery.brewery.name
+                                      });
+    modal.present();
+  }   
 
 }

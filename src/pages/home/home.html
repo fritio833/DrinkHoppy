@@ -17,11 +17,9 @@
   <ion-grid class="background-home">
     <ion-row>
       <ion-col>
-        <!--
         <div id="find-drinks-button" class="center">
-          <button ion-button color="white" clear (click)="startSearch()">Search Beers &amp; Places</button>
+          <button ion-button color="dark" (click)="demoAlert()">Alpha Test</button>
         </div>
-        -->
         <div id="city-select" class="right">
           <button *ngIf="sing.hasLocation() && isOnline" right ion-button small color="dark" (click)="changeCity()">
             {{sing.getSelectCity()}}. Change?

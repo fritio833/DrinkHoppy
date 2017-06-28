@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, Events,LoadingController, ToastController, ModalController } from 'ionic-angular';
+import { NavController, Events, LoadingController,AlertController, ToastController, ModalController } from 'ionic-angular';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 import { Storage } from '@ionic/storage';
 import { Diagnostic } from '@ionic-native/diagnostic';
@@ -27,7 +27,7 @@ import { RandomBeersPage } from '../random-beers/random-beers';
 import { EventInfoPage } from '../event-info/event-info';
 import { SelectLocationPage } from '../select-location/select-location';
 import { AchievementsPage } from '../achievements/achievements';
-
+import { ContactPage } from '../contact/contact';
 
 
 @Component({
@@ -64,6 +64,7 @@ export class HomePage {
               public loadingCtrl:LoadingController,
   	          public toastCtrl:ToastController,
               public beerAPI:BreweryService,
+              public alertCtrl:AlertController,
               public events:Events,
               public demo:DemoService,
               public geo:GoogleService,
@@ -127,13 +128,6 @@ export class HomePage {
         if (citySet) {
           console.log('getLocation',this.sing.getLocation());
           this.getPopular();
-          /*
-          let geoObj:any;
-          geoObj = this.geo.fixCityState(citySet);
-          this.sing.setCurrentLocation(geoObj);
-          console.log('citySet',geoObj);
-          this.getPopular();
-          */
         }
 
       });
@@ -155,6 +149,26 @@ export class HomePage {
     } else {
       this.sing.showNetworkAlert();
     }
+  }
+
+  demoAlert() {
+    let networkAlert = this.alertCtrl.create({
+      title: 'Alpha Test',
+      message: 'Please give us feedback on bugs or improvements. Thanks for helping us test our App.',
+      buttons: [
+        {
+          text: 'Cancel',
+          handler: () => {}
+        },
+        {
+          text: 'Leave Feedback',
+          handler: () => {
+            this.navCtrl.push(ContactPage);
+          }
+        }
+      ]
+    });
+    networkAlert.present();
   }
 
   getLeaderboard() {
@@ -364,12 +378,7 @@ export class HomePage {
     console.log('ionViewWillEnter HomePage');
     this.getPopular();
     this.getProfileData();
-
-   
-    
   }
-
-
 
   ionViewWillLeave() {
     if (this.notifications) {

@@ -4,6 +4,16 @@
   </ion-navbar>
 </ion-header>
 <ion-content>
+  <ion-fab top right edge>
+    <button ion-fab mini color="secondary"><ion-icon name="add"></ion-icon></button>
+    <ion-fab-list side="left">
+      <button ion-fab (click)="repDown()"><ion-icon name="thumbs-down"></ion-icon></button>
+      <button ion-fab (click)="repUp()"><ion-icon name="thumbs-up"></ion-icon></button>
+    </ion-fab-list>
+    <ion-fab-list>
+      <button ion-fab (click)="flagCheckin()" color="danger"><ion-icon name="flag"></ion-icon></button>
+    </ion-fab-list>
+  </ion-fab>  
   <img id="user-pic" [src]="checkinImg">
   <ion-card (click)="getBeerDetail()">
     <ion-card-header>
@@ -12,7 +22,8 @@
     <ion-card-content>
       <ion-item>
         <ion-thumbnail item-left>
-          <img [src]="beerIMG">
+          <img *ngIf="beerIMG" [src]="beerIMG">
+          <img *ngIf="beerIMG == null" src="images/no-image.jpg">
         </ion-thumbnail>
         <span item-left>
           <h3>{{beerDisplayName}}</h3>
@@ -69,6 +80,7 @@
             <p>Check-ins: {{numCheckins}}</p>	
           </span>
       </ion-item>
+      <!--
       <ion-item text-wrap>
         <button ion-button icon-only clear item-left large (click)="repUp()">
           <ion-icon name="thumbs-up"></ion-icon>
@@ -78,20 +90,13 @@
           Reputation is used to inform the community that the information provided is accurate.
         </p>
       </ion-item>
-      <!--
-      <ion-item text-wrap>
-        <button ion-button icon-only clear item-left large (click)="repDown()">
-          <ion-icon name="thumbs-down"></ion-icon>
-        </button>
-        <p>Was this info wrong. Give a thumbs down.</p>        
-      </ion-item>
-      -->
       <ion-item text-wrap (click)="flagCheckin()">
         <button ion-button icon-only clear large item-left>
           <ion-icon color="danger" name="flag"></ion-icon>
         </button>
          <p>Flag if picture or comment here is inappropriate. Also, if the user knowningly gives false information.</p>
-      </ion-item>       
+      </ion-item>
+      -->       
     </ion-card-content>
   </ion-card>  
 </ion-content>

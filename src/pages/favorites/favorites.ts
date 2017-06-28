@@ -162,12 +162,12 @@ export class FavoritesPage {
 
     if (this.sing.online) {
       let foundBrewpub:number = -1;
-      this.showLoading();
+      //this.showLoading();
       this.geo.getPlaceFromGoogleByLatLng(loc.name,loc.lat,loc.lng).subscribe(resp=>{
       
         this.beerAPI.getBreweryDetail(loc.breweryId,loc.breweryLocId).subscribe(pub=>{
           console.log('pub',pub);
-          this.loading.dismiss();
+           //this.loading.dismiss().catch(() => {});
           this.navCtrl.push(BreweryDetailPage,{brewery:pub['detail'],beers:pub['beers'],place:resp['result'],loading:this.loading});        
         },error=>{
           console.log('error getBrewery',error);

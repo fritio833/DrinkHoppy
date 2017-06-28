@@ -4,7 +4,7 @@
     	<ion-searchbar [hidden]="showMap"
     	               (ionInput)="autoBrewerySearch($event)" 
     	               placeholder="Brewery Name"
-                     debounce="1000"
+                     debounce="500"
     	               (ionClear)="autoSearchCancel($event)">
     	</ion-searchbar>
     	<ion-buttons left>
@@ -33,7 +33,7 @@
   </ion-navbar>
 </ion-header>
 <ion-content class="white-background">
-<div [hidden]="!qBreweryAuto.length || showMap">
+ <div [hidden]="!qBreweryAuto.length || showMap">
   <ion-list>
     <ion-item>
       <p><ion-icon name="search"></ion-icon>&nbsp;Search Results.</p>
@@ -47,6 +47,21 @@
       <ion-icon name="arrow-forward" item-right></ion-icon>
     </button>
   </ion-list>
+  <div id="sorry-area" *ngIf="brewerySearchLen == 0" align="center">
+    <div *ngIf="qBreweryAuto.length">
+      <p>
+        We couldn't find any breweries matching 
+      </p>
+      <h2>"{{qBreweryAuto}}"</h2>
+      <p>
+        Please check your spelling or add a new Brewery.
+      </p>
+    </div>  
+    <div>
+      <button ion-button (click)="addBrewery()">Add New Brewery</button>
+    </div>
+  </div>
+  
 </div>
 <div [hidden]="qBreweryAuto.length || showMap"> 
   <ion-list>
@@ -67,7 +82,20 @@
     </button>
     <ion-infinite-scroll [hidden]="numPages <= 1" (ionInfinite)="getMoreBreweries($event)">
       <ion-infinite-scroll-content></ion-infinite-scroll-content>
-    </ion-infinite-scroll>       
+    </ion-infinite-scroll>
+    <div id="sorry-area" *ngIf="!breweries.length && !breweriesFound" align="center">
+      <p>
+        We couldn't find any breweries in 
+      </p>
+      <h2>"{{sing.getSelectCity()}}"</h2>
+      <p>
+        Let locals know about this brewery<br />
+        by adding to Brew Search.
+      </p>
+      <div>
+        <button ion-button (click)="addBrewery()">Add New Brewery</button>
+      </div>
+    </div>         
   </ion-list>
 </div>
 <div [hidden]="!showMap" #map id="map"></div>

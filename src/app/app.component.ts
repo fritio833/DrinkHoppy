@@ -17,6 +17,7 @@ import { Storage } from '@ionic/storage';
 import { SearchMenuPage } from '../pages/search-menu/search-menu';
 import { FriendsPage } from '../pages/friends/friends';
 import { FeedsPage } from '../pages/feeds/feeds';
+import { ContactPage } from '../pages/contact/contact';
 
 
 @Component({
@@ -59,7 +60,8 @@ export class MyApp {
       { title: 'Favorites', component: FavoritesPage },
       { title: 'Friends', component: FriendsPage },
       { title: 'Feeds', component: FeedsPage },
-      { title: 'Profile', component: ProfilePage }
+      { title: 'Profile', component: ProfilePage },
+      { title: 'Leave Feedback', component: ContactPage }
     ];
 
     /*

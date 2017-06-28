@@ -1,0 +1,36 @@
+page-contact {
+  .item-border-botton {
+      border-bottom: 1px solid #dedede !important;
+  }
+
+  ion-textarea {
+    border:1px solid #dedede !important;
+  }
+
+  ul {
+    padding: 0px;
+
+    &.rating li {
+      padding: 5px 10px;
+      background: none;
+      color: #ffb400;
+      ion-icon {
+        font-size: 20px;
+      }
+    }
+  }
+
+  .button {
+      margin:0px !important;
+      height:4.5rem;
+  }
+
+  #success-card h3 {
+      font-weight:bold;
+      font-size: 2rem;
+  }
+
+  #success-card p {
+      padding:2rem;
+  }  
+}

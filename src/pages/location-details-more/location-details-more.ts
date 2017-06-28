@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, Platform, ModalController } from 'ionic-angular';
+import { NavController, NavParams, ToastController, Platform, ModalController } from 'ionic-angular';
 
 import { Ionic2RatingModule } from 'ionic2-rating';
 
 import { GoogleService } from '../../providers/google-service';
 import { SingletonService } from '../../providers/singleton-service';
+import { AuthService } from '../../providers/auth-service';
 
 import { LocationMapPage } from '../location-map/location-map';
 import { CheckinPage } from '../checkin/checkin';
@@ -25,12 +26,16 @@ export class LocationDetailsMorePage {
   public locationPhoto:any;
   public locationRating:any;
   public locationReviews:any;
+  public locationLat:any;
+  public locationLng:any;
 
   constructor(public navCtrl: NavController, 
               public params: NavParams,
               public platform:Platform,
               public modalCtrl:ModalController,
               public sing:SingletonService,
+              public auth:AuthService,
+              public toastCtrl:ToastController,
               public goog:GoogleService) {
     this.location = params.get('location');
     this.locationPhoto = params.get('photo');
@@ -95,11 +100,11 @@ export class LocationDetailsMorePage {
   }
 
   getGoogleStaticMap() {
-    return this.goog.getStaticMap(this.location.geometry.location.lat,this.location.geometry.location.lng);
+    return this.goog.getStaticMap(this.locationLat,this.locationLng);
   }
 
   goToNavApp() {
-      let destination = this.location.geometry.location.lat+','+this.location.geometry.location.lng;
+      let destination = this.locationLat+','+this.locationLng;
 
       if(this.platform.is('ios')){
         window.open('maps://?q=' + destination, '_system');
@@ -110,6 +115,7 @@ export class LocationDetailsMorePage {
       }    
   }
 
+  /*
   checkIn() {
     if (this.sing.online) {
       let modal = this.modalCtrl.create(CheckinPage,{ location:this.location,checkinType:'place'});
@@ -117,11 +123,45 @@ export class LocationDetailsMorePage {
     } else
       this.sing.showNetworkAlert();
   }
+  */
+  checkIn() {
+    
+    if (this.sing.online) {
+
+      this.sing.canUserCheckin(this.auth.userRole,this.locationLat,this.locationLng).subscribe(canCheckIn=>{
+
+        console.log('here',canCheckIn);
+        
+        if (canCheckIn['checkin']) {
+          let modal = this.modalCtrl.create(CheckinPage,{ location:this.location,checkinType:'place'});
+          modal.present();
+        } else {
+          this.presentToast(canCheckIn['msg']);
+        }
+      },error=>{
+        console.log('error canUserCheckin',error);
+        this.presentToast(error);
+      });
+    } else
+      this.sing.showNetworkAlert();
+
+  }
+
+  presentToast(msg) {
+    let toast = this.toastCtrl.create({
+      message: msg,
+      position: 'top',
+      duration: 3000
+    });
+    toast.present();
+  }  
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad LocationDetailsMorePage');
 
     this.locationRating = this.location.rating;
+    this.locationLat = this.location.geometry.location.lat;
+    this.locationLng = this.location.geometry.location.lng;
 
     if (this.location.hasOwnProperty('opening_hours')) {
       this.locationHours = this.location.opening_hours.weekday_text;

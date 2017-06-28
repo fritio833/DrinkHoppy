@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, ModalController, LoadingController, ToastController, Platform } from 'ionic-angular';
+import { NavController, NavParams, ModalController, LoadingController, AlertController, ToastController, Platform } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import firebase from 'firebase';
 import { GoogleService } from '../../providers/google-service';
@@ -16,6 +16,7 @@ import { BreweryDetailMorePage } from '../brewery-detail-more/brewery-detail-mor
 import { DrinkMenuPage } from '../drink-menu/drink-menu';
 import { CheckinPage } from '../checkin/checkin';
 import { ReviewsPage } from '../reviews/reviews';
+import { AddBeerPage } from '../add-beer/add-beer';
 
 declare var window: any;
 declare var cordova: any;
@@ -58,6 +59,7 @@ export class BreweryDetailPage {
               public social:SocialService,
               public storage: Storage,
               public toastCtrl:ToastController,
+              public alertCtrl:AlertController,
               public auth:AuthService,
               public modalCtrl:ModalController) {
 
@@ -153,7 +155,13 @@ export class BreweryDetailPage {
     modal.present();
   }  
 
-  
+  addBeer() {
+    let modal = this.modalCtrl.create(AddBeerPage,
+                                      { breweryId:this.brewery.breweryId,
+                                        locName:this.brewery.brewery.name
+                                      });
+    modal.present();
+  }
 
   getCheckIns() {
 
@@ -247,9 +255,14 @@ export class BreweryDetailPage {
 
 
 
-  checkIn(brewery) {
+  checkIn() {
     
     if (this.sing.online) {
+
+      if (!this.breweryBeers.length) {
+        this.presentAlert();
+        return;
+      }
 
       this.sing.canUserCheckin(this.auth.userRole,this.brewery.latitude,this.brewery.longitude).subscribe(canCheckIn=>{
         if (canCheckIn['checkin']) {
@@ -364,7 +377,11 @@ export class BreweryDetailPage {
   }
 
   showDrinkMenu() {
-    this.navCtrl.push(DrinkMenuPage,{beers:this.breweryBeers,brewery:this.brewery,location:this.location});
+
+    if (!this.breweryBeers.length)
+      this.presentAlert();
+    else 
+      this.navCtrl.push(DrinkMenuPage,{beers:this.breweryBeers,brewery:this.brewery,location:this.location});
   }
 
   getBeerDetail(beer) {
@@ -387,6 +404,26 @@ export class BreweryDetailPage {
       }
     });
   }
+
+  presentAlert() {
+    let networkAlert = this.alertCtrl.create({
+      title: 'Sorry!',
+      message: 'This brewery as no beers to view or check-in. Help us grow by adding one.',
+      buttons: [
+        {
+          text: 'Cancel',
+          handler: () => {}
+        },
+        {
+          text: 'Add New Beer',
+          handler: () => {
+            this.addBeer();
+          }
+        }
+      ]
+    });
+    networkAlert.present();
+  }  
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad BreweryDetailPage');

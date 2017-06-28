@@ -1,0 +1,151 @@
+<ion-header>
+  <ion-navbar color="primary">
+		<button ion-button menuToggle>
+				<ion-icon name="menu"></ion-icon>
+		</button>
+     <ion-title>Leave Feedback</ion-title>     
+  </ion-navbar>
+</ion-header>
+<ion-content>
+  <ion-card>
+    <ion-card-header>Did you like the App?</ion-card-header>
+    <ion-card-content>
+      <p>
+        We hope you haved enjoyed the Brew Search App as much as we loved creating it.
+        Please let us know how we can improve our App by taking a quick
+        survey and a description of any errors, suggestions, or improvements.  On behalf 
+        of the Brew Search Team, we thank you for supporting our community.  Cheers! 
+      </p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="!formSubmitted">
+    <ion-card-content>
+      <ion-item>
+        <ion-label>User Friendly</ion-label>
+      </ion-item>
+      <ion-item class="item-border-botton">
+        <span item-right><rating [(ngModel)]="user_friendly" max="5"></rating></span>
+      </ion-item>
+      <ion-item>
+        <ion-label>Look and Feel</ion-label>
+      </ion-item>
+      <ion-item class="item-border-botton">  
+        <span item-right><rating [(ngModel)]="look_and_feel" max="5"></rating></span>
+      </ion-item>
+      <ion-item>
+        <ion-label>Responsiveness</ion-label>
+      </ion-item>
+      <ion-item class="item-border-botton">        
+        <span item-right><rating [(ngModel)]="responsiveness" max="5"></rating></span>
+      </ion-item>
+      <ion-item>
+        <ion-label>Data Accuracy</ion-label>
+      </ion-item>
+      <ion-item class="item-border-botton">  
+        <span item-right><rating [(ngModel)]="data_accuracy" max="5"></rating></span>
+      </ion-item>
+      <ion-item>
+        <ion-label>Functionality</ion-label>
+      </ion-item>
+      <ion-item class="item-border-botton">  
+        <span item-right><rating [(ngModel)]="functionality" max="5"></rating></span>
+      </ion-item>
+      <ion-item>
+        <ion-label>Overall Rating</ion-label>
+      </ion-item>
+      <ion-item class="item-border-botton">  
+        <span item-right><rating [(ngModel)]="overall" max="5"></rating></span>
+      </ion-item>      
+      <ion-item>
+        <ion-label>Would you tell a friend about our App?</ion-label>
+      </ion-item>
+      <ion-item class="item-border-botton">  
+            <ion-select item-right [(ngModel)]="tell_friend">
+              <ion-option value="N">No</ion-option>
+              <ion-option value="Y">Yes</ion-option>
+            </ion-select>          
+      </ion-item>
+      <ion-item>
+        <ion-label>How many times did the App crash?</ion-label>
+      </ion-item>
+      <ion-item class="item-border-botton">  
+          <ion-select item-right [(ngModel)]="app_crash">
+            <ion-option value="none">None</ion-option>
+            <ion-option value="once">Once</ion-option>
+            <ion-option value="couple">Couple</ion-option>
+            <ion-option value="several">Several</ion-option>
+          </ion-select>
+      </ion-item>
+      <ion-item>
+        <ion-label>How many hours have you used the App?</ion-label>
+      </ion-item>
+      <ion-item class="item-border-botton">  
+          <ion-select item-right [(ngModel)]="hours_used">
+            <ion-option value="1_hour">Less than 1 hour</ion-option>
+            <ion-option value="couple">Couple hours</ion-option>
+            <ion-option value="several">Several hours</ion-option>
+          </ion-select>
+      </ion-item>      
+      <ion-item>
+        <ion-label>iOS or Android</ion-label>
+      </ion-item>
+      <ion-item class="item-border-botton">  
+          <ion-select item-right [(ngModel)]="platform">
+            <ion-option value="ios">iOS</ion-option>
+            <ion-option value="android">Android</ion-option>
+          </ion-select>
+      </ion-item>
+      <ion-item>
+        <ion-label>Would you pay a $1 for this App?</ion-label>
+      </ion-item>
+      <ion-item class="item-border-botton">  
+          <ion-select item-right [(ngModel)]="pay_dollar">
+            <ion-option value="yes">Yes</ion-option>
+            <ion-option value="no">No</ion-option>
+          </ion-select>
+      </ion-item>      
+      <ion-item>
+        <ion-label>Device Name &amp; Model</ion-label>
+      </ion-item>
+      <ion-item class="item-border-botton">  
+         <ion-input type="text" [(ngModel)]="device_name" placeholder="iPhone 6"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label>Tell us of any errors or crashes.</ion-label>
+      </ion-item>
+      <ion-item>  
+            <ion-textarea maxlength="2000" rows="5" type="text" [(ngModel)]="error_description">
+            </ion-textarea>        
+      </ion-item>
+      <ion-item>
+        <ion-label>How can we improve our App?</ion-label>
+      </ion-item>
+      <ion-item>  
+        <ion-textarea maxlength="2000" rows="5" type="text" [(ngModel)]="improve_description"></ion-textarea>        
+      </ion-item>
+      <ion-item>
+        <ion-label>What did you like about our App?</ion-label>
+      </ion-item>
+      <ion-item>  
+        <ion-textarea maxlength="2000" rows="5" type="text" [(ngModel)]="positive_description"></ion-textarea>        
+      </ion-item>
+      <ion-item>
+        <ion-label>What didn't you like about our App?</ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-textarea maxlength="2000" rows="5" type="text" [(ngModel)]="negative_description"></ion-textarea>        
+      </ion-item>                  
+    </ion-card-content>
+    <button ion-button full (click)="submitFeedback()">Submit Feedback</button>
+  </ion-card>
+
+  <ion-card id="success-card" *ngIf="formSubmitted">
+    <ion-card-content>
+      <div align="center">
+        <h3>Thanks for your Feedback!</h3>
+        <p>You can come back and give muliple feedbacks.</p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

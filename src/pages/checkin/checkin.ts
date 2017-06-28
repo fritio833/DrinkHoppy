@@ -938,6 +938,7 @@ export class CheckinPage {
       var timestamp = new Date().getTime() + offset;
       locationData['dateCreated'] = timestamp;
       locationData['priority'] = negativeTimestamp;
+      locationData['checkinScore'] = that.checkinScore;
       
       newFeedRef = that.checkin.ref('/checkin/feeds/').push(locationData);
 

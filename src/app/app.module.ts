@@ -77,6 +77,9 @@ import { AchievementsPage } from '../pages/achievements/achievements';
 import { AchievementsDetailPage } from '../pages/achievements-detail/achievements-detail';
 import { EventBreweryBeersPage } from '../pages/event-brewery-beers/event-brewery-beers';
 import { SettingsPage } from '../pages/settings/settings';
+import { AddBeerPage } from '../pages/add-beer/add-beer';
+import { AddBreweryPage } from '../pages/add-brewery/add-brewery';
+import { ContactPage } from '../pages/contact/contact';
 
 export const firebaseConfig = {
     apiKey: "AIzaSyCd-WZs4O8gNx9qVlwwyRdK6_qY60WuQl0",
@@ -161,7 +164,10 @@ const cloudSettings: CloudSettings = {
     EventBreweryBeersPage,
     AchievementsPage,
     AchievementsDetailPage,
-    SettingsPage
+    SettingsPage,
+    AddBeerPage,
+    AddBreweryPage,
+    ContactPage
   ],
   imports: [
     IonicModule.forRoot(MyApp),
@@ -224,7 +230,10 @@ const cloudSettings: CloudSettings = {
     EventBreweryBeersPage,
     AchievementsPage,
     AchievementsDetailPage,
-    SettingsPage
+    SettingsPage,
+    AddBeerPage,
+    AddBreweryPage,
+    ContactPage
   ],
   providers: [{provide: ErrorHandler, 
               useClass: IonicErrorHandler},

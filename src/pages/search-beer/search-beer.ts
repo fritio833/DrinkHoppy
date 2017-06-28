@@ -8,6 +8,7 @@ import { Beer } from '../../models/beer';
 import { SearchPage } from '../search/search';
 import { BeerDetailPage } from '../beer-detail/beer-detail';
 import { SearchBeerFilterPage } from '../search-beer-filter/search-beer-filter';
+import { AddBeerPage } from '../add-beer/add-beer';
 
 @Component({
   selector: 'page-search-beer',
@@ -72,6 +73,15 @@ export class SearchBeerPage {
     });
     toast.present();
   }
+
+  addBeer() {
+    let modal = this.modalCtrl.create(AddBeerPage,
+                                      { breweryId:null,
+                                        locName:null,
+                                        beerName:this.qSearchBeer
+                                      });
+    modal.present();    
+  }
   
   clearSearch(event){
 
@@ -81,6 +91,7 @@ export class SearchBeerPage {
     this.showLoader = false;
   	this.beers = null;
   }
+
   doSearchBeer(evt) {
     
     this.qSearchBeer = '';

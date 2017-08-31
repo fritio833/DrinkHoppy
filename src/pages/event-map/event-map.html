@@ -1,12 +1,9 @@
 <ion-header>
   <ion-navbar color="primary">
-    <ion-title>Emerald Coast Beer Festival</ion-title>
-    <ion-buttons right>
-        <button ion-button icon-left (click)="getMap(null)">
-          <ion-icon name="map"></ion-icon>
-          Map
-        </button>
-    </ion-buttons>    
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>    
+    <ion-title *ngIf="event">{{event.name}}</ion-title>    
   </ion-navbar>
   <ion-toolbar no-border-top color="primary"> 
     <ion-segment [(ngModel)]="choice" color="white" class="toolbar">
@@ -23,89 +20,44 @@
   </ion-toolbar>
   <ion-toolbar class="sub-header" color="light">
     <ion-list no-lines>
-      <ion-item>      
-        <h2 item-left>2017 Emerald Coast Beer Festival</h2>
+      <ion-item>    
+        <h2 item-left *ngIf="choice =='beers'">{{eventBeers.length}} Beers</h2>
+        <h2 item-left *ngIf="choice =='breweries'">{{eventBreweries.length}} Breweries</h2>
+        <h2 item-left *ngIf="choice =='vendors'">{{eventVendors.length}} Vendors</h2>
         <button *ngIf="choice =='beers'" (click)="getSorActions()" small item-right ion-button>Sort</button>
+        <button (click)="getEventMap()" icon-left small item-right ion-button>
+          <ion-icon name="map"></ion-icon>
+          Map
+        </button>
       </ion-item>
     </ion-list>
   </ion-toolbar>  
 </ion-header>
 <ion-content fullscreen class="white-background">
-  <!--
-<ion-item>
-  <ion-thumbnail item-left>
-    <img src="images/beerfest.png">
-  </ion-thumbnail>
-  <h2>Emeral Coast Beer Festival</h2>
-  <p>87 Breweries</p>
-  <p>430 Beers</p>
-</ion-item>
--->
-<div [ngSwitch]="choice">
+<div *ngIf="showEvent" [ngSwitch]="choice">
   <ion-list *ngSwitchCase="'breweries'">
-    <ion-list-header>Breweries</ion-list-header>
-    <ion-item>
+    <ion-item *ngFor="let brew of eventBreweries" (click)="getBreweryActions(brew)">
       <ion-thumbnail item-left>
-        <img src="https://s3.amazonaws.com/brewerydbapi/brewery/O0JDg5/upload_ihppsC-icon.png">
+        <img *ngIf="brew.logo" [src]="brew.logo">
       </ion-thumbnail>
-      <h2>40 Arpent Brewing Co.</h2>
-      <p>Map# 60</p>
-      <p>Micro Brewery</p>
-      <p>Arabi, Louisiana</p>
+      <h2>{{brew.name}}</h2>
+      <p *ngIf="brew.city">{{brew.city}}, {{brew.state}}</p>
+      <p *ngIf="brew.booth">Map #{{brew.booth}}</p> 
       <ion-icon item-right name="more"></ion-icon>
-    </ion-item>
-    <ion-item (click)="getBeerActions()">
-      <ion-thumbnail item-left>
-        <img src="https://s3.amazonaws.com/brewerydbapi/brewery/BBE5WM/upload_6HsKvN-icon.png">
-      </ion-thumbnail>
-      <h2>Abita Brewing Co.</h2>
-      <p>Map# 17</p>
-      <p>Micro Brewery</p>
-      <p>Covington, Louisiana</p>
-      <ion-icon item-right name="more"></ion-icon>
-    </ion-item>
-    <ion-item>
-      <ion-thumbnail item-left>
-        <img src="https://s3.amazonaws.com/brewerydbapi/brewery/tYf3W8/upload_G5touV-icon.png">
-      </ion-thumbnail>
-      <h2>Angry Orchard Cider Company</h2>
-      <p>Map# 46</p>
-      <p>Micro Brewery</p>
-      <p>Cincinnati, OH</p>
-      <ion-icon item-right name="more"></ion-icon>
-    </ion-item>
-    <ion-list-header>Homebrew Clubs</ion-list-header>
-    <ion-item>
-      <ion-thumbnail item-left>
-        <img src="">
-      </ion-thumbnail>
-      <h2>Home Brewers Underground</h2>
-      <p>Map# 16</p>
-      <p>Pensacola, FL</p>
-      <ion-icon item-right name="more"></ion-icon>
-    </ion-item>
-    <ion-item>
-      <ion-thumbnail item-left>
-        <img src="https://firebasestorage.googleapis.com/v0/b/bender-1487426215149.appspot.com/o/img%2Fescambiabay.jpg?alt=media&token=920db3c2-9c89-468a-bfbb-faffbacbac39">
-      </ion-thumbnail>
-      <h2>Escambia Bay Homebrewers</h2>
-      <p>Map# 50</p>
-      <p>Pensacola, FL</p>
-      <ion-icon item-right name="more"></ion-icon>
-    </ion-item>    
+    </ion-item> 
   </ion-list>
+
   <ion-list *ngSwitchCase="'beers'">
-     <ion-list-header>Brewery Beers</ion-list-header>
      <div *ngIf="!isGrouped">
-        <button ion-item text-wrap *ngFor="let beer of eventBeers" (click) = "getBeerListActions(beer)">
+        <button ion-item text-wrap *ngFor="let beer of eventBeers" (click)="getBeerListActions(beer)">
           <ion-thumbnail item-left>
             <img *ngIf="beer.labels" [src]="beer.labels.icon">
             <img *ngIf="!beer.labels && beer.breweries && beer.breweries.length && beer.breweries[0].images" [src]="beer.breweries[0].images.icon">
           </ion-thumbnail>
           <h2>{{ beer.name }}</h2>
-          <p>Abita Brewing Company</p>
+          <p>{{ beer.breweries[0].name}}</p>
           <p *ngIf="beer.style"><span>{{ beer.style.shortName}}</span><span *ngIf="beer.abv"> &#8226; {{beer?.abv}}%</span></p>
-          <p>Map# {{beer.booth}}</p>
+          <p *ngIf="beer.booth">Map# {{beer.booth}}</p>
         <ion-icon *ngIf="approve[beer.id]" name="thumbs-up" item-right></ion-icon>
         <ion-icon *ngIf="approve[beer.id] == false" name="thumbs-down" item-right></ion-icon>
         <ion-icon *ngIf="approve[beer.id] == null" name="more" item-right></ion-icon>
@@ -114,24 +66,36 @@
      <div *ngIf="isGrouped">
        <ion-item-group *ngFor="let group of groupedBeers">
          <ion-item-divider light>{{group.style}}</ion-item-divider>
-          <button ion-item text-wrap *ngFor="let beer of group.beers" (click) = "getBeerListActions(beer)">
+          <button ion-item text-wrap *ngFor="let beer of group.beers" (click)="getBeerListActions(beer)">
             <ion-thumbnail item-left>
               <img *ngIf="beer.labels" [src]="beer.labels.icon">
               <img *ngIf="!beer.labels && beer.breweries && beer.breweries.length && beer.breweries[0].images" [src]="beer.breweries[0].images.icon">
             </ion-thumbnail>
             <h2>{{ beer.name }}</h2>
-            <p>Abita Brewing Company</p>
+            <p>{{ beer.breweries[0].name}}</p>
             <p *ngIf="beer.style"><span>{{ beer.style.shortName}}</span><span *ngIf="beer.abv"> &#8226; {{beer?.abv}}%</span></p>
-            <p>Map# {{beer.booth}}</p>
+            <p *ngIf="beer.booth">Map# {{beer.booth}}</p>
           <ion-icon *ngIf="approve[beer.id]" name="thumbs-up" item-right></ion-icon>
           <ion-icon *ngIf="approve[beer.id] == false" name="thumbs-down" item-right></ion-icon>
           <ion-icon *ngIf="approve[beer.id] == null" name="more" item-right></ion-icon>
           </button>
        </ion-item-group>
-     </div>     
+     </div>    
   </ion-list>
   <ion-list *ngSwitchCase="'vendors'">
-    Vendors
+       <ion-item-group *ngFor="let group of groupedVendors">
+         <ion-item-divider light>{{group.type}}</ion-item-divider>
+          <button ion-item text-wrap *ngFor="let vendor of group.vendors" (click)="getVendorMap(vendor)">
+            <h2>{{ vendor.name }}</h2>
+            <h3>Map# {{vendor.booth}}</h3>
+            <ul>
+              <li *ngFor="let item of vendor.items">
+                {{item}}
+              </li>
+            </ul>
+            <ion-icon name="more" item-right></ion-icon>
+          </button>
+       </ion-item-group>
   </ion-list>    
 </div>  
 </ion-content>

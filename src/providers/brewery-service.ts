@@ -128,6 +128,39 @@ export class BreweryService {
            .map(res => res.json());    
   }
 
+  getFeaturedEvent(eventId) {
+    return this.http.get(this.breweryDbUrl 
+           + 'event/'
+           + eventId
+           + '?key=' 
+           + this.breweryDbAPI)
+           .retryWhen(error => error.delay(500))
+           .timeout(5000)
+           .map(res => res.json());    
+  }
+
+  getEventBreweries(eventId) {
+    return this.http.get(this.breweryDbUrl 
+           + 'event/'
+           + eventId
+           + '/breweries?key=' 
+           + this.breweryDbAPI)
+           .retryWhen(error => error.delay(500))
+           .timeout(5000)
+           .map(res => res.json());    
+  }
+
+  getEventBeers(eventId) {
+    return this.http.get(this.breweryDbUrl 
+           + 'event/'
+           + eventId
+           + '/beers?key=' 
+           + this.breweryDbAPI)
+           .retryWhen(error => error.delay(500))
+           .timeout(5000)
+           .map(res => res.json());    
+  }  
+
   suggestBeers(beerId) {
     return this.http.get(this.breweryDbUrl 
            + 'beer/'

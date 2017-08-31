@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, ViewController, LoadingController, ActionSheetController } from 'ionic-angular';
+import { NavController, NavParams, ViewController, ToastController, LoadingController, ActionSheetController } from 'ionic-angular';
 import { PhotoViewer } from '@ionic-native/photo-viewer';
 
 import firebase from 'firebase';
@@ -18,10 +18,13 @@ import { BeerDetailPage } from '../beer-detail/beer-detail';
 export class EventBreweryBeersPage {
 
   public beers:any;
+  public breweryName:string;
+  public brewery:any;
   public loading:any;
   public fbRef:any;
   public user:any;
   public approve = new Array();
+  public eventId:any;
 
   constructor(public navCtrl: NavController, 
               public beerAPI:BreweryService, 
@@ -31,11 +34,18 @@ export class EventBreweryBeersPage {
               public auth:AuthService,
               public actionCtrl: ActionSheetController,
               public conn:ConnectivityService,
+              public toastCtrl:ToastController,
               public sing:SingletonService,
               public view:ViewController) {
-                this.beers = params.get('beers');
+                //this.beers = params.get('beers');
+                //this.breweryName = params.get('breweryName');
                 this.fbRef = firebase.database();
                 this.user = this.auth.getUser();
+                this.brewery = params.get('brewery');
+                this.eventId = params.get('eventId');
+
+                if (this.brewery.hasOwnProperty('beers'))
+                  this.beers = this.brewery.beers;
               }
 
   cancel() {
@@ -48,18 +58,15 @@ export class EventBreweryBeersPage {
       snapshot.forEach(item=>{
         this.approve[item.key] = item.val().approve;
       });
-      console.log('approve',this.approve);
     });
   }
 
-  getMap(label) {
-
-      label = 'Booth #17 - Abita Brewing Co.';
-      if (label==null)
-        this.photo.show('https://firebasestorage.googleapis.com/v0/b/bender-1487426215149.appspot.com/o/img%2FFestivalMap.png?alt=media&token=1e43e8e6-ca91-40fa-abb3-d0c3441047d0','Emeral Coast Beerfestival', {share: false});
-      else
-        this.photo.show('https://firebasestorage.googleapis.com/v0/b/bender-1487426215149.appspot.com/o/img%2FFestivalMap.png?alt=media&token=1e43e8e6-ca91-40fa-abb3-d0c3441047d0',label, {share: false});
-
+  getMap(label,breweryId) {
+    
+    let map = 'https://firebasestorage.googleapis.com/v0/b/bender-1487426215149.appspot.com/o/event_maps%2F'+this.eventId+'%2F'+this.brewery.booth+'.gif?alt=media&token=d6838db0-8ce6-4167-8517-8da3d9abbeab';
+    this.photo.show(map,label, {share: false});
+    
+    console.log('yup',map);
   }
 
   getBeerDetail(beerId) {
@@ -98,7 +105,41 @@ export class EventBreweryBeersPage {
     });  
   }
 
+  getBeerFavList() {
+    this.approve = [];
+    this.fbRef.ref('favorite_beers/'+this.user.uid).once('value').then(snapshot=>{
+      snapshot.forEach(item=>{
+        this.approve[item.key] = true;
+      });
+    });    
+  }
+
+  saveBeerToFavorites(beer) {
+    
+    beer['timestamp'] = firebase.database.ServerValue.TIMESTAMP;
+    this.fbRef.ref('/favorite_beers/'+this.user.uid+'/'+beer.id).set(beer).then(resp=>{
+      this.presentToast(beer.name + ' saved to favorites.');
+      this.getBeerFavList();
+    });
+
+  }
+
+  removeBeerFromFavorites(beer) {
+    this.fbRef.ref('/favorite_beers/'+this.user.uid+'/'+beer.id).remove().then(resp=>{
+      this.presentToast(beer.name + ' removed from favorites');
+      this.getBeerFavList();
+    });    
+  }  
+
   getBeerActions(beer) {
+
+    let removeFromFav = false;
+    let favText = 'Save to Favorites';
+
+    if (this.approve[beer.id]!=null) {
+      removeFromFav = true;
+      favText = 'Remove from Favorites';
+    }    
     
     let actionSheet = this.actionCtrl.create({
       title: beer.name,
@@ -110,22 +151,20 @@ export class EventBreweryBeersPage {
             this.getBeerDetail(beer.id);
           }
         },{
+          icon: 'map',
+          text: 'Find It',
+          handler: () => {
+            this.getMap('Booth #' + beer.booth + ' - '+beer.name,beer.breweries[0].id);           
+          }
+        },{          
           icon: 'thumbs-up',
-          text: 'Thumbs Up',
+          text: favText,
           handler: () => {
-            this.rateUp(beer.id);            
-          }
-        },{
-          icon: 'thumbs-down',
-          text: 'Thumbs Down',
-          handler: () => {
-            this.rateDown(beer.id);            
-          }
-        },{
-          icon: 'remove',
-          text: 'Remove Thumb',
-          handler: () => {
-            this.removeThumb(beer.id);            
+            //this.rateUp(beer.id);
+            if (removeFromFav)
+              this.removeBeerFromFavorites(beer);
+            else
+              this.saveBeerToFavorites(beer);                           
           }
         },{
           icon: 'close',
@@ -140,9 +179,19 @@ export class EventBreweryBeersPage {
     actionSheet.present();
   }   
 
+  presentToast(msg) {
+    let toast = this.toastCtrl.create({
+      message: msg,
+      position: 'top',
+      duration: 3000
+    });
+    toast.present();
+  }
+
   ionViewDidLoad() {
     console.log('ionViewDidLoad EventBreweryBeersPage');
-    this.getChecklist();
+    //this.getChecklist();
+    this.getBeerFavList();
   }
 
 }

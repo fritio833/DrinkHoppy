@@ -6,6 +6,7 @@ import { Ionic2RatingModule } from 'ionic2-rating';
 import { GoogleService } from '../../providers/google-service';
 import { SingletonService } from '../../providers/singleton-service';
 import { AuthService } from '../../providers/auth-service';
+import { ConnectivityService } from '../../providers/connectivity-service';
 
 import { LocationMapPage } from '../location-map/location-map';
 import { CheckinPage } from '../checkin/checkin';
@@ -36,6 +37,7 @@ export class LocationDetailsMorePage {
               public sing:SingletonService,
               public auth:AuthService,
               public toastCtrl:ToastController,
+              public conn:ConnectivityService,
               public goog:GoogleService) {
     this.location = params.get('location');
     this.locationPhoto = params.get('photo');
@@ -117,7 +119,7 @@ export class LocationDetailsMorePage {
 
   /*
   checkIn() {
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       let modal = this.modalCtrl.create(CheckinPage,{ location:this.location,checkinType:'place'});
       modal.present();
     } else
@@ -126,7 +128,7 @@ export class LocationDetailsMorePage {
   */
   checkIn() {
     
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
 
       this.sing.canUserCheckin(this.auth.userRole,this.locationLat,this.locationLng).subscribe(canCheckIn=>{
 

@@ -169,6 +169,10 @@ export class GoogleService {
  
      let _open_now = "";
      let _affordability = "";
+     let searchText = "";
+
+     //Example:  Bars in Tallahassee FL
+     searchText = encodeURIComponent(placeType + ' in ' + cityState);
 
     if (filter!=null) {
 
@@ -182,9 +186,8 @@ export class GoogleService {
 
      return this.http.get(this.googlePlacesURL 
         + 'textsearch/json?query='
-        + cityState
+        + searchText
         + _open_now
-        + '&type=' + placeType
         + '&key=' 
         + this.googlePlacesAPIKey)
         .retryWhen(error => error.delay(500))

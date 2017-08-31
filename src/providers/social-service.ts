@@ -20,25 +20,36 @@ export class SocialService {
     console.log('Hello SocialService Provider');
   }
 
-
-
   shareFacebook(caption,description,picURL,shareType?,shareId?) {
     return new Observable(observer => {
       let link = this.sing.webURL;
-
-      
+      let subDirectory = '';
+    
       if (shareType != null && shareId != null) {
-        link = link + '/' + shareType + '/' + shareId;
+
+        switch(shareType) {
+          case 'brewery': 
+              link = link + '/b/' + shareId; 
+            break;
+          case 'beer':
+              link = link +'/beer/'+shareId;
+            break;
+          case 'place':
+              link = link +'/bar/'+shareId;
+            break;
+          case 'checkin':
+              link = link +'/checkin/'+shareId
+            break;
+        }
+        //link = link + '/' + subDirectory + '/' + shareId;
         console.log('link',link);
+
       }
       
       
       Facebook.showDialog({
         method: 'share',
-        href: link,
-        caption: caption,
-        description: description,
-        picture: picURL      
+        href: link
       }).then(success=>{
         observer.next(success);
         observer.complete();

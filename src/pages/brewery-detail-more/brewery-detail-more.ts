@@ -4,6 +4,7 @@ import { NavController, NavParams, Platform, AlertController, ToastController, M
 import { GoogleService } from '../../providers/google-service';
 import { SingletonService } from '../../providers/singleton-service';
 import { AuthService } from '../../providers/auth-service';
+import { ConnectivityService } from '../../providers/connectivity-service';
 
 import { LocationMapPage } from '../location-map/location-map';
 import { CheckinPage } from '../checkin/checkin';
@@ -35,6 +36,7 @@ export class BreweryDetailMorePage {
               public auth:AuthService,
               public alertCtrl:AlertController,
               public toastCtrl:ToastController,
+              public conn:ConnectivityService,
   	          public geo:GoogleService) {
   	this.brewery = params.get('brewery');
     this.location = params.get('location');
@@ -75,7 +77,7 @@ export class BreweryDetailMorePage {
 
   checkIn() {
     
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
 
       if (!this.breweryBeers.length) {
         this.presentAlert();

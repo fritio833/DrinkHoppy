@@ -13,6 +13,7 @@ import { BreweryService } from '../../providers/brewery-service';
 import { SingletonService } from '../../providers/singleton-service';
 import { SocialService } from '../../providers/social-service';
 import { AuthService } from '../../providers/auth-service';
+import { ConnectivityService } from '../../providers/connectivity-service';
 
 import { LocationMapPage } from '../location-map/location-map';
 import { LocationDetailsMorePage } from '../location-details-more/location-details-more';
@@ -76,6 +77,7 @@ export class LocationDetailPage {
               public social:SocialService,
               public toastCtrl:ToastController,
               public auth:AuthService,
+              public conn:ConnectivityService,
   	          public geo:GoogleService) {
 
     
@@ -249,7 +251,7 @@ export class LocationDetailPage {
 
   checkIn() {
     
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
 
       this.sing.canUserCheckin(this.auth.userRole,this.locationLat,this.locationLng).subscribe(canCheckIn=>{
 

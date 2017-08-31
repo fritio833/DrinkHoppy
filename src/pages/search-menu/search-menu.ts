@@ -6,6 +6,8 @@ import { SearchBreweriesPage } from '../search-breweries/search-breweries';
 import { ProfilePage } from '../profile/profile';
 
 import { SingletonService } from '../../providers/singleton-service';
+import { ConnectivityService } from '../../providers/connectivity-service';
+
 
 
 @Component({
@@ -14,10 +16,13 @@ import { SingletonService } from '../../providers/singleton-service';
 })
 export class SearchMenuPage {
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public sing:SingletonService) {}
+  constructor(public navCtrl: NavController, 
+              public navParams: NavParams,
+              public conn:ConnectivityService, 
+              public sing:SingletonService) {}
 
   doSearch(page) {
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       switch(page) {
 
         case 'beers':

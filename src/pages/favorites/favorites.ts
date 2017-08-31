@@ -9,6 +9,7 @@ import { SingletonService } from '../../providers/singleton-service';
 import { BreweryService } from '../../providers/brewery-service';
 import { GoogleService } from '../../providers/google-service';
 import { AuthService } from '../../providers/auth-service';
+import { ConnectivityService } from '../../providers/connectivity-service';
 
 import { BeerDetailPage } from '../beer-detail/beer-detail';
 import { CheckinPage } from '../checkin/checkin';
@@ -46,6 +47,7 @@ export class FavoritesPage {
               public angFire:AngularFire,
               public auth:AuthService,
               public loadingCtrl:LoadingController,
+              public conn:ConnectivityService,
               public geo:GoogleService,
               public toastCtrl:ToastController) {
     this.choice = "beerlist";
@@ -63,14 +65,14 @@ export class FavoritesPage {
   }
 
   getBeerDetail(beerDbId) {
-    if (this.sing.online)
+    if (this.conn.isOnline())
       this.navCtrl.push(BeerDetailPage,{beerId:beerDbId,favorites:true});
     else
       this.sing.showNetworkAlert();
   }
   
   checkinBeer(beer) {
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       this.showLoading();
       this.beerAPI.loadBeerById(beer.id).subscribe(resp=>{
         this.loading.dismiss();
@@ -89,7 +91,7 @@ export class FavoritesPage {
   }
 
   locateBeer(beer) {
-    if (this.sing.online)
+    if (this.conn.isOnline())
       this.navCtrl.push(LocateBeerPage,{beer:beer});
     else
       this.sing.showNetworkAlert();
@@ -138,7 +140,7 @@ export class FavoritesPage {
 
   getLocation(loc) {
      
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       this.showLoading();
 
       if (loc.isBrewery=='Y') {
@@ -160,7 +162,7 @@ export class FavoritesPage {
 
   getBrewery(loc) {
 
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       let foundBrewpub:number = -1;
       //this.showLoading();
       this.geo.getPlaceFromGoogleByLatLng(loc.name,loc.lat,loc.lng).subscribe(resp=>{
@@ -227,7 +229,7 @@ export class FavoritesPage {
     if (this.favLocations) {
       return;
     }
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       this.showLoading();
       this.favLocations = this.angFire.database.list('/favorite_locations/'+this.uid+'/',{
         query:{

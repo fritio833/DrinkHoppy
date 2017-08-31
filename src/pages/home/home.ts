@@ -11,6 +11,7 @@ import { GoogleService } from '../../providers/google-service';
 import { BreweryService } from '../../providers/brewery-service';
 import { DemoService } from '../../providers/demo-service';
 import { AchievementsService } from '../../providers/achievements-service';
+import { ConnectivityService } from '../../providers/connectivity-service';
 
 import { ProfilePage } from '../profile/profile';
 import { SearchMenuPage } from '../search-menu/search-menu';
@@ -28,6 +29,7 @@ import { EventInfoPage } from '../event-info/event-info';
 import { SelectLocationPage } from '../select-location/select-location';
 import { AchievementsPage } from '../achievements/achievements';
 import { ContactPage } from '../contact/contact';
+import { EventMapPage } from '../event-map/event-map';
 
 
 @Component({
@@ -57,6 +59,7 @@ export class HomePage {
   public achievement:any;
   public isOnline:boolean = false;
   public geoFailed:boolean = false;
+  public featuredEvent:any = null;
 
   constructor(public navCtrl: NavController, 
   	          public sing:SingletonService,
@@ -71,6 +74,7 @@ export class HomePage {
               public angFire:AngularFire,
               public diagnostic: Diagnostic,
               public achieve:AchievementsService,
+              public conn:ConnectivityService,
   	          public storage:Storage) {
     this.fbRef = firebase.database();
     this.events.subscribe('online:status',status=>{
@@ -122,7 +126,7 @@ export class HomePage {
   }
 
   changeCity() {
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       let modal = this.modalCtrl.create(SelectLocationPage);
       modal.onDidDismiss(citySet => {
         if (citySet) {
@@ -138,7 +142,7 @@ export class HomePage {
   }
 
   randomBeers() {
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       this.showLoading();
       this.beerAPI.getRandomBeers().subscribe(beers=>{
         this.navCtrl.push(RandomBeersPage,{beers:beers,loading:this.loading});
@@ -151,19 +155,26 @@ export class HomePage {
     }
   }
 
-  demoAlert() {
+  getEvent(eventId) {
+    this.navCtrl.setRoot(EventMapPage,{eventId:eventId});
+  }  
+
+  featureEventAlert(event) {
     let networkAlert = this.alertCtrl.create({
-      title: 'Alpha Test',
-      message: 'Please give us feedback on bugs or improvements. Thanks for helping us test our App.',
+      title: 'Featured Event',
+      message: event.name + ' is happening today! Check out the event details.',
       buttons: [
         {
           text: 'Cancel',
-          handler: () => {}
+          handler: () => {
+            this.sing.featuredNoticeClicked = true;
+          }
         },
         {
-          text: 'Leave Feedback',
+          text: 'See Event',
           handler: () => {
-            this.navCtrl.push(ContactPage);
+            this.sing.featuredNoticeClicked = true;
+            this.navCtrl.setRoot(EventMapPage,{eventId:event.id});
           }
         }
       ]
@@ -177,7 +188,7 @@ export class HomePage {
 
   doSearch(page) {
 
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       switch(page) {
 
         case 'beers':
@@ -255,19 +266,23 @@ export class HomePage {
     }
   }
 
- getBeerEventInfo() {
-   this.navCtrl.push(EventInfoPage);
- }
+  getBeerEventInfo() {
+    this.navCtrl.push(EventInfoPage);
+  }
+
+  getEventMap() {
+    this.navCtrl.push(EventMapPage);
+  } 
 
   getPopBeer(beerId) {
-    if (this.sing.online)
+    if (this.conn.isOnline())
       this.navCtrl.push(BeerDetailPage,{beerId:beerId});
     else
       this.sing.showNetworkAlert();
   }
 
   getPopLocation(placeId) {
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       this.geo.placeDetail(placeId).subscribe((resp)=>{
         this.navCtrl.push(LocationDetailPage,{location:resp.result});
       });
@@ -277,14 +292,14 @@ export class HomePage {
   }
 
   getAllPopLocation() {
-    if (this.sing.online)
+    if (this.conn.isOnline())
       this.navCtrl.push(PopularLocationsPage);
     else
       this.sing.showNetworkAlert()
   }
 
   getAllPopBeers() {
-    if (this.sing.online)
+    if (this.conn.isOnline())
       this.navCtrl.push(PopularBeersPage);
     else
       this.sing.showNetworkAlert();
@@ -305,7 +320,7 @@ export class HomePage {
   }
 
   showNotifications() {
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       let modal = this.modalCtrl.create(NotificationsPage,{});
       modal.onDidDismiss(filter => {
 
@@ -324,7 +339,7 @@ export class HomePage {
   }
 
   seeAchievements() {
-    if (this.sing.online)
+    if (this.conn.isOnline())
       this.navCtrl.push(AchievementsPage,{uid:this.uid});
     else
       this.sing.showNetworkAlert();
@@ -356,6 +371,19 @@ export class HomePage {
       }); 
   }
 
+  getFeaturedEvents() {
+    this.fbRef.ref('/featured_events/').orderByChild('active').equalTo(true).once('child_added').then(snapshot=>{        
+      if (snapshot.exists()) {
+        this.featuredEvent = snapshot.val();
+
+        if (this.featuredEvent.hasOwnProperty('showAlert') && this.featuredEvent.showAlert && !this.sing.featuredNoticeClicked)
+          this.featureEventAlert(this.featuredEvent);
+        //console.log('prompt feature alert');
+      }
+    });
+
+  }
+
   setCityState(coords) {
     this.geo.reverseGeocodeLookup(coords.latitude,coords.longitude)
       .subscribe((success)=>{
@@ -373,6 +401,11 @@ export class HomePage {
       //this.presentNoGPSAlert();
     });    
   }
+
+  ionViewDidLoad() {
+    console.log('ionViewDidLoad HomePage');
+    this.getFeaturedEvents();    
+   }  
   
   ionViewWillEnter() {
     console.log('ionViewWillEnter HomePage');

@@ -91,7 +91,7 @@ export class SearchBreweriesPage {
     let breweryId;
     let foundBrewpub:number = -1;
   
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
   
       this.showLoading();
 
@@ -200,7 +200,7 @@ export class SearchBreweriesPage {
 
   getBreweries() {
 
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       this.showLoading();
       // Get breweries at user's current location
       if (this.sing.getLocation().geo != null && this.sing.getLocation().geo){

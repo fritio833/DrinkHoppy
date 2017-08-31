@@ -136,6 +136,7 @@
       </ion-card-content>
     </ion-card>
   </ion-item>
+  <!--
   <ion-item class="botton-border-item" *ngIf="beer">
       <ion-label>Share</ion-label>
       <button *ngIf="!toggleFB" color="light" item-right ion-button icon-left (click)="shareOnFacebook()">        
@@ -147,6 +148,7 @@
         Facebook
       </button>
   </ion-item>
+  -->
   <button *ngIf="beer" class="chk-btn" ion-button color="check" full (click)="doCheckin()">Check-in</button>
 </div>
 <div *ngIf="successfulCheckin">
@@ -167,6 +169,12 @@
       </ion-chip>
     </ion-item>
   </ion-list>
+  <div align="center">
+    <button ion-button color="facebook" item-right ion-button icon-left (click)="shareOnFacebook()">
+      <ion-icon class="social-button" ios="logo-facebook" md="logo-facebook"></ion-icon>
+      Share on Facebook?
+    </button>
+  </div>
   <ion-card *ngIf="achievements.length">
     <ion-card-header>Congratulations!  You unlocked a badge</ion-card-header>
     <ion-card-content>

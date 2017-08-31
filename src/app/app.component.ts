@@ -8,6 +8,7 @@ import firebase from 'firebase';
 import { SingletonService } from '../providers/singleton-service';
 import { GoogleService } from '../providers/google-service';
 import { AuthService } from '../providers/auth-service';
+import { ConnectivityService } from '../providers/connectivity-service';
 
 import { LoginPage } from '../pages/login/login';
 import { HomePage } from '../pages/home/home';
@@ -47,6 +48,7 @@ export class MyApp {
     public storage:Storage,
     public events:Events,
     public push:Push,
+    public conn:ConnectivityService,
     public alertCtrl: AlertController
   ) {
    
@@ -159,7 +161,7 @@ export class MyApp {
     // close the menu when clicking a link from the menu
     this.menu.close();
     // navigate to the new page if it is not the current page
-    if (this.sing.online)
+    if (this.conn.isOnline())
       this.nav.setRoot(page.component);
     else
       this.sing.showNetworkAlert();

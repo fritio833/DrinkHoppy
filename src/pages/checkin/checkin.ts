@@ -75,6 +75,7 @@ export class CheckinPage {
   public achievements = new Array();
   public checkinPoints = new Array();
   public toggleFB:boolean = false;
+  public checkinId:string = null;
 
   constructor(public navCtrl: NavController, 
   	          public params: NavParams,
@@ -490,11 +491,12 @@ export class CheckinPage {
   }
 
   shareOnFacebook() {
+    /*
     if (this.toggleFB)
       this.toggleFB = false;
     else
       this.toggleFB = true;
-
+   */
 
    /*
     SocialSharing.shareViaFacebook('message me',null,'http://benderapp.com').then((success)=>{
@@ -503,6 +505,16 @@ export class CheckinPage {
        this.presentAlert("Make sure you have the Facebook app installed.");
     });
     */
+
+    this.social.shareFacebook('Brew Search',
+                                  '',
+                                  '',
+                                  'checkin',
+                                  this.checkinId).subscribe(success=>{
+                                    console.log('success fb post');
+                                  },error=>{
+                                    console.log('error fb post',error);
+                                  });    
   }
 
   presentToast(msg) {
@@ -739,6 +751,7 @@ export class CheckinPage {
         city:success.city,
         state:success.state,
         zip:success.zip,
+        locKey:this.sing.getCityStateKey(success.city,success.state,success.country),
         locationRating:locationRating,
         country:success.country,
         comments:this.socialMessage,
@@ -956,6 +969,8 @@ export class CheckinPage {
       that.fbRef.ref().update(updates).then(success=>{
         that.successfulCheckin = true;
         that.loading.dismiss().catch(()=>{});
+        that.checkinId = newKey;
+        /*
         if (that.location != null && that.toggleFB) {
           let fbIMG = that.sing.logo;
           let fbComment = '';
@@ -985,6 +1000,7 @@ export class CheckinPage {
                                          console.log('error fb post',error);
                                        });
         }
+        */
       }).catch(error=>{
         console.log('error',error);
         that.loading.dismiss().catch(()=>{});

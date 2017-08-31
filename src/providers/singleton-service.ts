@@ -40,7 +40,8 @@ export class SingletonService {
   public checkinProximityMeters = 200;
   
   public popularLoaded:boolean = false;
-  public webURL:string = 'http://brewsearchapp.com';
+  public featuredNoticeClicked = false;
+  public webURL:string = 'http://brewsearchapp.herokuapp.com';
   public logo:string = 'https://firebasestorage.googleapis.com/v0/b/bender-1487426215149.appspot.com/o/img%2Fbeerfest.png?alt=media&token=971dfd29-50c8-46b2-978c-4c406891b947';
   public noImageBeer:string = 'https://firebasestorage.googleapis.com/v0/b/bender-1487426215149.appspot.com/o/img%2Fno-image.jpg?alt=media&token=5a8ee978-0ab9-4e8c-af54-dfedbd4be527';
 

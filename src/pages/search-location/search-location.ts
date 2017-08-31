@@ -150,7 +150,7 @@ export class SearchLocationPage {
         
   	if (event.type == "input") {
 
-      if (this.sing.online) {
+      if (this.conn.isOnline()) {
         setTimeout(()=>{
           console.log(event.target.value);
           this.geo.placesAutocomplete(event.target.value).subscribe((success)=>{
@@ -190,7 +190,7 @@ export class SearchLocationPage {
 
   getLocal() {
 
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       this.showLoading();
 
       if (this.searchType == 'nearbysearch' || !this.sing.isSelectedLocation()) {
@@ -260,7 +260,7 @@ export class SearchLocationPage {
   }
 
   getMoreLocal(infiniteScroll) {
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       if (this.nextNearByToken == null) {
         infiniteScroll.complete();
         return;
@@ -299,7 +299,7 @@ export class SearchLocationPage {
   }
 
   getLocationDetail(location) {
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       let validLocation = false;
       this.showLoading();
       this.geo.placeDetail(location.place_id).subscribe((resp)=>{
@@ -340,7 +340,7 @@ export class SearchLocationPage {
 
   getBreweryDetail(brewery) {
     //console.log('brewery',brewery);
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       this.geo.placeDetail(brewery.placeId).subscribe((resp)=>{        
           this.beerAPI.getBreweryDetail(brewery.breweryId,brewery.breweryLocId).subscribe(pub=>{
             console.log('pub',pub);
@@ -388,7 +388,7 @@ export class SearchLocationPage {
   }  
 
   showLocationFilter() {
-    if (this.sing.online){
+    if (this.conn.isOnline()){
       let modal = this.modalCtrl.create(SearchLocationFilterPage,
                                         { 
                                           filter:this.filter,

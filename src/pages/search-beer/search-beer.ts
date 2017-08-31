@@ -4,6 +4,8 @@ import { Validators, FormBuilder } from '@angular/forms';
 
 import { BreweryService } from '../../providers/brewery-service';
 import { SingletonService } from '../../providers/singleton-service';
+import { ConnectivityService } from '../../providers/connectivity-service';
+
 import { Beer } from '../../models/beer';
 import { SearchPage } from '../search/search';
 import { BeerDetailPage } from '../beer-detail/beer-detail';
@@ -35,6 +37,7 @@ export class SearchBeerPage {
   	          public modalCtrl:ModalController,
               public sing: SingletonService,
               public loadingCtrl:LoadingController,
+              public conn:ConnectivityService,
   	          public _form: FormBuilder) {
 
   	this.qSearchBeer = params.get("qSearchBeer");
@@ -98,7 +101,7 @@ export class SearchBeerPage {
     if (evt.type != "input")
       return;
 
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       this.showNoResults = false;
       this.currentPage = 1;
 
@@ -139,7 +142,7 @@ export class SearchBeerPage {
 
   getMoreBeers(infiniteScroll) {
     
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       if (this.currentPage < this.numberOfPages) {
         this.currentPage++;
       }
@@ -172,7 +175,7 @@ export class SearchBeerPage {
   }
 
   showBeerFilter() {
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
       this.showNoResults = false;
       let modal = this.modalCtrl.create(SearchBeerFilterPage,{filter:this.filter});
       modal.onDidDismiss(filter => {
@@ -215,7 +218,7 @@ export class SearchBeerPage {
   }
 
   getBeerDetail(beerDbId) {
-    if (this.sing.online)
+    if (this.conn.isOnline())
       this.navCtrl.push(BeerDetailPage,{beerId:beerDbId});
     else
       this.sing.showNetworkAlert();

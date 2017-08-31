@@ -9,6 +9,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { SingletonService } from '../../providers/singleton-service';
 import { SocialService } from '../../providers/social-service';
 import { AuthService } from '../../providers/auth-service';
+import { ConnectivityService } from '../../providers/connectivity-service';
 
 import { BeerDetailPage } from '../beer-detail/beer-detail';
 import { LocationMapPage } from '../location-map/location-map';
@@ -61,6 +62,7 @@ export class BreweryDetailPage {
               public toastCtrl:ToastController,
               public alertCtrl:AlertController,
               public auth:AuthService,
+              public conn:ConnectivityService,
               public modalCtrl:ModalController) {
 
   	this.brewery = params.get('brewery');
@@ -257,7 +259,7 @@ export class BreweryDetailPage {
 
   checkIn() {
     
-    if (this.sing.online) {
+    if (this.conn.isOnline()) {
 
       if (!this.breweryBeers.length) {
         this.presentAlert();

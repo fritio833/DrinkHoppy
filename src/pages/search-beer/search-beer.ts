@@ -101,7 +101,7 @@ export class SearchBeerPage {
     if (evt.type != "input")
       return;
 
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
       this.showNoResults = false;
       this.currentPage = 1;
 
@@ -142,7 +142,7 @@ export class SearchBeerPage {
 
   getMoreBeers(infiniteScroll) {
     
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
       if (this.currentPage < this.numberOfPages) {
         this.currentPage++;
       }
@@ -175,7 +175,7 @@ export class SearchBeerPage {
   }
 
   showBeerFilter() {
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
       this.showNoResults = false;
       let modal = this.modalCtrl.create(SearchBeerFilterPage,{filter:this.filter});
       modal.onDidDismiss(filter => {
@@ -218,7 +218,7 @@ export class SearchBeerPage {
   }
 
   getBeerDetail(beerDbId) {
-    if (this.conn.isOnline())
+    if (this.sing.isOnline())
       this.navCtrl.push(BeerDetailPage,{beerId:beerDbId});
     else
       this.sing.showNetworkAlert();

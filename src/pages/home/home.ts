@@ -126,7 +126,7 @@ export class HomePage {
   }
 
   changeCity() {
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
       let modal = this.modalCtrl.create(SelectLocationPage);
       modal.onDidDismiss(citySet => {
         if (citySet) {
@@ -142,7 +142,7 @@ export class HomePage {
   }
 
   randomBeers() {
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
       this.showLoading();
       this.beerAPI.getRandomBeers().subscribe(beers=>{
         this.navCtrl.push(RandomBeersPage,{beers:beers,loading:this.loading});
@@ -188,7 +188,7 @@ export class HomePage {
 
   doSearch(page) {
 
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
       switch(page) {
 
         case 'beers':
@@ -275,14 +275,14 @@ export class HomePage {
   } 
 
   getPopBeer(beerId) {
-    if (this.conn.isOnline())
+    if (this.sing.isOnline())
       this.navCtrl.push(BeerDetailPage,{beerId:beerId});
     else
       this.sing.showNetworkAlert();
   }
 
   getPopLocation(placeId) {
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
       this.geo.placeDetail(placeId).subscribe((resp)=>{
         this.navCtrl.push(LocationDetailPage,{location:resp.result});
       });
@@ -292,14 +292,14 @@ export class HomePage {
   }
 
   getAllPopLocation() {
-    if (this.conn.isOnline())
+    if (this.sing.isOnline())
       this.navCtrl.push(PopularLocationsPage);
     else
       this.sing.showNetworkAlert()
   }
 
   getAllPopBeers() {
-    if (this.conn.isOnline())
+    if (this.sing.isOnline())
       this.navCtrl.push(PopularBeersPage);
     else
       this.sing.showNetworkAlert();
@@ -320,7 +320,7 @@ export class HomePage {
   }
 
   showNotifications() {
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
       let modal = this.modalCtrl.create(NotificationsPage,{});
       modal.onDidDismiss(filter => {
 
@@ -339,7 +339,7 @@ export class HomePage {
   }
 
   seeAchievements() {
-    if (this.conn.isOnline())
+    if (this.sing.isOnline())
       this.navCtrl.push(AchievementsPage,{uid:this.uid});
     else
       this.sing.showNetworkAlert();

@@ -105,6 +105,10 @@ export class SingletonService {
     });
   }
 
+  isOnline() {
+    return this.online;
+  }
+
 
   getLocation() {
     let loc:any;    
@@ -136,8 +140,10 @@ export class SingletonService {
   getLocationKey() {
     let locObj = this.getLocation();
     
-    if (locObj == null)
+    if (!locObj.hasOwnProperty('city') && locObj.city != null)
       return null;
+
+    console.log('wtf2',locObj);
 
     let key = locObj.city.toLowerCase().replace(/\s|\#|\[|\]|\$|\./g, "")
               +'-'+locObj.state.toLowerCase().replace(/\s|\#|\[|\]|\$|\./g, "")
@@ -201,6 +207,7 @@ export class SingletonService {
 
   getCityStateKey(city,state,country) {
     // Remove special characters that would cause firebase to crash
+    console.log('wtf1');
     return city.toLowerCase().replace(/\s|\#|\[|\]|\$|\./g, "")
                         +'-'+state.toLowerCase().replace(/\s|\#|\[|\]|\$|\./g, "")
                         +'-'+country.toLowerCase().replace(/\s|\#|\[|\]|\$|\./g, "");

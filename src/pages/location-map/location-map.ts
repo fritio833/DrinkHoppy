@@ -1,6 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { NavController, LoadingController, ViewController, NavParams } from 'ionic-angular';
 import { ConnectivityService } from '../../providers/connectivity-service';
+import { SingletonService } from '../../providers/singleton-service';
 
 declare var google;
 declare var GoogleMap;
@@ -24,6 +25,7 @@ export class LocationMapPage {
               public view: ViewController,
               public conn:ConnectivityService,
               public loadingCtrl:LoadingController,
+              public sing:SingletonService,
   	          public params: NavParams) {
 
   	this.locationLat = params.get('lat');
@@ -68,7 +70,7 @@ export class LocationMapPage {
       console.log("Google maps JavaScript needs to be loaded.");
       this.disableMap();
    
-      if(this.conn.isOnline()){
+      if(this.sing.isOnline()){
         console.log("online, loading map");
    
         //Load the SDK
@@ -91,7 +93,7 @@ export class LocationMapPage {
       } 
     } else {
  
-      if(this.conn.isOnline()){
+      if(this.sing.isOnline()){
         console.log("showing map");
         this.initMap();
         this.enableMap();

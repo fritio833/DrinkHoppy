@@ -22,7 +22,7 @@ export class SearchMenuPage {
               public sing:SingletonService) {}
 
   doSearch(page) {
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
       switch(page) {
 
         case 'beers':

@@ -251,7 +251,7 @@ export class LocationDetailPage {
 
   checkIn() {
     
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
 
       this.sing.canUserCheckin(this.auth.userRole,this.locationLat,this.locationLng).subscribe(canCheckIn=>{
 

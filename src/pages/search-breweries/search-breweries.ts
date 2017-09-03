@@ -91,7 +91,7 @@ export class SearchBreweriesPage {
     let breweryId;
     let foundBrewpub:number = -1;
   
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
   
       this.showLoading();
 
@@ -200,7 +200,7 @@ export class SearchBreweriesPage {
 
   getBreweries() {
 
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
       this.showLoading();
       // Get breweries at user's current location
       if (this.sing.getLocation().geo != null && this.sing.getLocation().geo){
@@ -401,7 +401,7 @@ export class SearchBreweriesPage {
 	    console.log("Google maps JavaScript needs to be loaded.");
 	    this.disableMap();
 	 
-	    if(this.conn.isOnline()){
+	    if(this.sing.isOnline()){
 	      console.log("online, loading map");
 	 
 	      //Load the SDK
@@ -424,7 +424,7 @@ export class SearchBreweriesPage {
 	    } 
     } else {
  
-	    if(this.conn.isOnline()){
+	    if(this.sing.isOnline()){
 	      console.log("showing map");
 	      this.initMap();
 	      this.enableMap();

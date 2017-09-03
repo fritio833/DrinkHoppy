@@ -65,14 +65,14 @@ export class FavoritesPage {
   }
 
   getBeerDetail(beerDbId) {
-    if (this.conn.isOnline())
+    if (this.sing.isOnline())
       this.navCtrl.push(BeerDetailPage,{beerId:beerDbId,favorites:true});
     else
       this.sing.showNetworkAlert();
   }
   
   checkinBeer(beer) {
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
       this.showLoading();
       this.beerAPI.loadBeerById(beer.id).subscribe(resp=>{
         this.loading.dismiss();
@@ -91,7 +91,7 @@ export class FavoritesPage {
   }
 
   locateBeer(beer) {
-    if (this.conn.isOnline())
+    if (this.sing.isOnline())
       this.navCtrl.push(LocateBeerPage,{beer:beer});
     else
       this.sing.showNetworkAlert();
@@ -140,7 +140,7 @@ export class FavoritesPage {
 
   getLocation(loc) {
      
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
       this.showLoading();
 
       if (loc.isBrewery=='Y') {
@@ -162,7 +162,7 @@ export class FavoritesPage {
 
   getBrewery(loc) {
 
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
       let foundBrewpub:number = -1;
       //this.showLoading();
       this.geo.getPlaceFromGoogleByLatLng(loc.name,loc.lat,loc.lng).subscribe(resp=>{
@@ -229,7 +229,7 @@ export class FavoritesPage {
     if (this.favLocations) {
       return;
     }
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
       this.showLoading();
       this.favLocations = this.angFire.database.list('/favorite_locations/'+this.uid+'/',{
         query:{

@@ -16,8 +16,8 @@
 		<ion-spinner></ion-spinner>
 	</div>
   <ion-thumbnail item-left *ngIf="beerLoaded">
-	    <img *ngIf="beer.labels.medium" [src]="beer?.labels.medium" />
-			<img *ngIf="beer.labels.medium === null" src="images/no-image.jpg" />
+	    <img *ngIf="beer.labels != null" [src]="beer.labels.medium" />
+			<img *ngIf="!beer.labels === null" src="images/no-image.jpg" />
   </ion-thumbnail>
 	<span item-left *ngIf="beer && beerLoaded">
 	    <b>{{beer?.name}}</b>

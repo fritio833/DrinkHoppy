@@ -77,7 +77,7 @@ export class BreweryDetailMorePage {
 
   checkIn() {
     
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
 
       if (!this.breweryBeers.length) {
         this.presentAlert();

@@ -119,7 +119,7 @@ export class LocationDetailsMorePage {
 
   /*
   checkIn() {
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
       let modal = this.modalCtrl.create(CheckinPage,{ location:this.location,checkinType:'place'});
       modal.present();
     } else
@@ -128,7 +128,7 @@ export class LocationDetailsMorePage {
   */
   checkIn() {
     
-    if (this.conn.isOnline()) {
+    if (this.sing.isOnline()) {
 
       this.sing.canUserCheckin(this.auth.userRole,this.locationLat,this.locationLng).subscribe(canCheckIn=>{
 

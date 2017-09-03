@@ -292,10 +292,13 @@ export class BeerDetailPage {
 
   hasLocations() {
 
-    let locKey;
+    let locKey = null;
     let locations;
-    locKey = this.sing.getLocationKey();
-    console.log('locKey',locKey);
+
+    if (this.sing.hasLocation()) {
+      locKey = this.sing.getLocationKey();
+      console.log('locKey',locKey);
+    }
 
     if (locKey != null) {
       var geo = this.sing.getLocation();

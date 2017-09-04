@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.ionicframework.bendertest203532" version="1.0.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.brewsearchapp.brewsearch" version="1.0.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Brew Search</name>
     <description>Helping people find great beers.</description>
-    <author email="frito833@yahoo.com" href="http://brewsearchapp.com/">Brew Search Team</author>
+    <author email="ryan@brewsearchapp.com" href="http://brewsearchapp.com/">Brew Search Team</author>
     <content src="index.html" />
     <access origin="*" />
     <allow-navigation href="http://ionic.local/*" />

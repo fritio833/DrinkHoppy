@@ -150,12 +150,19 @@ export class BreweryService {
            .map(res => res.json());    
   }
 
-  getEventBeers(eventId) {
+  getEventBeers(eventId,page?) {
+
+    let _page = '';
+
+    if (page!=null)
+      _page = '&p=' + page;
+        
     return this.http.get(this.breweryDbUrl 
            + 'event/'
            + eventId
            + '/beers?key=' 
-           + this.breweryDbAPI)
+           + this.breweryDbAPI
+           +_page)
            .retryWhen(error => error.delay(500))
            .timeout(5000)
            .map(res => res.json());    

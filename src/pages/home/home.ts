@@ -404,13 +404,14 @@ export class HomePage {
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad HomePage');
-    this.getFeaturedEvents();    
+    //this.getFeaturedEvents();    
    }  
   
   ionViewWillEnter() {
     console.log('ionViewWillEnter HomePage');
     this.getPopular();
     this.getProfileData();
+    this.getFeaturedEvents();
   }
 
   ionViewWillLeave() {

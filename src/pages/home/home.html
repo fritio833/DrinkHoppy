@@ -21,11 +21,9 @@
           <button *ngIf="sing.hasLocation() && isOnline" right ion-button small color="dark" (click)="changeCity()">
             {{sing.getSelectCity()}}. Change?
           </button>
-          <!--
           <button *ngIf="!isOnline" right ion-button small color="dark" (click)="sing.showSettings()">
             Offline
           </button>
-          -->
           <button *ngIf="isOnline && geoFailed" right ion-button small color="dark" (click)="setLocation()">
             No Location. Try Again?
           </button>          

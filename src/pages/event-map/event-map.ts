@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { PhotoViewer } from '@ionic-native/photo-viewer';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/forkJoin';
 
 import { NavController, NavParams, ToastController, LoadingController,  ActionSheetController, ModalController } from 'ionic-angular';
 
@@ -14,6 +16,7 @@ import { ConnectivityService } from '../../providers/connectivity-service';
 import { BeerDetailPage } from '../beer-detail/beer-detail';
 import { BreweryDetailPage } from '../brewery-detail/brewery-detail';
 import { EventBreweryBeersPage } from '../event-brewery-beers/event-brewery-beers';
+
 
 
 @Component({
@@ -127,11 +130,53 @@ export class EventMapPage {
             });
           }
 
-          console.log('event breweries',this.eventBreweries);
+          //console.log('event breweries',this.eventBreweries);
 
           this.beerAPI.getEventBeers(this.eventId).subscribe(beers=>{
 
-            var beersDB = beers.data;            
+            var numPages;
+            var totalBeers;
+            var currentPage = 1;
+            var beersDB = [];
+            let observableBatch = [];
+
+            console.log('beersDB',beers);
+
+            if (beers.totalResults) {
+
+              beersDB = beers.data;
+              totalBeers = beers.totalResults;
+              numPages = beers.numberOfPages;
+
+              console.log('beersDB',beersDB);
+              this.setEventData(beersDB);
+              
+              if (numPages > 1) {
+
+                currentPage++;
+
+                for (let i=currentPage; i <=numPages ; i++) {
+                  observableBatch.push(this.beerAPI.getEventBeers(this.eventId,i));
+                }
+                
+                Observable.forkJoin(observableBatch).subscribe(beerBatch=>{
+                  //console.log('beerBatch',beerBatch);
+                  for (let i=0; i < beerBatch.length; i++)
+                    this.setEventData(beerBatch[i]['data']);
+
+                  this.eventBreweries.sort(this.SORT_BREWERY_NAME);
+                  this.showEvent = true;
+                  this.loading.dismiss().catch(() => {});                  
+                },error=>{
+                  console.log(error);
+                });                
+              } else {
+                this.eventBreweries.sort(this.SORT_BREWERY_NAME);
+                this.showEvent = true;
+                this.loading.dismiss().catch(() => {});                
+              }
+            }
+            /*
             for (var i=0;i<beersDB.length;i++) {
 
               for (var j=0; j<this.eventBreweries.length;j++) {
@@ -150,15 +195,19 @@ export class EventMapPage {
               this.eventBeers.push(beersDB[i].beer);
             }
 
+        
+
           this.eventBreweries.sort(this.SORT_BREWERY_NAME);
           this.showEvent = true;
           this.loading.dismiss().catch(() => {});
-                       
+            */
           },error=>{
             console.log(error);
             this.loading.dismiss().catch(() => {});
           });
         }
+        
+
        
       },error=>{
         console.log(error);
@@ -170,6 +219,26 @@ export class EventMapPage {
       this.loading.dismiss().catch(() => {});
       console.log(error);
     });
+  }
+
+  setEventData(beersDB) {
+    for (var i=0;i<beersDB.length;i++) {
+
+      for (var j=0; j<this.eventBreweries.length;j++) {
+
+        if (this.eventBreweries[j].id === beersDB[i].beer.breweries[0].id) {
+
+          this.eventBreweries[j].beers.push(beersDB[i].beer);
+          
+          if (this.eventBreweries[j].city == null && beersDB[i].beer.breweries[0].hasOwnProperty('locations')) {
+            this.eventBreweries[j].city = beersDB[i].beer.breweries[0].locations[0].locality;
+            this.eventBreweries[j].state = beersDB[i].beer.breweries[0].locations[0].region;
+          }
+        }
+      }
+
+      this.eventBeers.push(beersDB[i].beer);
+    }    
   }
 
   getDetail(brewery) {
